@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    §10.1: interfaces, DTOs, events, result types and primitives only.
+    ZERO package references — this project depends only on the BCL, enforced
+    by Edpf.ArchitectureTests (rule EDPF0001). Every other package depends on
+    this one; it depends on nothing.
+  -->
+  <PropertyGroup>
+    <TargetFrameworks>$(EdpfLibraryTargetFrameworks)</TargetFrameworks>
+    <IsPackable>true</IsPackable>
+    <Description>Enterprise Data Platform Framework — contracts, result types and primitives. Zero dependencies.</Description>
+  </PropertyGroup>
+
+  <!-- Analyzer only; PrivateAssets=all keeps the dependency graph clean. -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" PrivateAssets="all" />
+    <AdditionalFiles Include="PublicAPI.Shipped.txt" />
+    <AdditionalFiles Include="PublicAPI.Unshipped.txt" />
+  </ItemGroup>
+
+</Project>

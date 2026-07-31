@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    The ONLY assembly where `#if` conditional compilation is permitted
+    (Z.1, Z.3 rule 12, rule EDPF0002). Per-TFM divergence is isolated here
+    behind polyfill boundaries so every other assembly stays clean — the single
+    rule that keeps ADR-002 survivable (Phase 01 §④).
+  -->
+  <PropertyGroup>
+    <TargetFrameworks>$(EdpfLibraryTargetFrameworks)</TargetFrameworks>
+    <IsPackable>true</IsPackable>
+    <Description>Enterprise Data Platform Framework — per-TFM polyfills. The only assembly permitted to contain conditional compilation.</Description>
+  </PropertyGroup>
+
+</Project>

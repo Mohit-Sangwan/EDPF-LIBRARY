@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    The shared kernel (Phase 01 §④) — deliberately small. Additions require
+    Chief Architect approval and a written justification (Phase 01 §⑧: the
+    kernel must not become a junk drawer).
+  -->
+  <PropertyGroup>
+    <TargetFrameworks>$(EdpfLibraryTargetFrameworks)</TargetFrameworks>
+    <IsPackable>true</IsPackable>
+    <Description>Enterprise Data Platform Framework — shared kernel: clock, guards, tenant and correlation context implementations.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Edpf.Abstractions\Edpf.Abstractions.csproj" />
+    <ProjectReference Include="..\Edpf.Compatibility\Edpf.Compatibility.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,53 @@
+# Phase 02 §④: the walking-skeleton harness — API dependencies only.
+# Credentials below are local-container throwaways for this harness, not
+# secrets (Z.10); the API's real secret custody lands in Phase 03.
+#
+#   docker compose up -d
+#   dotnet run --project Edpf.WalkingSkeleton.Api --framework net10.0
+#
+# Jaeger UI:  http://localhost:16686      Seq UI:  http://localhost:5341
+
+name: edpf-walking-skeleton
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "Edpf!Local%Dev1"
+    ports:
+      - "14331:1433"
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P 'Edpf!Local%Dev1' -Q 'SELECT 1' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: edpf
+      POSTGRES_PASSWORD: "Edpf!Local%Dev1"
+      POSTGRES_DB: edpf_skeleton
+    ports:
+      - "54321:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U edpf -d edpf_skeleton"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.60
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+    ports:
+      - "16686:16686" # UI
+      - "4317:4317"   # OTLP gRPC
+
+  seq:
+    image: datalust/seq:2024.3
+    environment:
+      ACCEPT_EULA: "Y"
+    ports:
+      - "5341:80"

@@ -1,0 +1,95 @@
+# EDPF commit gate (Appendix Z.13; Phase 01 CI skeleton — Phase 34 completes it).
+# Budget: 15 minutes. A red main branch is a stop-the-line event.
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  CI: "true"
+  DOTNET_NOLOGO: "true"
+  DOTNET_CLI_TELEMETRY_OPTOUT: "true"
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    name: Build, analyze, unit + architecture tests (all TFMs)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # full history for secret scanning and versioning
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Restore
+        run: dotnet restore Edpf.sln
+
+      - name: Build (warnings as errors, all TFMs)
+        run: dotnet build Edpf.sln --no-restore --configuration Release
+
+      - name: Unit tests + coverage
+        run: >
+          dotnet test tests/Edpf.UnitTests/Edpf.UnitTests.csproj
+          --no-build --configuration Release
+          --collect:"XPlat Code Coverage"
+          --results-directory TestResults
+
+      - name: Architecture tests (Clean Architecture as executable rules)
+        run: >
+          dotnet test tests/Edpf.ArchitectureTests/Edpf.ArchitectureTests.csproj
+          --no-build --configuration Release
+
+      - name: Walking-skeleton unit tests
+        run: >
+          dotnet test tests/Edpf.WalkingSkeleton.Tests/Edpf.WalkingSkeleton.Tests.csproj
+          --no-build --configuration Release
+          --filter "Category!=RequiresDocker"
+
+      - name: SBOM (CycloneDX)
+        run: |
+          dotnet tool install --global CycloneDX
+          dotnet CycloneDX Edpf.sln -o artifacts/sbom --disable-github-licenses
+        shell: bash
+
+      - name: Upload SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom
+          path: artifacts/sbom
+
+  integration:
+    name: Integration tests (Tier A providers, Testcontainers)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Integration tests — SQL Server + PostgreSQL
+        run: >
+          dotnet test tests/Edpf.WalkingSkeleton.Tests/Edpf.WalkingSkeleton.Tests.csproj
+          --configuration Release
+          --filter "Category=RequiresDocker"
+
+  secret-scan:
+    name: Secret scan (gitleaks)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

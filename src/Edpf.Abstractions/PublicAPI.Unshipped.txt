@@ -1,0 +1,250 @@
+#nullable enable
+const Edpf.Abstractions.Primitives.ErrorCodes.AuditUnavailable = "EDPF-AUDIT-9001" -> string!
+const Edpf.Abstractions.Primitives.ErrorCodes.AuthenticationFailed = "EDPF-AUTH-2001" -> string!
+const Edpf.Abstractions.Primitives.ErrorCodes.AuthorizationFailed = "EDPF-AUTHZ-2101" -> string!
+const Edpf.Abstractions.Primitives.ErrorCodes.CapabilityNotSupported = "EDPF-DATA-3005" -> string!
+const Edpf.Abstractions.Primitives.ErrorCodes.CircuitOpen = "EDPF-INT-7002" -> string!
+const Edpf.Abstractions.Primitives.ErrorCodes.ConcurrencyConflict = "EDPF-DATA-3001" -> string!
+const Edpf.Abstractions.Primitives.ErrorCodes.ConfigurationInvalid = "EDPF-CFG-8001" -> string!
+const Edpf.Abstractions.Primitives.ErrorCodes.ConsentRequired = "EDPF-CMP-6001" -> string!
+const Edpf.Abstractions.Primitives.ErrorCodes.CryptoFailure = "EDPF-SEC-5001" -> string!
+const Edpf.Abstractions.Primitives.ErrorCodes.Duplicate = "EDPF-DATA-3003" -> string!
+const Edpf.Abstractions.Primitives.ErrorCodes.FieldAccessDenied = "EDPF-AUTHZ-2103" -> string!
+const Edpf.Abstractions.Primitives.ErrorCodes.IdempotencyConflict = "EDPF-TX-4002" -> string!
+const Edpf.Abstractions.Primitives.ErrorCodes.IntegrationFailed = "EDPF-INT-7003" -> string!
+const Edpf.Abstractions.Primitives.ErrorCodes.InvalidFilter = "EDPF-QRY-3101" -> string!
+const Edpf.Abstractions.Primitives.ErrorCodes.KeyDestroyed = "EDPF-SEC-5002" -> string!
+const Edpf.Abstractions.Primitives.ErrorCodes.LegalHold = "EDPF-CMP-6003" -> string!
+const Edpf.Abstractions.Primitives.ErrorCodes.MfaRequired = "EDPF-AUTH-2002" -> string!
+const Edpf.Abstractions.Primitives.ErrorCodes.NotFound = "EDPF-DATA-3002" -> string!
+const Edpf.Abstractions.Primitives.ErrorCodes.ProviderFailure = "EDPF-DATA-3004" -> string!
+const Edpf.Abstractions.Primitives.ErrorCodes.QueryCostExceeded = "EDPF-QRY-3102" -> string!
+const Edpf.Abstractions.Primitives.ErrorCodes.RateLimited = "EDPF-SEC-5003" -> string!
+const Edpf.Abstractions.Primitives.ErrorCodes.ResidencyViolation = "EDPF-CMP-6002" -> string!
+const Edpf.Abstractions.Primitives.ErrorCodes.SchemaMismatch = "EDPF-VAL-1002" -> string!
+const Edpf.Abstractions.Primitives.ErrorCodes.TenantScopeViolation = "EDPF-AUTHZ-2102" -> string!
+const Edpf.Abstractions.Primitives.ErrorCodes.TransactionFailed = "EDPF-TX-4001" -> string!
+const Edpf.Abstractions.Primitives.ErrorCodes.TransientFailure = "EDPF-INT-7001" -> string!
+const Edpf.Abstractions.Primitives.ErrorCodes.ValidationFailed = "EDPF-VAL-1001" -> string!
+const Edpf.Abstractions.Primitives.PageRequest.DefaultPageSize = 50 -> int
+const Edpf.Abstractions.Primitives.PageRequest.MaxPageSize = 500 -> int
+const Edpf.Abstractions.Security.EncryptionEnvelope.CurrentVersion = 1 -> byte
+const Edpf.Abstractions.Security.EncryptionEnvelope.HeaderSize = 35 -> int
+const Edpf.Abstractions.Security.EncryptionEnvelope.NonceSize = 12 -> int
+const Edpf.Abstractions.Security.EncryptionEnvelope.TagSize = 16 -> int
+Edpf.Abstractions.Audit.AuditChainVerification
+Edpf.Abstractions.Audit.AuditChainVerification.AuditChainVerification(bool isValid, long recordCount, long? firstBrokenSequence) -> void
+Edpf.Abstractions.Audit.AuditChainVerification.FirstBrokenSequence.get -> long?
+Edpf.Abstractions.Audit.AuditChainVerification.IsValid.get -> bool
+Edpf.Abstractions.Audit.AuditChainVerification.RecordCount.get -> long
+Edpf.Abstractions.Audit.AuditEventDescriptor
+Edpf.Abstractions.Audit.AuditEventDescriptor.AfterCipher.get -> byte[]?
+Edpf.Abstractions.Audit.AuditEventDescriptor.AuditEventDescriptor(string! eventType, System.Guid subjectId, string! correlationId, byte[]? beforeCipher = null, byte[]? afterCipher = null) -> void
+Edpf.Abstractions.Audit.AuditEventDescriptor.BeforeCipher.get -> byte[]?
+Edpf.Abstractions.Audit.AuditEventDescriptor.CorrelationId.get -> string!
+Edpf.Abstractions.Audit.AuditEventDescriptor.EventType.get -> string!
+Edpf.Abstractions.Audit.AuditEventDescriptor.SubjectId.get -> System.Guid
+Edpf.Abstractions.Audit.IAuditChainVerifier
+Edpf.Abstractions.Audit.IAuditChainVerifier.VerifyAsync(System.Guid tenantId, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result<Edpf.Abstractions.Audit.AuditChainVerification!>!>!
+Edpf.Abstractions.Audit.IAuditWriter
+Edpf.Abstractions.Audit.IAuditWriter.WriteAsync(Edpf.Abstractions.Audit.AuditEventDescriptor! auditEvent, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result!>!
+Edpf.Abstractions.Consistency.IdempotencyRecord
+Edpf.Abstractions.Consistency.IdempotencyRecord.CreatedUtc.get -> System.DateTimeOffset
+Edpf.Abstractions.Consistency.IdempotencyRecord.IdempotencyKey.get -> string!
+Edpf.Abstractions.Consistency.IdempotencyRecord.IdempotencyRecord(System.Guid tenantId, string! idempotencyKey, string! requestHash, int responseStatusCode, string! responseBody, System.DateTimeOffset createdUtc) -> void
+Edpf.Abstractions.Consistency.IdempotencyRecord.RequestHash.get -> string!
+Edpf.Abstractions.Consistency.IdempotencyRecord.ResponseBody.get -> string!
+Edpf.Abstractions.Consistency.IdempotencyRecord.ResponseStatusCode.get -> int
+Edpf.Abstractions.Consistency.IdempotencyRecord.TenantId.get -> System.Guid
+Edpf.Abstractions.Consistency.IIdempotencyStore
+Edpf.Abstractions.Consistency.IIdempotencyStore.FindAsync(System.Guid tenantId, string! idempotencyKey, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Consistency.IdempotencyRecord?>!
+Edpf.Abstractions.Consistency.IIdempotencyStore.SaveAsync(Edpf.Abstractions.Consistency.IdempotencyRecord! record, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result!>!
+Edpf.Abstractions.Consistency.IOutboxDispatcher
+Edpf.Abstractions.Consistency.IOutboxDispatcher.DispatchPendingAsync(int batchSize, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result<int>!>!
+Edpf.Abstractions.Data.IAuditableEntity
+Edpf.Abstractions.Data.IAuditableEntity.CreatedUtc.get -> System.DateTimeOffset
+Edpf.Abstractions.Data.IAuditableEntity.ModifiedUtc.get -> System.DateTimeOffset?
+Edpf.Abstractions.Data.IReadRepository<TEntity, TKey>
+Edpf.Abstractions.Data.IReadRepository<TEntity, TKey>.GetByIdAsync(TKey id, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result<TEntity!>!>!
+Edpf.Abstractions.Data.IReadRepository<TEntity, TKey>.ListAsync(Edpf.Abstractions.Primitives.PageRequest page, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result<Edpf.Abstractions.Primitives.PagedResult<TEntity!>!>!>!
+Edpf.Abstractions.Data.IRepository<TEntity, TKey>
+Edpf.Abstractions.Data.IRepository<TEntity, TKey>.AddAsync(TEntity! entity, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result<TEntity!>!>!
+Edpf.Abstractions.Data.ITenantScopedEntity
+Edpf.Abstractions.Data.ITenantScopedEntity.TenantId.get -> System.Guid
+Edpf.Abstractions.Data.IUnitOfWork
+Edpf.Abstractions.Data.IUnitOfWork.CommitAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result!>!
+Edpf.Abstractions.Primitives.DataClassificationAttribute
+Edpf.Abstractions.Primitives.DataClassificationAttribute.DataClassificationAttribute(Edpf.Abstractions.Primitives.DataClassificationLevel level) -> void
+Edpf.Abstractions.Primitives.DataClassificationAttribute.Level.get -> Edpf.Abstractions.Primitives.DataClassificationLevel
+Edpf.Abstractions.Primitives.DataClassificationLevel
+Edpf.Abstractions.Primitives.DataClassificationLevel.Confidential = 2 -> Edpf.Abstractions.Primitives.DataClassificationLevel
+Edpf.Abstractions.Primitives.DataClassificationLevel.Internal = 1 -> Edpf.Abstractions.Primitives.DataClassificationLevel
+Edpf.Abstractions.Primitives.DataClassificationLevel.Pci = 5 -> Edpf.Abstractions.Primitives.DataClassificationLevel
+Edpf.Abstractions.Primitives.DataClassificationLevel.Phi = 4 -> Edpf.Abstractions.Primitives.DataClassificationLevel
+Edpf.Abstractions.Primitives.DataClassificationLevel.Pii = 3 -> Edpf.Abstractions.Primitives.DataClassificationLevel
+Edpf.Abstractions.Primitives.DataClassificationLevel.Public = 0 -> Edpf.Abstractions.Primitives.DataClassificationLevel
+Edpf.Abstractions.Primitives.EntityId<TEntity>
+Edpf.Abstractions.Primitives.EntityId<TEntity>.EntityId() -> void
+Edpf.Abstractions.Primitives.EntityId<TEntity>.EntityId(System.Guid value) -> void
+Edpf.Abstractions.Primitives.EntityId<TEntity>.Equals(Edpf.Abstractions.Primitives.EntityId<TEntity> other) -> bool
+Edpf.Abstractions.Primitives.EntityId<TEntity>.IsEmpty.get -> bool
+Edpf.Abstractions.Primitives.EntityId<TEntity>.Value.get -> System.Guid
+Edpf.Abstractions.Primitives.Error
+Edpf.Abstractions.Primitives.Error.Category.get -> Edpf.Abstractions.Primitives.ErrorCategory
+Edpf.Abstractions.Primitives.Error.Code.get -> string!
+Edpf.Abstractions.Primitives.Error.CorrelationId.get -> string?
+Edpf.Abstractions.Primitives.Error.Equals(Edpf.Abstractions.Primitives.Error? other) -> bool
+Edpf.Abstractions.Primitives.Error.Error(string! code, string! message, Edpf.Abstractions.Primitives.ErrorCategory category, string? correlationId = null) -> void
+Edpf.Abstractions.Primitives.Error.Message.get -> string!
+Edpf.Abstractions.Primitives.Error.WithCorrelationId(string? correlationId) -> Edpf.Abstractions.Primitives.Error!
+Edpf.Abstractions.Primitives.ErrorCategory
+Edpf.Abstractions.Primitives.ErrorCategory.Authentication = 1 -> Edpf.Abstractions.Primitives.ErrorCategory
+Edpf.Abstractions.Primitives.ErrorCategory.Authorization = 2 -> Edpf.Abstractions.Primitives.ErrorCategory
+Edpf.Abstractions.Primitives.ErrorCategory.Compliance = 9 -> Edpf.Abstractions.Primitives.ErrorCategory
+Edpf.Abstractions.Primitives.ErrorCategory.Concurrency = 5 -> Edpf.Abstractions.Primitives.ErrorCategory
+Edpf.Abstractions.Primitives.ErrorCategory.Configuration = 7 -> Edpf.Abstractions.Primitives.ErrorCategory
+Edpf.Abstractions.Primitives.ErrorCategory.Conflict = 4 -> Edpf.Abstractions.Primitives.ErrorCategory
+Edpf.Abstractions.Primitives.ErrorCategory.Integration = 10 -> Edpf.Abstractions.Primitives.ErrorCategory
+Edpf.Abstractions.Primitives.ErrorCategory.Internal = 11 -> Edpf.Abstractions.Primitives.ErrorCategory
+Edpf.Abstractions.Primitives.ErrorCategory.NotFound = 3 -> Edpf.Abstractions.Primitives.ErrorCategory
+Edpf.Abstractions.Primitives.ErrorCategory.Security = 8 -> Edpf.Abstractions.Primitives.ErrorCategory
+Edpf.Abstractions.Primitives.ErrorCategory.Transient = 6 -> Edpf.Abstractions.Primitives.ErrorCategory
+Edpf.Abstractions.Primitives.ErrorCategory.Validation = 0 -> Edpf.Abstractions.Primitives.ErrorCategory
+Edpf.Abstractions.Primitives.ErrorCodes
+Edpf.Abstractions.Primitives.IClock
+Edpf.Abstractions.Primitives.IClock.UtcNow.get -> System.DateTimeOffset
+Edpf.Abstractions.Primitives.ICorrelationContext
+Edpf.Abstractions.Primitives.ICorrelationContext.CausationId.get -> string?
+Edpf.Abstractions.Primitives.ICorrelationContext.CorrelationId.get -> string!
+Edpf.Abstractions.Primitives.ICorrelationContext.RequestId.get -> string!
+Edpf.Abstractions.Primitives.ICorrelationContextAccessor
+Edpf.Abstractions.Primitives.ICorrelationContextAccessor.Current.get -> Edpf.Abstractions.Primitives.ICorrelationContext?
+Edpf.Abstractions.Primitives.ICorrelationContextAccessor.Push(Edpf.Abstractions.Primitives.ICorrelationContext! context) -> System.IDisposable!
+Edpf.Abstractions.Primitives.PagedResult<T>
+Edpf.Abstractions.Primitives.PagedResult<T>.HasNextPage.get -> bool
+Edpf.Abstractions.Primitives.PagedResult<T>.HasPreviousPage.get -> bool
+Edpf.Abstractions.Primitives.PagedResult<T>.Items.get -> System.Collections.Generic.IReadOnlyList<T>!
+Edpf.Abstractions.Primitives.PagedResult<T>.PagedResult(System.Collections.Generic.IReadOnlyList<T>! items, Edpf.Abstractions.Primitives.PageRequest request, long totalCount) -> void
+Edpf.Abstractions.Primitives.PagedResult<T>.PageNumber.get -> int
+Edpf.Abstractions.Primitives.PagedResult<T>.PageSize.get -> int
+Edpf.Abstractions.Primitives.PagedResult<T>.TotalCount.get -> long
+Edpf.Abstractions.Primitives.PagedResult<T>.TotalPages.get -> long
+Edpf.Abstractions.Primitives.PageRequest
+Edpf.Abstractions.Primitives.PageRequest.Equals(Edpf.Abstractions.Primitives.PageRequest other) -> bool
+Edpf.Abstractions.Primitives.PageRequest.PageNumber.get -> int
+Edpf.Abstractions.Primitives.PageRequest.PageRequest() -> void
+Edpf.Abstractions.Primitives.PageRequest.PageRequest(int pageNumber, int pageSize = 50) -> void
+Edpf.Abstractions.Primitives.PageRequest.PageSize.get -> int
+Edpf.Abstractions.Primitives.PageRequest.Skip.get -> int
+Edpf.Abstractions.Primitives.Result
+Edpf.Abstractions.Primitives.Result.Error.get -> Edpf.Abstractions.Primitives.Error?
+Edpf.Abstractions.Primitives.Result.IsFailure.get -> bool
+Edpf.Abstractions.Primitives.Result.IsSuccess.get -> bool
+Edpf.Abstractions.Primitives.Result.Match<TOut>(System.Func<TOut>! onSuccess, System.Func<Edpf.Abstractions.Primitives.Error!, TOut>! onFailure) -> TOut
+Edpf.Abstractions.Primitives.Result<T>
+Edpf.Abstractions.Primitives.Result<T>.Bind<TOut>(System.Func<T, Edpf.Abstractions.Primitives.Result<TOut>!>! bind) -> Edpf.Abstractions.Primitives.Result<TOut>!
+Edpf.Abstractions.Primitives.Result<T>.Map<TOut>(System.Func<T, TOut>! map) -> Edpf.Abstractions.Primitives.Result<TOut>!
+Edpf.Abstractions.Primitives.Result<T>.Match<TOut>(System.Func<T, TOut>! onSuccess, System.Func<Edpf.Abstractions.Primitives.Error!, TOut>! onFailure) -> TOut
+Edpf.Abstractions.Primitives.Result<T>.TryGetValue(out T value) -> bool
+Edpf.Abstractions.Primitives.Result<T>.Value.get -> T
+Edpf.Abstractions.Security.EncryptionEnvelope
+Edpf.Abstractions.Security.EncryptionEnvelope.AlgorithmId.get -> short
+Edpf.Abstractions.Security.EncryptionEnvelope.Ciphertext.get -> byte[]!
+Edpf.Abstractions.Security.EncryptionEnvelope.EncryptionEnvelope(byte version, short algorithmId, System.Guid keyId, int keyVersion, byte[]! nonce, byte[]! ciphertext, byte[]! tag) -> void
+Edpf.Abstractions.Security.EncryptionEnvelope.KeyId.get -> System.Guid
+Edpf.Abstractions.Security.EncryptionEnvelope.KeyVersion.get -> int
+Edpf.Abstractions.Security.EncryptionEnvelope.Nonce.get -> byte[]!
+Edpf.Abstractions.Security.EncryptionEnvelope.Serialize() -> byte[]!
+Edpf.Abstractions.Security.EncryptionEnvelope.Tag.get -> byte[]!
+Edpf.Abstractions.Security.EncryptionEnvelope.Version.get -> byte
+Edpf.Abstractions.Security.IAlgorithmRegistry
+Edpf.Abstractions.Security.IAlgorithmRegistry.Current.get -> Edpf.Abstractions.Security.ISymmetricAlgorithm!
+Edpf.Abstractions.Security.IAlgorithmRegistry.Register(Edpf.Abstractions.Security.ISymmetricAlgorithm! algorithm) -> void
+Edpf.Abstractions.Security.IAlgorithmRegistry.Resolve(short algorithmId) -> Edpf.Abstractions.Primitives.Result<Edpf.Abstractions.Security.ISymmetricAlgorithm!>!
+Edpf.Abstractions.Security.ICryptoProvider
+Edpf.Abstractions.Security.ICryptoProvider.DecryptAsync(Edpf.Abstractions.Security.EncryptionEnvelope! envelope, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result<byte[]!>!>!
+Edpf.Abstractions.Security.ICryptoProvider.EncryptAsync(byte[]! plaintext, Edpf.Abstractions.Security.KeyScope scope, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result<Edpf.Abstractions.Security.EncryptionEnvelope!>!>!
+Edpf.Abstractions.Security.IHashingService
+Edpf.Abstractions.Security.IHashingService.HmacSha256(byte[]! key, byte[]! data) -> byte[]!
+Edpf.Abstractions.Security.IHashingService.Sha256(byte[]! data) -> byte[]!
+Edpf.Abstractions.Security.IKeyManagementService
+Edpf.Abstractions.Security.IKeyManagementService.DestroyAsync(Edpf.Abstractions.Security.KeyScope scope, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result!>!
+Edpf.Abstractions.Security.IKeyManagementService.GetCurrentAsync(Edpf.Abstractions.Security.KeyScope scope, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result<Edpf.Abstractions.Security.KeyHandle!>!>!
+Edpf.Abstractions.Security.IKeyManagementService.ResolveAsync(System.Guid keyId, int keyVersion, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result<Edpf.Abstractions.Security.KeyHandle!>!>!
+Edpf.Abstractions.Security.ISymmetricAlgorithm
+Edpf.Abstractions.Security.ISymmetricAlgorithm.Decrypt(byte[]! ciphertext, byte[]! tag, byte[]! key, byte[]! nonce) -> byte[]!
+Edpf.Abstractions.Security.ISymmetricAlgorithm.Encrypt(byte[]! plaintext, byte[]! key, byte[]! nonce) -> (byte[]! Ciphertext, byte[]! Tag)
+Edpf.Abstractions.Security.ISymmetricAlgorithm.Id.get -> short
+Edpf.Abstractions.Security.ISymmetricAlgorithm.KeySizeBytes.get -> int
+Edpf.Abstractions.Security.ISymmetricAlgorithm.NonceSizeBytes.get -> int
+Edpf.Abstractions.Security.ISymmetricAlgorithm.TagSizeBytes.get -> int
+Edpf.Abstractions.Security.ITokenizer
+Edpf.Abstractions.Security.ITokenizer.TokenizeAsync(string! rawIdentifier, System.Guid tenantId, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result<string!>!>!
+Edpf.Abstractions.Security.KeyHandle
+Edpf.Abstractions.Security.KeyHandle.Dispose() -> void
+Edpf.Abstractions.Security.KeyHandle.KeyHandle(System.Guid keyId, int keyVersion, byte[]! material) -> void
+Edpf.Abstractions.Security.KeyHandle.KeyId.get -> System.Guid
+Edpf.Abstractions.Security.KeyHandle.KeyVersion.get -> int
+Edpf.Abstractions.Security.KeyHandle.Material.get -> byte[]!
+Edpf.Abstractions.Security.KeyScope
+Edpf.Abstractions.Security.KeyScope.Equals(Edpf.Abstractions.Security.KeyScope other) -> bool
+Edpf.Abstractions.Security.KeyScope.IsSubjectScoped.get -> bool
+Edpf.Abstractions.Security.KeyScope.KeyScope() -> void
+Edpf.Abstractions.Security.KeyScope.SubjectId.get -> System.Guid?
+Edpf.Abstractions.Security.KeyScope.TenantId.get -> System.Guid
+Edpf.Abstractions.Tenancy.ITenantContext
+Edpf.Abstractions.Tenancy.ITenantContext.IsolationMode.get -> Edpf.Abstractions.Tenancy.TenantIsolationMode
+Edpf.Abstractions.Tenancy.ITenantContext.KekReference.get -> System.Guid
+Edpf.Abstractions.Tenancy.ITenantContext.Region.get -> string!
+Edpf.Abstractions.Tenancy.ITenantContext.TenantId.get -> System.Guid
+Edpf.Abstractions.Tenancy.ITenantContextAccessor
+Edpf.Abstractions.Tenancy.ITenantContextAccessor.Current.get -> Edpf.Abstractions.Tenancy.ITenantContext?
+Edpf.Abstractions.Tenancy.ITenantContextAccessor.Push(Edpf.Abstractions.Tenancy.ITenantContext! context) -> System.IDisposable!
+Edpf.Abstractions.Tenancy.ITenantResolver
+Edpf.Abstractions.Tenancy.ITenantResolver.ResolveAsync(string! resolutionKey, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result<Edpf.Abstractions.Tenancy.TenantDescriptor!>!>!
+Edpf.Abstractions.Tenancy.ITenantStore
+Edpf.Abstractions.Tenancy.ITenantStore.GetAsync(System.Guid tenantId, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result<Edpf.Abstractions.Tenancy.TenantDescriptor!>!>!
+Edpf.Abstractions.Tenancy.TenantDescriptor
+Edpf.Abstractions.Tenancy.TenantDescriptor.IsolationMode.get -> Edpf.Abstractions.Tenancy.TenantIsolationMode
+Edpf.Abstractions.Tenancy.TenantDescriptor.KekReference.get -> System.Guid
+Edpf.Abstractions.Tenancy.TenantDescriptor.Name.get -> string!
+Edpf.Abstractions.Tenancy.TenantDescriptor.Region.get -> string!
+Edpf.Abstractions.Tenancy.TenantDescriptor.TenantDescriptor(System.Guid tenantId, string! name, string! region, Edpf.Abstractions.Tenancy.TenantIsolationMode isolationMode, System.Guid kekReference) -> void
+Edpf.Abstractions.Tenancy.TenantDescriptor.TenantId.get -> System.Guid
+Edpf.Abstractions.Tenancy.TenantIsolationMode
+Edpf.Abstractions.Tenancy.TenantIsolationMode.DatabasePerTenant = 2 -> Edpf.Abstractions.Tenancy.TenantIsolationMode
+Edpf.Abstractions.Tenancy.TenantIsolationMode.SchemaPerTenant = 1 -> Edpf.Abstractions.Tenancy.TenantIsolationMode
+Edpf.Abstractions.Tenancy.TenantIsolationMode.SharedSchema = 0 -> Edpf.Abstractions.Tenancy.TenantIsolationMode
+override Edpf.Abstractions.Primitives.EntityId<TEntity>.Equals(object? obj) -> bool
+override Edpf.Abstractions.Primitives.EntityId<TEntity>.GetHashCode() -> int
+override Edpf.Abstractions.Primitives.EntityId<TEntity>.ToString() -> string!
+override Edpf.Abstractions.Primitives.Error.Equals(object? obj) -> bool
+override Edpf.Abstractions.Primitives.Error.GetHashCode() -> int
+override Edpf.Abstractions.Primitives.Error.ToString() -> string!
+override Edpf.Abstractions.Primitives.PageRequest.Equals(object? obj) -> bool
+override Edpf.Abstractions.Primitives.PageRequest.GetHashCode() -> int
+override Edpf.Abstractions.Primitives.PageRequest.ToString() -> string!
+override Edpf.Abstractions.Security.KeyScope.Equals(object? obj) -> bool
+override Edpf.Abstractions.Security.KeyScope.GetHashCode() -> int
+override Edpf.Abstractions.Security.KeyScope.ToString() -> string!
+static Edpf.Abstractions.Primitives.EntityId<TEntity>.Empty.get -> Edpf.Abstractions.Primitives.EntityId<TEntity>
+static Edpf.Abstractions.Primitives.EntityId<TEntity>.From(System.Guid value) -> Edpf.Abstractions.Primitives.EntityId<TEntity>
+static Edpf.Abstractions.Primitives.EntityId<TEntity>.New() -> Edpf.Abstractions.Primitives.EntityId<TEntity>
+static Edpf.Abstractions.Primitives.EntityId<TEntity>.operator !=(Edpf.Abstractions.Primitives.EntityId<TEntity> left, Edpf.Abstractions.Primitives.EntityId<TEntity> right) -> bool
+static Edpf.Abstractions.Primitives.EntityId<TEntity>.operator ==(Edpf.Abstractions.Primitives.EntityId<TEntity> left, Edpf.Abstractions.Primitives.EntityId<TEntity> right) -> bool
+static Edpf.Abstractions.Primitives.PageRequest.First.get -> Edpf.Abstractions.Primitives.PageRequest
+static Edpf.Abstractions.Primitives.PageRequest.operator !=(Edpf.Abstractions.Primitives.PageRequest left, Edpf.Abstractions.Primitives.PageRequest right) -> bool
+static Edpf.Abstractions.Primitives.PageRequest.operator ==(Edpf.Abstractions.Primitives.PageRequest left, Edpf.Abstractions.Primitives.PageRequest right) -> bool
+static Edpf.Abstractions.Primitives.Result.Failure(Edpf.Abstractions.Primitives.Error! error) -> Edpf.Abstractions.Primitives.Result!
+static Edpf.Abstractions.Primitives.Result.Failure<T>(Edpf.Abstractions.Primitives.Error! error) -> Edpf.Abstractions.Primitives.Result<T>!
+static Edpf.Abstractions.Primitives.Result.Success() -> Edpf.Abstractions.Primitives.Result!
+static Edpf.Abstractions.Primitives.Result.Success<T>(T value) -> Edpf.Abstractions.Primitives.Result<T>!
+static Edpf.Abstractions.Primitives.Result<T>.FromError(Edpf.Abstractions.Primitives.Error! error) -> Edpf.Abstractions.Primitives.Result<T>!
+static Edpf.Abstractions.Primitives.Result<T>.FromValue(T value) -> Edpf.Abstractions.Primitives.Result<T>!
+static Edpf.Abstractions.Primitives.Result<T>.implicit operator Edpf.Abstractions.Primitives.Result<T>!(Edpf.Abstractions.Primitives.Error! error) -> Edpf.Abstractions.Primitives.Result<T>!
+static Edpf.Abstractions.Primitives.Result<T>.implicit operator Edpf.Abstractions.Primitives.Result<T>!(T value) -> Edpf.Abstractions.Primitives.Result<T>!
+static Edpf.Abstractions.Security.EncryptionEnvelope.Deserialize(byte[]! raw) -> Edpf.Abstractions.Security.EncryptionEnvelope!
+static Edpf.Abstractions.Security.KeyScope.ForSubject(System.Guid tenantId, System.Guid subjectId) -> Edpf.Abstractions.Security.KeyScope
+static Edpf.Abstractions.Security.KeyScope.ForTenant(System.Guid tenantId) -> Edpf.Abstractions.Security.KeyScope
+static Edpf.Abstractions.Security.KeyScope.operator !=(Edpf.Abstractions.Security.KeyScope left, Edpf.Abstractions.Security.KeyScope right) -> bool
+static Edpf.Abstractions.Security.KeyScope.operator ==(Edpf.Abstractions.Security.KeyScope left, Edpf.Abstractions.Security.KeyScope right) -> bool

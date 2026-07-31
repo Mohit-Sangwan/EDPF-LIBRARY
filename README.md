@@ -1,0 +1,118 @@
+# EDPF — Enterprise Data Platform Framework
+
+A modular, database-agnostic data platform framework for regulated
+enterprises, on Clean Architecture in C#. Domain focus: healthcare
+(HIS / EMR / LIS / RIS / Pharmacy / Billing / Insurance), extensible to ERP,
+CRM, HRMS, Finance, Insurance, Manufacturing, Retail, Government, Banking,
+Logistics, Education.
+
+> **What EDPF is for.** Its defensible product is **compliance, tenancy and
+> audit** — not data access. The data layer is the thinnest viable wrapper
+> over libraries other people maintain (ADR-001), so engineering effort lands
+> where nothing off the shelf helps.
+
+> **On compliance.** EDPF ships *controls that enable* HIPAA / GDPR / SOC 2 /
+> ISO compliance. A framework cannot make an application compliant —
+> compliance is a property of the system, its processes, and its
+> organization. Neither the documentation nor the marketing may claim
+> otherwise.
+
+## Current state
+
+**Wave 0 complete** — Phases 00 (Discovery & Decisions), 01 (Foundations) and
+02 (Walking Skeleton) are done; Gate G0 passed on engineering criteria.
+
+| | |
+|---|---|
+| ADRs accepted | 12 (ADR-001 … ADR-012) |
+| Target frameworks building green | 5 (net472, net48, net6.0, net8.0, net10.0) |
+| Automated tests | 84 green (unit, architecture, component, conformance contract) |
+| Live gate demonstrations | 19/19 passed against a real database |
+| Public API surface | tracked, diffed in CI |
+
+## Quick start
+
+```bash
+dotnet build Edpf.slnx -c Release
+```
+
+```bash
+dotnet test Edpf.slnx -c Release --filter "Category!=RequiresDocker"
+```
+
+Run the walking skeleton and its gate demonstration —
+see [samples/walking-skeleton](docs/phases/p02-walking-skeleton/11-usage.md)
+for the full instructions, including the no-Docker path:
+
+```bash
+docker compose -f samples/walking-skeleton/docker-compose.yml up -d
+```
+
+```bash
+dotnet run --project samples/walking-skeleton/Edpf.WalkingSkeleton.Api --framework net10.0
+```
+
+```powershell
+./samples/walking-skeleton/gate-demonstration.ps1
+```
+
+## What the skeleton proves
+
+One authenticated request creates a `Patient` under tenant A. A correctly
+authorized user of tenant B asking for that same id gets **404, not 403** —
+because leaking existence is itself a leak. The patient's medical record
+number is ciphertext in the raw table, wrapped in a self-describing 35-byte
+envelope. Destroying the subject's key makes the data unrecoverable while the
+tamper-evident audit chain still verifies. One outbox message rides the same
+transaction and dispatches exactly once. Every failure is an RFC 9457
+document carrying the correlation id that ties the whole request together.
+
+All of it runs on both SQL Server and PostgreSQL, on two runtimes, in CI.
+
+## Repository layout
+
+```text
+src/          Edpf.Abstractions (contracts, zero deps) · Edpf.Core (shared
+              kernel) · Edpf.Compatibility (the only #if) · Edpf.Diagnostics
+providers/    per-engine providers, licence-isolated (Wave 2)
+verticals/    domain packages: healthcare, finance (Wave 5)
+tests/        UnitTests · ArchitectureTests · ConformanceTests ·
+              WalkingSkeleton.Tests · Benchmarks
+samples/      reference applications; the walking skeleton lives here
+tools/        CLI, generators, diagram emitter (Phase 33)
+docs/         adr/ · tdl/ · phases/ · compliance/
+```
+
+## Documentation
+
+| Start here | |
+|---|---|
+| [Appendix Z](docs/standards/appendix-z-implementation-standards.md) | The engineering rulebook — read on day one, return to for every PR |
+| [Architecture decisions](docs/adr/README.md) | The twelve binding decisions and why |
+| [Phase folders](docs/phases/) | What each phase delivered, verified, and decided |
+| [Compliance controls](docs/compliance/compliance-control-matrix.md) | Control → HIPAA/GDPR/ISO/SOC 2 clause mapping |
+| [Data classification](docs/compliance/data-classification.md) | Handling rules per level |
+| [Threat model](docs/phases/p00-discovery-decisions/07-security.md) | 18 STRIDE entries with their controls |
+| [Contributing](CONTRIBUTING.md) | Branching, commits, review, the onboarding path |
+| [Security policy](SECURITY.md) | Reporting a vulnerability |
+
+## Non-negotiables
+
+1. **Decisions before code.** Every phase restates the ADRs that constrain it.
+2. **Vertical slice before horizontal scale.** Generalize only what a working
+   slice has already proven.
+3. **Every requirement carries a number.** No "fast" or "scalable" without a
+   target and a measurement method.
+4. **Compliance = controls, not claims.**
+5. **Prefer buy over build** (Principle 0): build only what differentiates;
+   wrap everything else so it can be replaced.
+6. **Continuous, not late:** testing, observability and security in every
+   phase.
+7. **Production bar:** XML docs, structured logging, no TODOs, no
+   placeholders, no hardcoded values, tests included.
+
+## Licence
+
+Dual: source-available core plus a commercial enterprise licence, with
+restrictive third-party drivers isolated in optional packages
+([ADR-009](docs/adr/ADR-009-licensing.md)). See [LICENSE.md](LICENSE.md).

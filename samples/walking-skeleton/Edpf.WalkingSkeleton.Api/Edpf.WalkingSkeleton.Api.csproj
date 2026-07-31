@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <!--
+    ★ NON-SHIPPABLE (Phase 02 §⑧) ★
+    The walking skeleton: one entity, two providers, two TFMs, one host.
+    It proves the whole stack end-to-end — pipeline order (ADR-012), tenancy
+    (ADR-004), outbox (ADR-003), crypto-shredding (ADR-006), envelope
+    encryption (ADR-007) — before any layer is generalized. Wave 2 rewrites
+    it; nothing here is promoted to production code.
+  -->
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+    <RootNamespace>Edpf.WalkingSkeleton.Api</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\src\Edpf.Abstractions\Edpf.Abstractions.csproj" />
+    <ProjectReference Include="..\..\..\src\Edpf.Core\Edpf.Core.csproj" />
+    <ProjectReference Include="..\..\..\src\Edpf.Diagnostics\Edpf.Diagnostics.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
+    <PackageReference Include="FluentValidation" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" />
+    <PackageReference Include="Serilog.AspNetCore" />
+    <PackageReference Include="Serilog.Sinks.Seq" />
+    <PackageReference Include="OpenTelemetry.Extensions.Hosting" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" />
+    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,19 @@
+<Solution>
+  <Folder Name="/samples/" />
+  <Folder Name="/samples/walking-skeleton/">
+    <Project Path="samples/walking-skeleton/Edpf.WalkingSkeleton.Api/Edpf.WalkingSkeleton.Api.csproj" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/Edpf.Abstractions/Edpf.Abstractions.csproj" />
+    <Project Path="src/Edpf.Compatibility/Edpf.Compatibility.csproj" />
+    <Project Path="src/Edpf.Core/Edpf.Core.csproj" />
+    <Project Path="src/Edpf.Diagnostics/Edpf.Diagnostics.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Edpf.ArchitectureTests/Edpf.ArchitectureTests.csproj" />
+    <Project Path="tests/Edpf.Benchmarks/Edpf.Benchmarks.csproj" />
+    <Project Path="tests/Edpf.ConformanceTests/Edpf.ConformanceTests.csproj" />
+    <Project Path="tests/Edpf.UnitTests/Edpf.UnitTests.csproj" />
+    <Project Path="tests/Edpf.WalkingSkeleton.Tests/Edpf.WalkingSkeleton.Tests.csproj" />
+  </Folder>
+</Solution>

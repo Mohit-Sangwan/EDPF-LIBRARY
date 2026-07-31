@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Z.9: BenchmarkDotNet, MemoryDiagnoser, release build. These benchmarks
+    seed the EDPF-BNC-001 baseline (Phase 02 §⑤ item 10); a regression over
+    5% fails the build once the baseline gate lands in Phase 31.
+    Run: dotnet run (Release) from tests/Edpf.Benchmarks
+  -->
+  <PropertyGroup>
+    <EdpfIsBenchmarkProject>true</EdpfIsBenchmarkProject>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <AnalysisLevel>latest-recommended</AnalysisLevel>
+    <NoWarn>$(NoWarn);CS1591;CA2007;CA1822</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Edpf.Abstractions\Edpf.Abstractions.csproj" />
+    <ProjectReference Include="..\..\src\Edpf.Core\Edpf.Core.csproj" />
+    <ProjectReference Include="..\..\samples\walking-skeleton\Edpf.WalkingSkeleton.Api\Edpf.WalkingSkeleton.Api.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BenchmarkDotNet" />
+  </ItemGroup>
+
+</Project>

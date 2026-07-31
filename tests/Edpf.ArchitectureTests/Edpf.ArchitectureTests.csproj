@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Clean Architecture as executable rules (Phase 01 §⑤): layering, the
+    zero-dependency abstractions rule, `#if` confinement, the DateTime and
+    Random bans, CancellationToken conventions, and C4 §12 diagram
+    conformance. A violated rule is a red build, not a review comment.
+  -->
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Edpf.Abstractions\Edpf.Abstractions.csproj" />
+    <ProjectReference Include="..\..\src\Edpf.Core\Edpf.Core.csproj" />
+    <ProjectReference Include="..\..\src\Edpf.Compatibility\Edpf.Compatibility.csproj" />
+    <ProjectReference Include="..\..\src\Edpf.Diagnostics\Edpf.Diagnostics.csproj" />
+    <ProjectReference Include="..\..\samples\walking-skeleton\Edpf.WalkingSkeleton.Api\Edpf.WalkingSkeleton.Api.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NetArchTest.Rules" />
+  </ItemGroup>
+
+</Project>

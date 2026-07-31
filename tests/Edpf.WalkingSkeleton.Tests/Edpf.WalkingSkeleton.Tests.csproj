@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Phase 02 §④: "one integration test suite that runs the full slice on both
+    providers". Component tests run everywhere (Sqlite in-memory); the gate
+    demonstrations (Category=RequiresDocker) run the real slice against
+    SQL Server and PostgreSQL via Testcontainers (Z.8: Testcontainers only,
+    never a shared environment).
+  -->
+  <ItemGroup>
+    <ProjectReference Include="..\..\samples\walking-skeleton\Edpf.WalkingSkeleton.Api\Edpf.WalkingSkeleton.Api.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
+    <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" />
+    <PackageReference Include="Testcontainers.MsSql" />
+    <PackageReference Include="Testcontainers.PostgreSql" />
+  </ItemGroup>
+
+</Project>

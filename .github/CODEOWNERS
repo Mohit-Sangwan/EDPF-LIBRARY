@@ -1,0 +1,19 @@
+# Squad ownership per path (Appendix Z.1). Reviews from the owning squad are
+# mandatory; security paths additionally require the Security Architect (Z.5.3).
+# Squad handles follow the v0.9 delivery plan (Book 6, Part 4): three squads.
+
+*                                   @edpf/squad-platform
+/src/Edpf.Abstractions/             @edpf/chief-architect
+/src/Edpf.Core/                     @edpf/chief-architect
+/src/Edpf.Compatibility/            @edpf/squad-platform
+/src/Edpf.Diagnostics/              @edpf/squad-platform
+/providers/                         @edpf/squad-data
+/samples/walking-skeleton/          @edpf/squad-platform @edpf/squad-trust
+/tests/Edpf.ArchitectureTests/      @edpf/chief-architect
+/tests/Edpf.ConformanceTests/       @edpf/squad-data
+/docs/adr/                          @edpf/chief-architect
+/docs/compliance/                   @edpf/squad-trust
+/.github/                           @edpf/squad-platform
+/Directory.Build.props              @edpf/chief-architect
+/Directory.Packages.props           @edpf/squad-platform
+/.editorconfig                      @edpf/chief-architect

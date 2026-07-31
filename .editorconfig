@@ -1,0 +1,141 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# EDPF — style and analyzer configuration (Appendix Z.4).
+# Style is a build error, not a suggestion. Severity changes to this file are
+# a Standards RFC (Z.21) and require two squads' agreement.
+# ═══════════════════════════════════════════════════════════════════════════
+
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+[*.{json,yml,yaml,props,targets,csproj,config,xml}]
+indent_size = 2
+
+[*.md]
+trim_trailing_whitespace = false
+
+[*.cs]
+
+# ── Usings & namespaces ─────────────────────────────────────────────────────
+csharp_using_directive_placement = outside_namespace:error
+csharp_style_namespace_declarations = file_scoped:error
+dotnet_sort_system_directives_first = true
+
+# ── Style conventions ───────────────────────────────────────────────────────
+csharp_style_var_for_built_in_types = false:suggestion
+csharp_style_var_when_type_is_apparent = true:suggestion
+csharp_prefer_braces = true:error
+csharp_style_expression_bodied_methods = when_on_single_line:suggestion
+csharp_style_expression_bodied_properties = when_on_single_line:suggestion
+dotnet_style_readonly_field = true:error
+dotnet_style_require_accessibility_modifiers = for_non_interface_members:error
+csharp_style_prefer_switch_expression = true:suggestion
+csharp_style_pattern_matching_over_as_with_null_check = true:warning
+dotnet_style_prefer_is_null_check_over_reference_equality_method = true:warning
+
+# ── Naming (Z.2): interfaces I-prefixed, async methods Async-suffixed ──────
+dotnet_naming_rule.interfaces_begin_with_i.severity = error
+dotnet_naming_rule.interfaces_begin_with_i.symbols = interface_symbols
+dotnet_naming_rule.interfaces_begin_with_i.style = i_prefix_style
+dotnet_naming_symbols.interface_symbols.applicable_kinds = interface
+dotnet_naming_style.i_prefix_style.required_prefix = I
+dotnet_naming_style.i_prefix_style.capitalization = pascal_case
+
+dotnet_naming_rule.async_methods_end_with_async.severity = error
+dotnet_naming_rule.async_methods_end_with_async.symbols = async_method_symbols
+dotnet_naming_rule.async_methods_end_with_async.style = async_suffix_style
+dotnet_naming_symbols.async_method_symbols.applicable_kinds = method
+dotnet_naming_symbols.async_method_symbols.required_modifiers = async
+dotnet_naming_style.async_suffix_style.required_suffix = Async
+dotnet_naming_style.async_suffix_style.capitalization = pascal_case
+
+dotnet_naming_rule.private_fields_underscore.severity = error
+dotnet_naming_rule.private_fields_underscore.symbols = private_field_symbols
+dotnet_naming_rule.private_fields_underscore.style = underscore_camel_style
+dotnet_naming_symbols.private_field_symbols.applicable_kinds = field
+dotnet_naming_symbols.private_field_symbols.applicable_accessibilities = private
+dotnet_naming_style.underscore_camel_style.required_prefix = _
+dotnet_naming_style.underscore_camel_style.capitalization = camel_case
+
+# ── CA analyzer configuration ───────────────────────────────────────────────
+# Guard methods are recognised as null-validation so CA1062 composes with the
+# shared-kernel Guard class (Z.3 rule: guard clauses at public boundaries).
+dotnet_code_quality.null_check_validation_methods = NotNull|NotNullOrEmpty|NotNullOrWhiteSpace|NotDefault
+
+# CA2007 (ConfigureAwait) — Z.3 rule 2: error in library code.
+dotnet_diagnostic.CA2007.severity = error
+
+# CA1848 (LoggerMessage delegates) — deferred: Z.9 escalates it per measured
+# hot path at the wave gate; premature adoption obscures the skeleton.
+dotnet_diagnostic.CA1848.severity = suggestion
+
+# CA1032 (standard exception ctors) — deliberately violated: the EDPF
+# exception taxonomy (§10.2) requires every exception to carry an Error;
+# parameterless construction would create code-less exceptions.
+dotnet_diagnostic.CA1032.severity = none
+
+# CA1716 (identifier matches language keyword) — 'Error' is the taxonomy's
+# central type (§10.1 primitives). VB consumption is not a supported scenario.
+dotnet_diagnostic.CA1716.severity = none
+
+# CA1014 (CLSCompliant) — CLS compliance is not an EDPF goal; the tiered TFM
+# surface is governed by ADR-002, not CLS.
+dotnet_diagnostic.CA1014.severity = none
+
+# CA1819 (properties returning arrays) — deliberately violated for crypto and
+# audit buffer carriers (EncryptionEnvelope, KeyHandle, AuditEventDescriptor):
+# defensive copies on the per-field crypto hot path violate the Z.18 allocation
+# budget. Ownership rules are documented on each property ("treat as
+# immutable"); Z.6 review enforces them.
+dotnet_diagnostic.CA1819.severity = none
+
+# CA1000 (static members on generic types) — deliberately violated for the
+# strongly-typed id pattern (EntityId<T>.New/From): the alternative erases the
+# type brand that is the entire point of the primitive.
+dotnet_diagnostic.CA1000.severity = none
+
+# CA1510/CA1511/CA1512/CA1513 (throw-helper APIs) — the helpers do not exist
+# on Tier 3 TFMs (net472/net48) and #if is confined to Edpf.Compatibility
+# (Z.3 rule 12), so shared source uses explicit guard clauses instead.
+dotnet_diagnostic.CA1510.severity = none
+dotnet_diagnostic.CA1511.severity = none
+dotnet_diagnostic.CA1512.severity = none
+dotnet_diagnostic.CA1513.severity = none
+
+# CA2225 (operator alternates) — named alternates exist (FromValue/FromError)
+# but the analyzer's name heuristic does not recognise them for generic
+# conversions. The alternates are part of the reviewed public API surface.
+dotnet_diagnostic.CA2225.severity = none
+
+# CA1859/CA1860-style micro-optimisations remain warnings (they are errors via
+# TreatWarningsAsErrors) — comply, do not suppress inline.
+
+# IDE0058 (unused expression value) — noisy against fluent APIs; the intent is
+# covered by CA1806.
+dotnet_diagnostic.IDE0058.severity = none
+
+# IDE0008 (explicit type vs var) — style preference handled above, not a gate.
+dotnet_diagnostic.IDE0008.severity = none
+
+# IDE0022 (expression-bodied members) / IDE0021 — preference, not a gate.
+dotnet_diagnostic.IDE0022.severity = none
+dotnet_diagnostic.IDE0160.severity = none
+dotnet_diagnostic.IDE0161.severity = error
+
+# ── Z.4 EDPF rules implemented as architecture/source tests until the
+#    dedicated Roslyn analyzer package ships in Phase 33:
+#    EDPF0001 zero-ref abstractions      → ArchitectureTests
+#    EDPF0002 #if outside Compatibility  → ArchitectureTests (source scan)
+#    EDPF0003 DateTime.Now/UtcNow ban    → ArchitectureTests (source scan)
+#    EDPF0004 System.Random in security  → ArchitectureTests (source scan)
+#    EDPF0007 CancellationToken required → ArchitectureTests (reflection)
+# ────────────────────────────────────────────────────────────────────────────
+
+# BinaryFormatter and friends: never.
+dotnet_diagnostic.SYSLIB0011.severity = error

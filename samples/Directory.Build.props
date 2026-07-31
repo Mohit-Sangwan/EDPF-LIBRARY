@@ -1,0 +1,18 @@
+<Project>
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)..'))" />
+
+  <!--
+    Samples are application code, not library code: ConfigureAwait(false) does
+    not apply (no synchronization context capture concern is being defended),
+    and the public-API doc bar applies to the framework surface, not hosts.
+    Everything else — nullable, warnings as errors, security rules — stays on.
+    The walking skeleton is additionally marked NON-SHIPPABLE (Phase 02 §⑧).
+  -->
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <AnalysisLevel>latest-recommended</AnalysisLevel>
+    <NoWarn>$(NoWarn);CS1591;CA2007</NoWarn>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+</Project>

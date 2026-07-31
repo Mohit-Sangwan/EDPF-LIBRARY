@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Logging and telemetry contracts (Phase 01 layout). Defines the standard
+    log schema and instrument names established in Phase 00 §⑥ — retrofitting
+    a log schema later is expensive, so it ships before any code path exists
+    to lose it.
+  -->
+  <PropertyGroup>
+    <TargetFrameworks>$(EdpfLibraryTargetFrameworks)</TargetFrameworks>
+    <IsPackable>true</IsPackable>
+    <Description>Enterprise Data Platform Framework — diagnostics contracts: standard log schema, activity source and meter names.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Edpf.Abstractions\Edpf.Abstractions.csproj" />
+  </ItemGroup>
+
+</Project>

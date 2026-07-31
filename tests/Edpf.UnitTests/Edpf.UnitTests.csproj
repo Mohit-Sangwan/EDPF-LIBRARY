@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Shared-kernel unit tests (Z.7): Method_Scenario_ExpectedResult naming,
+    AAA structure, no network/disk/database, deterministic.
+  -->
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Edpf.Abstractions\Edpf.Abstractions.csproj" />
+    <ProjectReference Include="..\..\src\Edpf.Core\Edpf.Core.csproj" />
+    <ProjectReference Include="..\..\src\Edpf.Compatibility\Edpf.Compatibility.csproj" />
+    <ProjectReference Include="..\..\src\Edpf.Diagnostics\Edpf.Diagnostics.csproj" />
+  </ItemGroup>
+
+</Project>

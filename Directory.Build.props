@@ -1,0 +1,88 @@
+<Project>
+
+  <!--
+    ═══════════════════════════════════════════════════════════════════════════
+    EDPF — Enterprise Data Platform Framework
+    Root build configuration. Normative source: Appendix Z (Z.1, Z.3, Z.4, Z.13)
+    and Phase 01 of the Execution Playbook.
+
+    Constraining ADRs: ADR-002 (multi-target tiers), ADR-011 (repo topology).
+    ═══════════════════════════════════════════════════════════════════════════
+  -->
+
+  <PropertyGroup Label="TargetFrameworkTiers">
+    <!--
+      ADR-002 tiered surface:
+        Tier 1 (net8.0, net10.0)  — full surface.
+        Tier 2 (net6.0)           — full minus newest APIs.
+        Tier 3 (net472, net48)    — reduced surface: data access, config,
+                                    logging, security primitives only.
+      Divergence is isolated in Edpf.Compatibility; `#if` is forbidden
+      everywhere else (Z.3 rule 12, enforced by architecture test EDPF0002).
+    -->
+    <EdpfLibraryTargetFrameworks>net472;net48;net6.0;net8.0;net10.0</EdpfLibraryTargetFrameworks>
+    <EdpfModernTargetFrameworks>net8.0;net10.0</EdpfModernTargetFrameworks>
+    <!-- net6.0 is retained deliberately as the Tier 2 surface per ADR-002;
+         its EOL status is acknowledged and tracked as a Phase 32 review item. -->
+    <CheckEolTargetFramework>false</CheckEolTargetFramework>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Compiler">
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <!-- Z.3 rule 1: style and analysis failures are build failures, not suggestions. -->
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <AnalysisLevel>latest-all</AnalysisLevel>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <!--
+      Z.4 EDPF0013: any public API change requires an explicit
+      PublicAPI.Unshipped.txt edit — accidental breaking changes cannot merge
+      silently. The baseline lives beside each tracked project.
+    -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NeutralLanguage>en</NeutralLanguage>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Determinism">
+    <!-- Z.13: every build is reproducible and deterministic. -->
+    <Deterministic>true</Deterministic>
+    <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <DebugType>portable</DebugType>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Package">
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <CentralPackageTransitivePinningEnabled>false</CentralPackageTransitivePinningEnabled>
+    <!-- Z.14: every package in a release shares the version. -->
+    <VersionPrefix>0.1.0</VersionPrefix>
+    <VersionSuffix>alpha.1</VersionSuffix>
+    <Authors>EDPF Contributors</Authors>
+    <Company>EDPF</Company>
+    <Product>Enterprise Data Platform Framework</Product>
+    <Copyright>© EDPF Contributors</Copyright>
+    <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
+    <RepositoryType>git</RepositoryType>
+    <IsPackable>false</IsPackable> <!-- opted in per shippable project -->
+  </PropertyGroup>
+
+  <!-- The licence file travels with every package (ADR-009). -->
+  <ItemGroup Condition="'$(IsPackable)' == 'true'">
+    <None Include="$(MSBuildThisFileDirectory)LICENSE.md" Pack="true" PackagePath="" Visible="false" />
+  </ItemGroup>
+
+  <PropertyGroup Label="Conventions">
+    <RootNamespace>$(MSBuildProjectName)</RootNamespace>
+    <AssemblyName>$(MSBuildProjectName)</AssemblyName>
+    <InvariantGlobalization>false</InvariantGlobalization>
+    <AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
+  </PropertyGroup>
+
+  <!-- .NET Framework reference assemblies: allows Tier 3 targets to build on
+       any machine/agent without a locally installed targeting pack. -->
+  <ItemGroup Condition="$([MSBuild]::GetTargetFrameworkIdentifier('$(TargetFramework)')) == '.NETFramework'">
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" PrivateAssets="all" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    The provider conformance suite (ADR-008, Z.12): the identical test set
+    every provider must pass 100% before it may be called Supported. Wave 2
+    (Phases 06-11) populates the suite against IDataProvider; this project
+    carries the suite contract so provider work starts against a fixed bar.
+  -->
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Edpf.Abstractions\Edpf.Abstractions.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,14 @@
+# Deterministic, reproducible builds (Z.13) require stable content hashes:
+# text is normalized to LF in the repository regardless of contributor OS.
+* text=auto eol=lf
+
+# Windows-only tooling that must keep CRLF to run.
+*.cmd text eol=crlf
+*.bat text eol=crlf
+
+*.png binary
+*.jpg binary
+*.ico binary
+*.pfx binary
+*.snk binary
+*.nupkg binary

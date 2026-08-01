@@ -1,6 +1,7 @@
 using Edpf.Abstractions.Data;
 using Edpf.Abstractions.Primitives;
 using Edpf.Abstractions.Query;
+using Edpf.Metadata;
 using Edpf.Abstractions.Tenancy;
 using Edpf.Data.Dialects;
 using Edpf.Data.Query;
@@ -21,10 +22,10 @@ public sealed class DialectTests
     [MemberData(nameof(AllDialects))]
     public void QuoteIdentifier_LegalName_IsQuoted(SqlDialectBase dialect)
     {
-        string quoted = dialect.QuoteIdentifier("PATIENT");
+        string quoted = dialect.QuoteIdentifier("SubjectRecord");
 
-        Assert.NotEqual("PATIENT", quoted);
-        Assert.Contains("PATIENT", quoted, StringComparison.Ordinal);
+        Assert.NotEqual("SubjectRecord", quoted);
+        Assert.Contains("SubjectRecord", quoted, StringComparison.Ordinal);
     }
 
     [Theory]
@@ -171,7 +172,7 @@ public sealed class QueryCompilerTests
     private static TenantDescriptor Context => new(
         Tenant, "t", "in-south-1", TenantIsolationMode.SharedSchema, Guid.NewGuid());
 
-    private static QueryCompiler Compiler(SqlDialectBase dialect) => new(dialect, new TestPatientMetadata());
+    private static QueryCompiler Compiler(SqlDialectBase dialect) => new(dialect, TestEntities.SubjectRecord());
 
     [Fact]
     public void CompilePaged_Always_AppendsAStableTiebreaker()

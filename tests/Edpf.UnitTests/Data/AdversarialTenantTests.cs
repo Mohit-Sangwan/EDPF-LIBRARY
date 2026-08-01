@@ -1,5 +1,6 @@
 using Edpf.Abstractions.Primitives;
 using Edpf.Abstractions.Query;
+using Edpf.Metadata;
 using Edpf.Abstractions.Tenancy;
 using Edpf.Data.Dialects;
 using Edpf.Data.Query;
@@ -19,7 +20,7 @@ public sealed class AdversarialTenantTests
     private static TenantDescriptor ContextFor(Guid tenantId) => new(
         tenantId, "t", "in-south-1", TenantIsolationMode.SharedSchema, Guid.NewGuid());
 
-    private static QueryCompiler Compiler => new(new SqlServerDialect(), new TestPatientMetadata());
+    private static QueryCompiler Compiler => new(new SqlServerDialect(), TestEntities.SubjectRecord());
 
     private static string TenantParameterOf(CompiledQuery query)
         => query.Parameters["tenantId"]!.ToString()!;
@@ -145,7 +146,7 @@ public sealed class AdversarialTenantTests
     public void Route6_SortOnEncryptedField_IsRejected()
     {
         Result<CompiledQuery> result = Compiler.CompilePaged(
-            Specification<object>.Create().OrderBy("MedicalRecordNumber"),
+            Specification<object>.Create().OrderBy("RecordNumber"),
             ContextFor(TenantA),
             new PageRequest(1, 10));
 
@@ -159,7 +160,7 @@ public sealed class AdversarialTenantTests
     public void Route7_FilterOnEncryptedField_IsRejectedWithoutNamingAlternatives()
     {
         Result<CompiledQuery> result = Compiler.CompilePaged(
-            Specification<object>.Create().Where("MedicalRecordNumber", FilterOperator.Equal, "MRN-1"),
+            Specification<object>.Create().Where("RecordNumber", FilterOperator.Equal, "MRN-1"),
             ContextFor(TenantA),
             new PageRequest(1, 10));
 

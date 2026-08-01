@@ -11,6 +11,7 @@
     <ProjectReference Include="..\..\src\Edpf.Diagnostics\Edpf.Diagnostics.csproj" />
     <ProjectReference Include="..\..\src\Edpf.Configuration\Edpf.Configuration.csproj" />
     <ProjectReference Include="..\..\src\Edpf.Data\Edpf.Data.csproj" />
+    <ProjectReference Include="..\..\src\Edpf.Metadata\Edpf.Metadata.csproj" />
     <ProjectReference Include="..\..\src\Edpf.Caching\Edpf.Caching.csproj" />
     <ProjectReference Include="..\..\src\Edpf.Security\Edpf.Security.csproj" />
     <ProjectReference Include="..\..\src\Edpf.DataPlatform\Edpf.DataPlatform.csproj" />

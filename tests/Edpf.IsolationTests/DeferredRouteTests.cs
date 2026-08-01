@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using Edpf.Abstractions.Primitives;
 using Edpf.Abstractions.Query;
+using Edpf.Metadata;
 using Edpf.Data.Dialects;
 using Edpf.Data.Query;
 
@@ -54,7 +55,7 @@ public sealed class RawSqlRouteTests
 [CoversIsolationRoute(IsolationRoutes.TimingSideChannel)]
 public sealed class TimingSideChannelRouteTests
 {
-    private static QueryCompiler Compiler => new(new SqlServerDialect(), new IsolationTestMetadata());
+    private static QueryCompiler Compiler => new(new SqlServerDialect(), IsolationTestMetadata.Create());
 
     [Fact]
     public void CompiledQuery_ForExistingAndNonExistingIds_IsStructurallyIdentical()

@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Phase 05b — Metadata Platform.
+
+    Inserted BEFORE the data core consumes it, per Appendix I.0. The master
+    document's own review found the ordering defect: the dynamic-query safety
+    model resolves caller-supplied fields against entity metadata, but no
+    metadata repository existed anywhere in the plan — the query layer was
+    implicitly assuming reflection over compile-time types, which cannot
+    describe a field a customer adds at runtime.
+
+    Tier 1 + Tier 2 (ADR-002). Metadata resolution is a platform service, not
+    part of the "data access, config, logging, security primitives" surface
+    that net472/net48 receive.
+  -->
+  <PropertyGroup>
+    <TargetFrameworks>$(EdpfPlatformTargetFrameworks)</TargetFrameworks>
+    <IsPackable>true</IsPackable>
+    <Description>Enterprise Data Platform Framework — entity and field metadata, including runtime-defined fields, with tenant-scoped overlays and effective dating.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Edpf.Abstractions\Edpf.Abstractions.csproj" />
+    <ProjectReference Include="..\Edpf.Core\Edpf.Core.csproj" />
+  </ItemGroup>
+
+</Project>

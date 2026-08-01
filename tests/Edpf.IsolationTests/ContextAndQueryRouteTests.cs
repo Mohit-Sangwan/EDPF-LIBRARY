@@ -1,5 +1,6 @@
 using Edpf.Abstractions.Primitives;
 using Edpf.Abstractions.Query;
+using Edpf.Metadata;
 using Edpf.Abstractions.Tenancy;
 using Edpf.Core.Tenancy;
 using Edpf.Data.Dialects;
@@ -16,7 +17,7 @@ namespace Edpf.IsolationTests;
 [CoversIsolationRoute(IsolationRoutes.Repository)]
 public sealed class RepositoryRouteTests
 {
-    private static QueryCompiler Compiler => new(new SqlServerDialect(), new IsolationTestMetadata());
+    private static QueryCompiler Compiler => new(new SqlServerDialect(), IsolationTestMetadata.Create());
 
     [Fact]
     public void Query_WithoutTenantContext_IsRefused()
@@ -50,7 +51,7 @@ public sealed class RepositoryRouteTests
 [CoversIsolationRoute(IsolationRoutes.ErrorEnumeration)]
 public sealed class ErrorEnumerationRouteTests
 {
-    private static QueryCompiler Compiler => new(new SqlServerDialect(), new IsolationTestMetadata());
+    private static QueryCompiler Compiler => new(new SqlServerDialect(), IsolationTestMetadata.Create());
 
     [Fact]
     public void CrossTenantRefusal_UsesNotFoundSemantics_NotForbidden()
@@ -88,14 +89,14 @@ public sealed class ErrorEnumerationRouteTests
         // would turn every rejection into a free schema dump.
         Assert.Contains("SecretField", message, StringComparison.Ordinal);
         Assert.DoesNotContain("GivenName", message, StringComparison.Ordinal);
-        Assert.DoesNotContain("MedicalRecordNumber", message, StringComparison.Ordinal);
+        Assert.DoesNotContain("RecordNumber", message, StringComparison.Ordinal);
     }
 
     [Fact]
     public void NonFilterableField_RefusalDoesNotConfirmWhyItIsProtected()
     {
         Result<CompiledQuery> result = Compiler.CompilePaged(
-            Specification<object>.Create().Where("MedicalRecordNumber", FilterOperator.Equal, "MRN-1"),
+            Specification<object>.Create().Where("RecordNumber", FilterOperator.Equal, "MRN-1"),
             Tenants.Context(Tenants.B),
             new PageRequest(1, 10));
 
@@ -180,42 +181,34 @@ public sealed class AmbientContextRouteTests
     }
 }
 
-/// <summary>Metadata for the isolation suite's fixture entity.</summary>
-internal sealed class IsolationTestMetadata : IEntityMetadata
+/// <summary>
+/// Metadata for the isolation suite's fixture entity.
+/// </summary>
+/// <remarks>
+/// Built from the production <see cref="EntityMetadata"/> since Phase 05b. An
+/// isolation suite proving a property against a hand-rolled double proves it
+/// about the double; the whole value of these twelve routes is that they run
+/// against what ships.
+/// </remarks>
+internal static class IsolationTestMetadata
 {
-    public string EntityName => "Patient";
+    public static EntityMetadata Create() => new(
+        "SubjectRecord",
+        "SUBJECT_RECORD",
+        [
+            new FieldMetadata("Id", "Id", typeof(Guid), DataClassificationLevel.Internal,
+                isFilterable: true, isSortable: true),
+            new FieldMetadata("TenantId", "TenantId", typeof(Guid), DataClassificationLevel.Internal,
+                isFilterable: true, isSortable: true),
+            new FieldMetadata("GivenName", "GivenName", typeof(string), DataClassificationLevel.Internal,
+                isFilterable: true, isSortable: true),
 
-    public string TableName => "PATIENT";
-
-    public IReadOnlyDictionary<string, IFieldMetadata> Fields { get; } =
-        new Dictionary<string, IFieldMetadata>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["Id"] = new Field("Id", "Id", typeof(Guid)),
-            ["TenantId"] = new Field("TenantId", "TenantId", typeof(Guid)),
-            ["GivenName"] = new Field("GivenName", "GivenName", typeof(string)),
-            ["MedicalRecordNumber"] = new Field(
-                "MedicalRecordNumber", "MrnEnvelope", typeof(byte[]), filterable: false, sortable: false),
-            ["IsDeleted"] = new Field("IsDeleted", "IsDeleted", typeof(bool)),
-        };
-
-    public Result<IFieldMetadata> ResolveField(string fieldName)
-        => Fields.TryGetValue(fieldName, out IFieldMetadata? field)
-            ? Result.Success(field)
-            : Result.Failure<IFieldMetadata>(new Error(
-                ErrorCodes.InvalidFilter,
-                $"Field '{fieldName}' is not a queryable field of {EntityName}.",
-                ErrorCategory.Validation));
-
-    private sealed class Field(
-        string name, string column, Type clrType, bool filterable = true, bool sortable = true)
-        : IFieldMetadata
-    {
-        public string Name { get; } = name;
-        public string ColumnName { get; } = column;
-        public Type ClrType { get; } = clrType;
-        public bool IsFilterable { get; } = filterable;
-        public bool IsSortable { get; } = sortable;
-        public bool IsProjectable => true;
-        public DataClassificationLevel Classification => DataClassificationLevel.Internal;
-    }
+            // Classified: encrypted at rest, so neither filterable nor
+            // sortable. FieldMetadata enforces that pairing rather than
+            // trusting this fixture to keep three flags consistent.
+            new FieldMetadata("RecordNumber", "RecordNumberEnvelope", typeof(byte[]),
+                DataClassificationLevel.Phi),
+            new FieldMetadata("IsDeleted", "IsDeleted", typeof(bool), DataClassificationLevel.Internal,
+                isFilterable: true, isSortable: true),
+        ]);
 }

@@ -364,6 +364,30 @@ Edpf.Abstractions.Identity.ScopeLevel.Facility = 1 -> Edpf.Abstractions.Identity
 Edpf.Abstractions.Identity.ScopeLevel.Organization = 0 -> Edpf.Abstractions.Identity.ScopeLevel
 Edpf.Abstractions.Identity.ScopeLevel.Resource = 4 -> Edpf.Abstractions.Identity.ScopeLevel
 Edpf.Abstractions.Identity.ScopeLevel.Unit = 3 -> Edpf.Abstractions.Identity.ScopeLevel
+Edpf.Abstractions.Metadata.DataProtectionRequirements
+Edpf.Abstractions.Metadata.DataProtectionRequirements.AuditAccess = 4 -> Edpf.Abstractions.Metadata.DataProtectionRequirements
+Edpf.Abstractions.Metadata.DataProtectionRequirements.EncryptAtRest = 1 -> Edpf.Abstractions.Metadata.DataProtectionRequirements
+Edpf.Abstractions.Metadata.DataProtectionRequirements.ErasableByKeyDestruction = 16 -> Edpf.Abstractions.Metadata.DataProtectionRequirements
+Edpf.Abstractions.Metadata.DataProtectionRequirements.IncludeInSubjectAccess = 8 -> Edpf.Abstractions.Metadata.DataProtectionRequirements
+Edpf.Abstractions.Metadata.DataProtectionRequirements.None = 0 -> Edpf.Abstractions.Metadata.DataProtectionRequirements
+Edpf.Abstractions.Metadata.DataProtectionRequirements.RedactInDiagnostics = 2 -> Edpf.Abstractions.Metadata.DataProtectionRequirements
+Edpf.Abstractions.Metadata.DataProtectionRequirements.TokenizeNeverStoreRaw = 32 -> Edpf.Abstractions.Metadata.DataProtectionRequirements
+Edpf.Abstractions.Metadata.FieldStorageStrategy
+Edpf.Abstractions.Metadata.FieldStorageStrategy.EntityAttributeValue = 3 -> Edpf.Abstractions.Metadata.FieldStorageStrategy
+Edpf.Abstractions.Metadata.FieldStorageStrategy.JsonColumn = 2 -> Edpf.Abstractions.Metadata.FieldStorageStrategy
+Edpf.Abstractions.Metadata.FieldStorageStrategy.SparseColumn = 1 -> Edpf.Abstractions.Metadata.FieldStorageStrategy
+Edpf.Abstractions.Metadata.FieldStorageStrategy.TypedColumn = 0 -> Edpf.Abstractions.Metadata.FieldStorageStrategy
+Edpf.Abstractions.Metadata.IDataProtectionPolicy
+Edpf.Abstractions.Metadata.IDataProtectionPolicy.For(Edpf.Abstractions.Primitives.DataClassificationLevel level) -> Edpf.Abstractions.Metadata.DataProtectionRequirements
+Edpf.Abstractions.Metadata.IDynamicEntity
+Edpf.Abstractions.Metadata.IDynamicEntity.EntityName.get -> string!
+Edpf.Abstractions.Metadata.IDynamicEntity.GetValue(string! fieldName) -> Edpf.Abstractions.Primitives.Result<object?>!
+Edpf.Abstractions.Metadata.IDynamicEntity.Metadata.get -> Edpf.Abstractions.Query.IEntityMetadata!
+Edpf.Abstractions.Metadata.IDynamicEntity.PopulatedFields.get -> System.Collections.Generic.IReadOnlyCollection<string!>!
+Edpf.Abstractions.Metadata.IDynamicEntity.SetValue(string! fieldName, object? value) -> Edpf.Abstractions.Primitives.Result!
+Edpf.Abstractions.Metadata.IDynamicEntity.TenantId.get -> System.Guid
+Edpf.Abstractions.Metadata.IMetadataRepository
+Edpf.Abstractions.Metadata.IMetadataRepository.GetEntity(string! entityName, System.Guid tenantId, System.DateTimeOffset asOf) -> Edpf.Abstractions.Primitives.Result<Edpf.Abstractions.Query.IEntityMetadata!>!
 Edpf.Abstractions.Primitives.DataClassificationAttribute
 Edpf.Abstractions.Primitives.DataClassificationAttribute.DataClassificationAttribute(Edpf.Abstractions.Primitives.DataClassificationLevel level) -> void
 Edpf.Abstractions.Primitives.DataClassificationAttribute.Level.get -> Edpf.Abstractions.Primitives.DataClassificationLevel
@@ -476,10 +500,14 @@ Edpf.Abstractions.Query.IFieldMetadata
 Edpf.Abstractions.Query.IFieldMetadata.Classification.get -> Edpf.Abstractions.Primitives.DataClassificationLevel
 Edpf.Abstractions.Query.IFieldMetadata.ClrType.get -> System.Type!
 Edpf.Abstractions.Query.IFieldMetadata.ColumnName.get -> string!
+Edpf.Abstractions.Query.IFieldMetadata.DisplayName.get -> string!
 Edpf.Abstractions.Query.IFieldMetadata.IsFilterable.get -> bool
 Edpf.Abstractions.Query.IFieldMetadata.IsProjectable.get -> bool
+Edpf.Abstractions.Query.IFieldMetadata.IsRuntimeDefined.get -> bool
 Edpf.Abstractions.Query.IFieldMetadata.IsSortable.get -> bool
 Edpf.Abstractions.Query.IFieldMetadata.Name.get -> string!
+Edpf.Abstractions.Query.IFieldMetadata.RequiredScope.get -> string?
+Edpf.Abstractions.Query.IFieldMetadata.StorageStrategy.get -> Edpf.Abstractions.Metadata.FieldStorageStrategy
 Edpf.Abstractions.Query.IFilterNode
 Edpf.Abstractions.Query.IFilterNode.Accept<TResult>(Edpf.Abstractions.Query.IFilterVisitor<TResult>! visitor) -> TResult
 Edpf.Abstractions.Query.IFilterVisitor<TResult>

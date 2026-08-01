@@ -11,9 +11,9 @@ is the single place a sponsor can see what exists, what does not, and why.
 
 | | |
 |---|---|
-| Waves worked | 9 of 9 (Phases 00–37, plus 24b) |
-| ADRs accepted | 24 |
-| Automated tests | 810, all passing |
+| Waves worked | 9 of 9 (Phases 00–37, plus 05b and 24b) |
+| ADRs accepted | 25 |
+| Automated tests | 843, all passing |
 | Target frameworks | 5, building clean with warnings as errors |
 | Gates passed on engineering criteria | **G0, G1** |
 | Gates with outstanding criteria | G2–G9 |
@@ -92,6 +92,8 @@ Worth recording, because they are the argument for the approach:
 | `Edpf.Security` importing cryptography directly | Architecture test | As crypto spreading across assemblies |
 | Stale entry in the public-API baseline after a signature change | RS0017 | As a missed breaking change |
 | Chained patient merge (A→B then B→C) passed the guard, because the guard only inspected incoming records and B was a *survivor* | Phase 24b reversibility test | **As a clinical-safety incident** — reversing the first merge would restore A after its data had already propagated to C |
+| No metadata repository existed in `src/` at all — the query compiler's whitelist had only test doubles to resolve against | Phase 05b, checking the document's own Appendix I.0 finding against this repository | As custom fields being unqueryable, then routed around the safety model |
+| Two redaction policies disagreed on `Internal` — the new metadata-driven one redacted it, the shipped ADR-015 one did not | Phase 05b cross-check test | As a field's protection depending on which subsystem looked at it |
 
 ---
 

@@ -13,6 +13,7 @@
     <ProjectReference Include="..\..\src\Edpf.Abstractions\Edpf.Abstractions.csproj" />
     <ProjectReference Include="..\..\src\Edpf.Core\Edpf.Core.csproj" />
     <ProjectReference Include="..\..\src\Edpf.Data\Edpf.Data.csproj" />
+    <ProjectReference Include="..\..\src\Edpf.Metadata\Edpf.Metadata.csproj" />
     <ProjectReference Include="..\..\src\Edpf.Caching\Edpf.Caching.csproj" />
     <ProjectReference Include="..\..\src\Edpf.Diagnostics\Edpf.Diagnostics.csproj" />
     <ProjectReference Include="..\..\src\Edpf.Configuration\Edpf.Configuration.csproj" />

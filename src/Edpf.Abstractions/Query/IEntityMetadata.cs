@@ -60,4 +60,29 @@ public interface IFieldMetadata
 
     /// <summary>The field's data classification, which drives redaction and encryption.</summary>
     DataClassificationLevel Classification { get; }
+
+    /// <summary>
+    /// True when this field was defined at runtime rather than compiled in.
+    /// </summary>
+    /// <remarks>
+    /// **Nothing in the framework may branch on this to decide protection.**
+    /// It exists for diagnostics, migration tooling and storage planning. A
+    /// runtime-defined field is protected by its
+    /// <see cref="Classification"/>, on exactly the same code path as a
+    /// compiled one — that sameness is what makes custom fields safe
+    /// (Appendix I.0).
+    /// </remarks>
+    bool IsRuntimeDefined { get; }
+
+    /// <summary>Where the value physically lives.</summary>
+    Metadata.FieldStorageStrategy StorageStrategy { get; }
+
+    /// <summary>
+    /// The authorization scope a caller must hold to read this field, or
+    /// <see langword="null"/> when entity-level authorization suffices.
+    /// </summary>
+    string? RequiredScope { get; }
+
+    /// <summary>The human-readable label, for forms and exports.</summary>
+    string DisplayName { get; }
 }

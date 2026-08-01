@@ -24,9 +24,9 @@ Gate G1 (Foundation) passed on engineering criteria.
 
 | | |
 |---|---|
-| ADRs accepted | 22 (ADR-001 … ADR-022) |
+| ADRs accepted | 23 (ADR-001 … ADR-023) |
 | Target frameworks building green | 5 (net472, net48, net6.0, net8.0, net10.0) |
-| Automated tests | 627 green |
+| Automated tests | 693 green |
 | Injection corpus | 226 assertions, zero successful injections |
 | Adversarial isolation routes | 12/12 covered, coverage machine-checked |
 | Live gate demonstrations | 24/24 passed against a real database |
@@ -39,7 +39,13 @@ Gate G1 (Foundation) passed on engineering criteria.
 | 2 — Data Access Core | 06 Providers · 07 Routing · 08 Query · 09 Consistency · 10 Repository · 11 Migrations | G2 — contracts done, [engine-bound verification outstanding](docs/phases/p06-p11-data-access-core/14-completion-report.md#carried-forward-to-gate-g2) |
 | 3 — Data Services | 12 Tenancy · 13 Bulk · 14 Blob · 15 Cache · 16 Search · 17 Validation | G3 — contracts done, [backend verification outstanding](docs/phases/p12-p17-data-services/14-completion-report.md#carried-forward-to-gate-g3) |
 | 4 — Trust | 18 Errors · 19 Audit · 20 Crypto · 21 AuthN/Z · 22 Compliance | G4 — [independent reviews outstanding](docs/phases/p18-p22-trust/14-completion-report.md#carried-forward-to-gate-g4) |
-| 5 — Data Platform & Domain | 23–24 | next |
+| 5 — Data Platform & Domain | 23 Classification · 24 Clinical safety | G5 — [interop verification outstanding](docs/phases/p23-p24-data-platform-domain/14-completion-report.md#carried-forward-to-gate-g5) |
+| 6 — Integration & Runtime | 25–28 | next |
+
+> **Regulatory boundary.** EDPF provides data infrastructure and does not make
+> clinical decisions. A consumer building clinical decision support on EDPF is
+> building a regulated medical device (FDA SaMD / EU MDR) and carries those
+> obligations. See [ADR-023](docs/adr/ADR-023-integrate-do-not-build.md).
 
 ## Quick start
 

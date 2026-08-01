@@ -22,6 +22,15 @@
     -->
     <EdpfLibraryTargetFrameworks>net472;net48;net6.0;net8.0;net10.0</EdpfLibraryTargetFrameworks>
     <EdpfModernTargetFrameworks>net8.0;net10.0</EdpfModernTargetFrameworks>
+    <!--
+      Tier 1 + Tier 2 only. Used by assemblies outside the Tier 3 surface that
+      ADR-002 defines — data-platform services (classification, lineage, MDM,
+      CDC) are not part of the "data access, config, logging, security
+      primitives" that net472/net48 receive. Declaring that here keeps the
+      exclusion a stated architectural decision rather than an accident of
+      whichever API happened to be unavailable.
+    -->
+    <EdpfPlatformTargetFrameworks>net6.0;net8.0;net10.0</EdpfPlatformTargetFrameworks>
     <!-- net6.0 is retained deliberately as the Tier 2 surface per ADR-002;
          its EOL status is acknowledged and tracked as a Phase 32 review item. -->
     <CheckEolTargetFramework>false</CheckEolTargetFramework>

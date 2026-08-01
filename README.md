@@ -24,9 +24,9 @@ Gate G1 (Foundation) passed on engineering criteria.
 
 | | |
 |---|---|
-| ADRs accepted | 23 (ADR-001 … ADR-023) |
+| ADRs accepted | 24 (ADR-001 … ADR-024) |
 | Target frameworks building green | 5 (net472, net48, net6.0, net8.0, net10.0) |
-| Automated tests | 792 green |
+| Automated tests | 810 green |
 | Injection corpus | 226 assertions, zero successful injections |
 | Adversarial isolation routes | 12/12 covered, coverage machine-checked |
 | Live gate demonstrations | 24/24 passed against a real database |
@@ -154,7 +154,8 @@ All of it runs on both SQL Server and PostgreSQL, on two runtimes, in CI.
 src/          Edpf.Abstractions (contracts, zero deps) · Edpf.Core (shared
               kernel) · Edpf.Compatibility (the only #if) · Edpf.Diagnostics
 providers/    per-engine providers, licence-isolated (Wave 2)
-verticals/    domain packages: healthcare, finance (Wave 5)
+verticals/    Edpf.Healthcare.Domain — optional; consumes only the public
+              surface, and the core never references it back (ADR-024)
 tests/        UnitTests · ArchitectureTests · ConformanceTests ·
               WalkingSkeleton.Tests · Benchmarks
 samples/      reference applications; the walking skeleton lives here
@@ -167,7 +168,7 @@ docs/         adr/ · tdl/ · phases/ · compliance/
 | Start here | |
 |---|---|
 | [Appendix Z](docs/standards/appendix-z-implementation-standards.md) | The engineering rulebook — read on day one, return to for every PR |
-| [Architecture decisions](docs/adr/README.md) | The twelve binding decisions and why |
+| [Architecture decisions](docs/adr/README.md) | The twenty-four binding decisions, each with its revisit triggers |
 | [Phase folders](docs/phases/) | What each phase delivered, verified, and decided |
 | [Compliance controls](docs/compliance/compliance-control-matrix.md) | Control → HIPAA/GDPR/ISO/SOC 2 clause mapping |
 | [Data classification](docs/compliance/data-classification.md) | Handling rules per level |

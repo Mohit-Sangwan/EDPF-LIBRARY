@@ -33,6 +33,7 @@ current answer is the current answer.
 | [ADR-021](ADR-021-zero-downtime-migration.md) | Zero-downtime migration discipline | Accepted |
 | [ADR-022](ADR-022-audit-event-taxonomy.md) | Audit event taxonomy | Accepted |
 | [ADR-023](ADR-023-integrate-do-not-build.md) | Integrate, do not build (FHIR, HL7 v2, DICOM) | Accepted |
+| [ADR-024](ADR-024-vertical-package-boundary.md) | Vertical package boundary — domain content never enters the core | Accepted |
 
 Template: [ADR-000-template.md](ADR-000-template.md).
 Smaller decisions go to the [technical decision log](../tdl/README.md).

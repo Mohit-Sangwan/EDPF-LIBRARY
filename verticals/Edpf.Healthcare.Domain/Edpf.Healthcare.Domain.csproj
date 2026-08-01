@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Phase 24b — the healthcare vertical.
+
+    This package exists because the originating specification placed
+    SavePatient(), SaveEncounter() and SaveLabOrder() directly on the
+    framework. That is a layering violation: a framework serving ERP, banking
+    and telecom cannot expose SavePatient(). Here that content has a correct
+    home — an optional package built ON the domain-neutral core.
+
+    ADR-024: a vertical may consume only the framework's PUBLIC surface. Any
+    change required in the core to support a vertical means the core's
+    extension points are inadequate; the fix is the extension point, never a
+    special case for the vertical.
+  -->
+  <PropertyGroup>
+    <TargetFrameworks>$(EdpfPlatformTargetFrameworks)</TargetFrameworks>
+    <IsPackable>true</IsPackable>
+    <Description>EDPF healthcare vertical — clinical domain model. Optional package; the core stays domain-neutral.</Description>
+  </PropertyGroup>
+
+  <!--
+    Note what is absent: no reference to anything internal, no shared source,
+    no InternalsVisibleTo. If this package can be built from the public
+    surface alone, the extension model works — and that is the point of
+    building it (Phase 24b §①).
+  -->
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Edpf.Abstractions\Edpf.Abstractions.csproj" />
+    <ProjectReference Include="..\..\src\Edpf.Core\Edpf.Core.csproj" />
+    <ProjectReference Include="..\..\src\Edpf.DataPlatform\Edpf.DataPlatform.csproj" />
+  </ItemGroup>
+
+</Project>

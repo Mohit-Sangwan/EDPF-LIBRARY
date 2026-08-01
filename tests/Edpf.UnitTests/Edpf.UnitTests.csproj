@@ -16,6 +16,7 @@
     <ProjectReference Include="..\..\src\Edpf.DataPlatform\Edpf.DataPlatform.csproj" />
     <ProjectReference Include="..\..\src\Edpf.Globalization\Edpf.Globalization.csproj" />
     <ProjectReference Include="..\..\src\Edpf.Operations\Edpf.Operations.csproj" />
+    <ProjectReference Include="..\..\verticals\Edpf.Healthcare.Domain\Edpf.Healthcare.Domain.csproj" />
     <ProjectReference Include="..\..\src\Edpf.Extensions.DependencyInjection\Edpf.Extensions.DependencyInjection.csproj" />
   </ItemGroup>
 

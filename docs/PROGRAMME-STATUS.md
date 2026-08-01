@@ -1,9 +1,9 @@
 # Programme status — all nine waves
 
-**Date:** 2026-08-01 · **Baseline:** Revision 12.0 (frozen)
+**Date:** 2026-08-02 · **Baseline:** Revision 12.0 (frozen)
 
-Phases 00–37 have been worked through in order. This document is the
-single place a sponsor can see what exists, what does not, and why.
+Phases 00–37, plus Phase 24b, have been worked through in order. This document
+is the single place a sponsor can see what exists, what does not, and why.
 
 ---
 
@@ -11,9 +11,9 @@ single place a sponsor can see what exists, what does not, and why.
 
 | | |
 |---|---|
-| Waves worked | 9 of 9 (Phases 00–37) |
-| ADRs accepted | 23 |
-| Automated tests | 792, all passing |
+| Waves worked | 9 of 9 (Phases 00–37, plus 24b) |
+| ADRs accepted | 24 |
+| Automated tests | 810, all passing |
 | Target frameworks | 5, building clean with warnings as errors |
 | Gates passed on engineering criteria | **G0, G1** |
 | Gates with outstanding criteria | G2–G9 |
@@ -34,6 +34,7 @@ external parties, or elapsed time, not by more code.
 | G3 Services | 3 | Contracts complete | Redis, search cluster, blob storage, broker |
 | G4 Trust | 4 | Contracts complete | **Independent cryptographic and security reviews** |
 | G5 Domain | 5 | Contracts complete | FHIR/HL7/DICOM interop against live test servers |
+| ↳ *vertical boundary* | 5 | ✅ Enforced | — ADR-024 and three core-neutrality tests |
 | G6 Integration | 6 | Contracts complete | Broker-down chaos test |
 | G7 Operable | 7 | Logic complete | **DR drill**, full 13-engine matrix, 72-hour soak |
 | G8 Adoptable | 8 | Tooling complete | **External team usability test** |
@@ -90,6 +91,7 @@ Worth recording, because they are the argument for the approach:
 | `AddEdpfCore` duplicated every registration when called twice | Idempotency test | As duplicate singletons, subtly |
 | `Edpf.Security` importing cryptography directly | Architecture test | As crypto spreading across assemblies |
 | Stale entry in the public-API baseline after a signature change | RS0017 | As a missed breaking change |
+| Chained patient merge (A→B then B→C) passed the guard, because the guard only inspected incoming records and B was a *survivor* | Phase 24b reversibility test | **As a clinical-safety incident** — reversing the first merge would restore A after its data had already propagated to C |
 
 ---
 

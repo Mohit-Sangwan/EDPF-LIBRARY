@@ -28,4 +28,7 @@
   <Folder Name="/tools/">
     <Project Path="tools/Edpf.Cli/Edpf.Cli.csproj" />
   </Folder>
+  <Folder Name="/verticals/">
+    <Project Path="verticals/Edpf.Healthcare.Domain/Edpf.Healthcare.Domain.csproj" />
+  </Folder>
 </Solution>

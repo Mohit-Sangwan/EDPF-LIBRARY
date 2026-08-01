@@ -5,6 +5,7 @@
   </Folder>
   <Folder Name="/src/">
     <Project Path="src/Edpf.Abstractions/Edpf.Abstractions.csproj" />
+    <Project Path="src/Edpf.Caching/Edpf.Caching.csproj" />
     <Project Path="src/Edpf.Compatibility/Edpf.Compatibility.csproj" />
     <Project Path="src/Edpf.Configuration/Edpf.Configuration.csproj" />
     <Project Path="src/Edpf.Core/Edpf.Core.csproj" />
@@ -16,6 +17,7 @@
     <Project Path="tests/Edpf.ArchitectureTests/Edpf.ArchitectureTests.csproj" />
     <Project Path="tests/Edpf.Benchmarks/Edpf.Benchmarks.csproj" />
     <Project Path="tests/Edpf.ConformanceTests/Edpf.ConformanceTests.csproj" />
+    <Project Path="tests/Edpf.IsolationTests/Edpf.IsolationTests.csproj" />
     <Project Path="tests/Edpf.UnitTests/Edpf.UnitTests.csproj" />
     <Project Path="tests/Edpf.WalkingSkeleton.Tests/Edpf.WalkingSkeleton.Tests.csproj" />
   </Folder>

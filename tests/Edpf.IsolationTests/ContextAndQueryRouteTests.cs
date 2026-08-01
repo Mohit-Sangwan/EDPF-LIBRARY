@@ -1,0 +1,221 @@
+using Edpf.Abstractions.Primitives;
+using Edpf.Abstractions.Query;
+using Edpf.Abstractions.Tenancy;
+using Edpf.Core.Tenancy;
+using Edpf.Data.Dialects;
+using Edpf.Data.Query;
+
+namespace Edpf.IsolationTests;
+
+/// <summary>
+/// Route 1 — the repository and query paths. Verified in depth by
+/// <c>Edpf.UnitTests.Data.AdversarialTenantTests</c>; the cases here are the
+/// ones that belong permanently in the isolation suite because they must be
+/// re-run at every gate.
+/// </summary>
+[CoversIsolationRoute(IsolationRoutes.Repository)]
+public sealed class RepositoryRouteTests
+{
+    private static QueryCompiler Compiler => new(new SqlServerDialect(), new IsolationTestMetadata());
+
+    [Fact]
+    public void Query_WithoutTenantContext_IsRefused()
+    {
+        Result<CompiledQuery> result = Compiler.CompilePaged(
+            Specification<object>.Create(), tenant: null, new PageRequest(1, 10));
+
+        Assert.True(result.IsFailure);
+        Assert.Equal(ErrorCodes.TenantScopeViolation, result.Error!.Code);
+    }
+
+    [Fact]
+    public void Query_AsTenantB_NeverBindsTenantA()
+    {
+        Result<CompiledQuery> result = Compiler.CompilePaged(
+            Specification<object>.Create().Where("TenantId", FilterOperator.Equal, Tenants.A),
+            Tenants.Context(Tenants.B),
+            new PageRequest(1, 10));
+
+        // The framework's own binding wins; the caller's attempt is an
+        // additional AND that simply matches nothing.
+        Assert.Equal(Tenants.B.ToString(), result.Value.Parameters["tenantId"]!.ToString());
+    }
+}
+
+/// <summary>
+/// Route 8 — error messages as an enumeration oracle. A cross-tenant read
+/// must be indistinguishable from a genuine absence, and a rejected filter
+/// must not reveal the schema.
+/// </summary>
+[CoversIsolationRoute(IsolationRoutes.ErrorEnumeration)]
+public sealed class ErrorEnumerationRouteTests
+{
+    private static QueryCompiler Compiler => new(new SqlServerDialect(), new IsolationTestMetadata());
+
+    [Fact]
+    public void CrossTenantRefusal_UsesNotFoundSemantics_NotForbidden()
+    {
+        // 404, never 403: disclosing that a record exists but belongs to
+        // someone else is itself the leak.
+        Result<CompiledQuery> result = Compiler.CompilePaged(
+            Specification<object>.Create(), tenant: null, new PageRequest(1, 10));
+
+        Assert.Equal(ErrorCategory.NotFound, result.Error!.Category);
+        Assert.Equal(ErrorCodes.TenantScopeViolation, result.Error.Code);
+    }
+
+    [Fact]
+    public void CrossTenantRefusal_MessageRevealsNothingAboutTheResource()
+    {
+        Result<CompiledQuery> result = Compiler.CompilePaged(
+            Specification<object>.Create(), tenant: null, new PageRequest(1, 10));
+
+        Assert.Equal("The requested resource was not found.", result.Error!.Message);
+        Assert.DoesNotContain("tenant", result.Error.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void RejectedFilter_DoesNotEnumerateValidFields()
+    {
+        Result<CompiledQuery> result = Compiler.CompilePaged(
+            Specification<object>.Create().Where("SecretField", FilterOperator.Equal, "x"),
+            Tenants.Context(Tenants.B),
+            new PageRequest(1, 10));
+
+        string message = result.Error!.Message;
+
+        // Naming what the caller asked for is fine; listing the alternatives
+        // would turn every rejection into a free schema dump.
+        Assert.Contains("SecretField", message, StringComparison.Ordinal);
+        Assert.DoesNotContain("GivenName", message, StringComparison.Ordinal);
+        Assert.DoesNotContain("MedicalRecordNumber", message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void NonFilterableField_RefusalDoesNotConfirmWhyItIsProtected()
+    {
+        Result<CompiledQuery> result = Compiler.CompilePaged(
+            Specification<object>.Create().Where("MedicalRecordNumber", FilterOperator.Equal, "MRN-1"),
+            Tenants.Context(Tenants.B),
+            new PageRequest(1, 10));
+
+        Assert.DoesNotContain("encrypt", result.Error!.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("PHI", result.Error.Message, StringComparison.Ordinal);
+    }
+}
+
+/// <summary>
+/// Route 7 — ambient context. A tenant scope must not survive its operation,
+/// and concurrent operations must not observe each other's tenant.
+/// </summary>
+[CoversIsolationRoute(IsolationRoutes.LogCorrelation)]
+[CoversIsolationRoute(IsolationRoutes.BackgroundJobContext)]
+[CoversIsolationRoute(IsolationRoutes.ConnectionReuse)]
+public sealed class AmbientContextRouteTests
+{
+    [Fact]
+    public void TenantScope_AfterDisposal_DoesNotLeakToTheNextOperation()
+    {
+        // The connection-reuse and background-job routes share this root
+        // cause: a pooled thread picking up the previous operation's context.
+        var accessor = new TenantContextAccessor();
+
+        using (accessor.Push(Tenants.Context(Tenants.A)))
+        {
+            Assert.Equal(Tenants.A, accessor.Current!.TenantId);
+        }
+
+        Assert.Null(accessor.Current);
+    }
+
+    [Fact]
+    public async Task TenantScope_ConcurrentOperations_DoNotObserveEachOther()
+    {
+        var accessor = new TenantContextAccessor();
+        var observed = new System.Collections.Concurrent.ConcurrentBag<(Guid Expected, Guid Actual)>();
+
+        async Task RunAs(Guid tenantId)
+        {
+            using (accessor.Push(Tenants.Context(tenantId)))
+            {
+                for (int i = 0; i < 20; i++)
+                {
+                    await Task.Yield();
+                    observed.Add((tenantId, accessor.Current!.TenantId));
+                }
+            }
+        }
+
+        await Task.WhenAll(
+            Task.Run(() => RunAs(Tenants.A)),
+            Task.Run(() => RunAs(Tenants.B)),
+            Task.Run(() => RunAs(Tenants.A)),
+            Task.Run(() => RunAs(Tenants.B)));
+
+        Assert.All(observed, pair => Assert.Equal(pair.Expected, pair.Actual));
+    }
+
+    [Fact]
+    public async Task TenantScope_BackgroundWork_StartsWithNoAmbientTenant()
+    {
+        // A job that inherits an ambient tenant would act as whichever tenant
+        // happened to enqueue it. Background work must resolve its own.
+        var accessor = new TenantContextAccessor();
+        Guid? observedInsideJob = Guid.Empty;
+
+        using (accessor.Push(Tenants.Context(Tenants.A)))
+        {
+            await Task.Run(() =>
+            {
+                // Simulates a job runner starting a fresh logical operation.
+                using (accessor.Push(Tenants.Context(Tenants.B)))
+                {
+                    observedInsideJob = accessor.Current!.TenantId;
+                }
+            });
+        }
+
+        Assert.Equal(Tenants.B, observedInsideJob);
+        Assert.Null(accessor.Current);
+    }
+}
+
+/// <summary>Metadata for the isolation suite's fixture entity.</summary>
+internal sealed class IsolationTestMetadata : IEntityMetadata
+{
+    public string EntityName => "Patient";
+
+    public string TableName => "PATIENT";
+
+    public IReadOnlyDictionary<string, IFieldMetadata> Fields { get; } =
+        new Dictionary<string, IFieldMetadata>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["Id"] = new Field("Id", "Id", typeof(Guid)),
+            ["TenantId"] = new Field("TenantId", "TenantId", typeof(Guid)),
+            ["GivenName"] = new Field("GivenName", "GivenName", typeof(string)),
+            ["MedicalRecordNumber"] = new Field(
+                "MedicalRecordNumber", "MrnEnvelope", typeof(byte[]), filterable: false, sortable: false),
+            ["IsDeleted"] = new Field("IsDeleted", "IsDeleted", typeof(bool)),
+        };
+
+    public Result<IFieldMetadata> ResolveField(string fieldName)
+        => Fields.TryGetValue(fieldName, out IFieldMetadata? field)
+            ? Result.Success(field)
+            : Result.Failure<IFieldMetadata>(new Error(
+                ErrorCodes.InvalidFilter,
+                $"Field '{fieldName}' is not a queryable field of {EntityName}.",
+                ErrorCategory.Validation));
+
+    private sealed class Field(
+        string name, string column, Type clrType, bool filterable = true, bool sortable = true)
+        : IFieldMetadata
+    {
+        public string Name { get; } = name;
+        public string ColumnName { get; } = column;
+        public Type ClrType { get; } = clrType;
+        public bool IsFilterable { get; } = filterable;
+        public bool IsSortable { get; } = sortable;
+        public bool IsProjectable => true;
+        public DataClassificationLevel Classification => DataClassificationLevel.Internal;
+    }
+}

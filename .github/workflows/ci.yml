@@ -48,6 +48,14 @@ jobs:
           dotnet test tests/Edpf.ArchitectureTests/Edpf.ArchitectureTests.csproj
           --no-build --configuration Release
 
+      # The adversarial isolation suite runs on every commit and at every
+      # gate, permanently (Phase 12 §④). It also fails if a phase adds a data
+      # path without extending it.
+      - name: Adversarial isolation suite
+        run: >
+          dotnet test tests/Edpf.IsolationTests/Edpf.IsolationTests.csproj
+          --no-build --configuration Release
+
       - name: Walking-skeleton unit tests
         run: >
           dotnet test tests/Edpf.WalkingSkeleton.Tests/Edpf.WalkingSkeleton.Tests.csproj

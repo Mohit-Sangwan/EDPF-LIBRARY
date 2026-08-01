@@ -26,8 +26,9 @@ Gate G1 (Foundation) passed on engineering criteria.
 |---|---|
 | ADRs accepted | 21 (ADR-001 … ADR-021) |
 | Target frameworks building green | 5 (net472, net48, net6.0, net8.0, net10.0) |
-| Automated tests | 446 green (unit, architecture, component, conformance contract) |
+| Automated tests | 527 green |
 | Injection corpus | 226 assertions, zero successful injections |
+| Adversarial isolation routes | 12/12 covered, coverage machine-checked |
 | Live gate demonstrations | 24/24 passed against a real database |
 | Public API surface | tracked, diffed in CI |
 
@@ -36,7 +37,8 @@ Gate G1 (Foundation) passed on engineering criteria.
 | 0 — Inception & Proof | 00 Discovery · 01 Foundations · 02 Walking Skeleton | G0 ✔ |
 | 1 — Platform Core | 03 Configuration & Secrets · 04 DI & Composition · 05 Observability | G1 ✔ |
 | 2 — Data Access Core | 06 Providers · 07 Routing · 08 Query · 09 Consistency · 10 Repository · 11 Migrations | G2 — contracts done, [engine-bound verification outstanding](docs/phases/p06-p11-data-access-core/14-completion-report.md#carried-forward-to-gate-g2) |
-| 3 — Data Services | 12–17 | next |
+| 3 — Data Services | 12 Tenancy · 13 Bulk · 14 Blob · 15 Cache · 16 Search · 17 Validation | G3 — contracts done, [backend verification outstanding](docs/phases/p12-p17-data-services/14-completion-report.md#carried-forward-to-gate-g3) |
+| 4 — Trust | 18–22 | next |
 
 ## Quick start
 
@@ -88,6 +90,13 @@ always parameters — so a hostile payload and a benign one compile to
 byte-identical SQL. **The tenant predicate is unavoidable**: it is emitted
 first, unconditionally, and an unresolved tenant is refused rather than read as
 "all tenants".
+
+Wave 3 extends that to the paths that leak in practice. A **cross-tenant blob
+path cannot be constructed**; traversal is rejected rather than normalised. An
+**unprefixed cache key cannot be constructed** for a tenant-scoped entity —
+the leak that looks obviously correct as `"patient:" + id`. A **validation
+failure cannot echo attacker input**. And a thousand concurrent requests on an
+expired cache key make exactly one origin call.
 
 All of it runs on both SQL Server and PostgreSQL, on two runtimes, in CI.
 

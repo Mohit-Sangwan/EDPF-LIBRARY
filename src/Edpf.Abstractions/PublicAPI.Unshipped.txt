@@ -1,4 +1,7 @@
 #nullable enable
+const Edpf.Abstractions.Caching.CacheKey.GlobalPrefix = 'g' -> char
+const Edpf.Abstractions.Caching.CacheKey.Separator = ':' -> char
+const Edpf.Abstractions.Caching.CacheKey.TenantPrefix = 't' -> char
 const Edpf.Abstractions.Configuration.SecretValue.Redacted = "***" -> string!
 const Edpf.Abstractions.Primitives.ErrorCodes.AuditUnavailable = "EDPF-AUDIT-9001" -> string!
 const Edpf.Abstractions.Primitives.ErrorCodes.AuthenticationFailed = "EDPF-AUTH-2001" -> string!
@@ -33,6 +36,9 @@ const Edpf.Abstractions.Security.EncryptionEnvelope.CurrentVersion = 1 -> byte
 const Edpf.Abstractions.Security.EncryptionEnvelope.HeaderSize = 35 -> int
 const Edpf.Abstractions.Security.EncryptionEnvelope.NonceSize = 12 -> int
 const Edpf.Abstractions.Security.EncryptionEnvelope.TagSize = 16 -> int
+const Edpf.Abstractions.Storage.BlobPath.MaxPathLength = 1024 -> int
+const Edpf.Abstractions.Storage.BlobPath.MaxSegmentLength = 255 -> int
+const Edpf.Abstractions.Validation.ValidationFailure.MaxMessageLength = 200 -> int
 Edpf.Abstractions.Audit.AuditChainVerification
 Edpf.Abstractions.Audit.AuditChainVerification.AuditChainVerification(bool isValid, long recordCount, long? firstBrokenSequence) -> void
 Edpf.Abstractions.Audit.AuditChainVerification.FirstBrokenSequence.get -> long?
@@ -49,6 +55,21 @@ Edpf.Abstractions.Audit.IAuditChainVerifier
 Edpf.Abstractions.Audit.IAuditChainVerifier.VerifyAsync(System.Guid tenantId, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result<Edpf.Abstractions.Audit.AuditChainVerification!>!>!
 Edpf.Abstractions.Audit.IAuditWriter
 Edpf.Abstractions.Audit.IAuditWriter.WriteAsync(Edpf.Abstractions.Audit.AuditEventDescriptor! auditEvent, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result!>!
+Edpf.Abstractions.Caching.CacheKey
+Edpf.Abstractions.Caching.CacheKey.Equals(Edpf.Abstractions.Caching.CacheKey? other) -> bool
+Edpf.Abstractions.Caching.CacheKey.IsReadableBy(System.Guid tenantId) -> bool
+Edpf.Abstractions.Caching.CacheKey.IsTenantScoped.get -> bool
+Edpf.Abstractions.Caching.CacheKey.TenantId.get -> System.Guid?
+Edpf.Abstractions.Caching.CacheKey.Value.get -> string!
+Edpf.Abstractions.Caching.ICacheKeyBuilder
+Edpf.Abstractions.Caching.ICacheKeyBuilder.ForEntity<TEntity>(System.Guid tenantId, string! id) -> Edpf.Abstractions.Caching.CacheKey!
+Edpf.Abstractions.Caching.ICacheKeyBuilder.ForQuery<TEntity>(System.Guid tenantId, string! queryHash) -> Edpf.Abstractions.Caching.CacheKey!
+Edpf.Abstractions.Caching.ICacheProvider
+Edpf.Abstractions.Caching.ICacheProvider.GetAsync<T>(Edpf.Abstractions.Caching.CacheKey! key, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<T?>!
+Edpf.Abstractions.Caching.ICacheProvider.GetOrCreateAsync<T>(Edpf.Abstractions.Caching.CacheKey! key, System.Func<System.Threading.CancellationToken, System.Threading.Tasks.Task<T!>!>! factory, System.TimeSpan expiry, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<T!>!
+Edpf.Abstractions.Caching.ICacheProvider.IsAvailable.get -> bool
+Edpf.Abstractions.Caching.ICacheProvider.RemoveAsync(Edpf.Abstractions.Caching.CacheKey! key, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result!>!
+Edpf.Abstractions.Caching.ICacheProvider.SetAsync<T>(Edpf.Abstractions.Caching.CacheKey! key, T! value, System.TimeSpan expiry, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result!>!
 Edpf.Abstractions.Configuration.IConfigurationValidator<TOptions>
 Edpf.Abstractions.Configuration.IConfigurationValidator<TOptions>.Validate(TOptions! options) -> System.Collections.Generic.IReadOnlyList<string!>!
 Edpf.Abstractions.Configuration.ISecretRotationHandler
@@ -116,6 +137,31 @@ Edpf.Abstractions.Consistency.SagaStatus.CompensationFailed = 4 -> Edpf.Abstract
 Edpf.Abstractions.Consistency.SagaStatus.Completed = 1 -> Edpf.Abstractions.Consistency.SagaStatus
 Edpf.Abstractions.Consistency.SagaStatus.Running = 0 -> Edpf.Abstractions.Consistency.SagaStatus
 Edpf.Abstractions.Consistency.SagaStatus.TimedOut = 5 -> Edpf.Abstractions.Consistency.SagaStatus
+Edpf.Abstractions.Data.BulkFailurePolicy
+Edpf.Abstractions.Data.BulkFailurePolicy.AllOrNothing = 0 -> Edpf.Abstractions.Data.BulkFailurePolicy
+Edpf.Abstractions.Data.BulkFailurePolicy.ContinueAndReport = 1 -> Edpf.Abstractions.Data.BulkFailurePolicy
+Edpf.Abstractions.Data.BulkOptions
+Edpf.Abstractions.Data.BulkOptions.BatchSize.get -> int
+Edpf.Abstractions.Data.BulkOptions.BulkOptions(int batchSize, Edpf.Abstractions.Data.BulkFailurePolicy failurePolicy, System.IProgress<Edpf.Abstractions.Data.BulkProgress>? progress = null) -> void
+Edpf.Abstractions.Data.BulkOptions.FailurePolicy.get -> Edpf.Abstractions.Data.BulkFailurePolicy
+Edpf.Abstractions.Data.BulkOptions.Progress.get -> System.IProgress<Edpf.Abstractions.Data.BulkProgress>?
+Edpf.Abstractions.Data.BulkProgress
+Edpf.Abstractions.Data.BulkProgress.BulkProgress() -> void
+Edpf.Abstractions.Data.BulkProgress.BulkProgress(long rowsProcessed, long rowsFailed) -> void
+Edpf.Abstractions.Data.BulkProgress.Equals(Edpf.Abstractions.Data.BulkProgress other) -> bool
+Edpf.Abstractions.Data.BulkProgress.RowsFailed.get -> long
+Edpf.Abstractions.Data.BulkProgress.RowsProcessed.get -> long
+Edpf.Abstractions.Data.BulkResult
+Edpf.Abstractions.Data.BulkResult.BulkResult(long rowsWritten, System.Collections.Generic.IReadOnlyList<Edpf.Abstractions.Data.BulkRowFailure>! failures, System.TimeSpan duration) -> void
+Edpf.Abstractions.Data.BulkResult.Duration.get -> System.TimeSpan
+Edpf.Abstractions.Data.BulkResult.Failures.get -> System.Collections.Generic.IReadOnlyList<Edpf.Abstractions.Data.BulkRowFailure>!
+Edpf.Abstractions.Data.BulkResult.RowsWritten.get -> long
+Edpf.Abstractions.Data.BulkRowFailure
+Edpf.Abstractions.Data.BulkRowFailure.BulkRowFailure() -> void
+Edpf.Abstractions.Data.BulkRowFailure.BulkRowFailure(long rowIndex, Edpf.Abstractions.Primitives.Error! error) -> void
+Edpf.Abstractions.Data.BulkRowFailure.Equals(Edpf.Abstractions.Data.BulkRowFailure other) -> bool
+Edpf.Abstractions.Data.BulkRowFailure.Error.get -> Edpf.Abstractions.Primitives.Error!
+Edpf.Abstractions.Data.BulkRowFailure.RowIndex.get -> long
 Edpf.Abstractions.Data.ConcurrencyStrategy
 Edpf.Abstractions.Data.ConcurrencyStrategy.Fail = 0 -> Edpf.Abstractions.Data.ConcurrencyStrategy
 Edpf.Abstractions.Data.ConcurrencyStrategy.LastWriteWins = 1 -> Edpf.Abstractions.Data.ConcurrencyStrategy
@@ -128,6 +174,8 @@ Edpf.Abstractions.Data.DatabaseEndpoint.Region.get -> string!
 Edpf.Abstractions.Data.IAuditableEntity
 Edpf.Abstractions.Data.IAuditableEntity.CreatedUtc.get -> System.DateTimeOffset
 Edpf.Abstractions.Data.IAuditableEntity.ModifiedUtc.get -> System.DateTimeOffset?
+Edpf.Abstractions.Data.IBulkInserter<TEntity>
+Edpf.Abstractions.Data.IBulkInserter<TEntity>.InsertAsync(System.Collections.Generic.IEnumerable<TEntity!>! entities, Edpf.Abstractions.Data.BulkOptions! options, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result<Edpf.Abstractions.Data.BulkResult!>!>!
 Edpf.Abstractions.Data.IConcurrencyToken
 Edpf.Abstractions.Data.IConcurrencyToken.Version.get -> byte[]!
 Edpf.Abstractions.Data.IConflictResolver<TEntity>
@@ -368,6 +416,22 @@ Edpf.Abstractions.Query.ISpecification<TEntity>.IncludeDeleted.get -> bool
 Edpf.Abstractions.Query.ISpecification<TEntity>.NoTracking.get -> bool
 Edpf.Abstractions.Query.ISpecification<TEntity>.Projection.get -> System.Collections.Generic.IReadOnlyList<string!>!
 Edpf.Abstractions.Query.ISpecification<TEntity>.Sort.get -> System.Collections.Generic.IReadOnlyList<Edpf.Abstractions.Data.SortColumn>!
+Edpf.Abstractions.Search.ISearchIndex<TDocument>
+Edpf.Abstractions.Search.ISearchIndex<TDocument>.IndexAsync(System.Guid tenantId, string! documentId, TDocument! document, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result!>!
+Edpf.Abstractions.Search.ISearchIndex<TDocument>.IndexName.get -> string!
+Edpf.Abstractions.Search.ISearchIndex<TDocument>.SearchAsync(Edpf.Abstractions.Search.SearchQuery! query, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result<Edpf.Abstractions.Search.SearchResults<TDocument!>!>!>!
+Edpf.Abstractions.Search.SearchQuery
+Edpf.Abstractions.Search.SearchQuery.AuthorizationScopes.get -> System.Collections.Generic.IReadOnlyList<string!>!
+Edpf.Abstractions.Search.SearchQuery.Facets.get -> System.Collections.Generic.IReadOnlyList<string!>!
+Edpf.Abstractions.Search.SearchQuery.Page.get -> Edpf.Abstractions.Primitives.PageRequest
+Edpf.Abstractions.Search.SearchQuery.SearchQuery(System.Guid tenantId, string! text, Edpf.Abstractions.Primitives.PageRequest page, System.Collections.Generic.IReadOnlyList<string!>? facets = null, System.Collections.Generic.IReadOnlyList<string!>? authorizationScopes = null) -> void
+Edpf.Abstractions.Search.SearchQuery.TenantId.get -> System.Guid
+Edpf.Abstractions.Search.SearchQuery.Text.get -> string!
+Edpf.Abstractions.Search.SearchResults<TDocument>
+Edpf.Abstractions.Search.SearchResults<TDocument>.Documents.get -> System.Collections.Generic.IReadOnlyList<TDocument!>!
+Edpf.Abstractions.Search.SearchResults<TDocument>.FacetCounts.get -> System.Collections.Generic.IReadOnlyDictionary<string!, System.Collections.Generic.IReadOnlyDictionary<string!, long>!>!
+Edpf.Abstractions.Search.SearchResults<TDocument>.SearchResults(System.Collections.Generic.IReadOnlyList<TDocument!>! documents, long totalHits, System.Collections.Generic.IReadOnlyDictionary<string!, System.Collections.Generic.IReadOnlyDictionary<string!, long>!>! facetCounts) -> void
+Edpf.Abstractions.Search.SearchResults<TDocument>.TotalHits.get -> long
 Edpf.Abstractions.Security.EncryptionEnvelope
 Edpf.Abstractions.Security.EncryptionEnvelope.AlgorithmId.get -> short
 Edpf.Abstractions.Security.EncryptionEnvelope.Ciphertext.get -> byte[]!
@@ -413,6 +477,22 @@ Edpf.Abstractions.Security.KeyScope.IsSubjectScoped.get -> bool
 Edpf.Abstractions.Security.KeyScope.KeyScope() -> void
 Edpf.Abstractions.Security.KeyScope.SubjectId.get -> System.Guid?
 Edpf.Abstractions.Security.KeyScope.TenantId.get -> System.Guid
+Edpf.Abstractions.Storage.BlobPath
+Edpf.Abstractions.Storage.BlobPath.Equals(Edpf.Abstractions.Storage.BlobPath? other) -> bool
+Edpf.Abstractions.Storage.BlobPath.RelativePath.get -> string!
+Edpf.Abstractions.Storage.BlobPath.TenantId.get -> System.Guid
+Edpf.Abstractions.Storage.BlobPath.Value.get -> string!
+Edpf.Abstractions.Tenancy.BreakGlassGrant
+Edpf.Abstractions.Tenancy.BreakGlassGrant.BreakGlassGrant(System.Guid grantId, string! operatorId, System.Guid targetTenantId, string! justification, System.DateTimeOffset expiresUtc) -> void
+Edpf.Abstractions.Tenancy.BreakGlassGrant.ExpiresUtc.get -> System.DateTimeOffset
+Edpf.Abstractions.Tenancy.BreakGlassGrant.GrantId.get -> System.Guid
+Edpf.Abstractions.Tenancy.BreakGlassGrant.IsLive(System.DateTimeOffset now) -> bool
+Edpf.Abstractions.Tenancy.BreakGlassGrant.Justification.get -> string!
+Edpf.Abstractions.Tenancy.BreakGlassGrant.OperatorId.get -> string!
+Edpf.Abstractions.Tenancy.BreakGlassGrant.TargetTenantId.get -> System.Guid
+Edpf.Abstractions.Tenancy.IBreakGlassService
+Edpf.Abstractions.Tenancy.IBreakGlassService.IsAuthorizedAsync(string! operatorId, System.Guid targetTenantId, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<bool>!
+Edpf.Abstractions.Tenancy.IBreakGlassService.RequestAsync(string! operatorId, System.Guid targetTenantId, string! justification, System.TimeSpan duration, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result<Edpf.Abstractions.Tenancy.BreakGlassGrant!>!>!
 Edpf.Abstractions.Tenancy.ITenantContext
 Edpf.Abstractions.Tenancy.ITenantContext.IsolationMode.get -> Edpf.Abstractions.Tenancy.TenantIsolationMode
 Edpf.Abstractions.Tenancy.ITenantContext.KekReference.get -> System.Guid
@@ -421,6 +501,12 @@ Edpf.Abstractions.Tenancy.ITenantContext.TenantId.get -> System.Guid
 Edpf.Abstractions.Tenancy.ITenantContextAccessor
 Edpf.Abstractions.Tenancy.ITenantContextAccessor.Current.get -> Edpf.Abstractions.Tenancy.ITenantContext?
 Edpf.Abstractions.Tenancy.ITenantContextAccessor.Push(Edpf.Abstractions.Tenancy.ITenantContext! context) -> System.IDisposable!
+Edpf.Abstractions.Tenancy.ITenantKeyProvider
+Edpf.Abstractions.Tenancy.ITenantKeyProvider.GetTenantKekAsync(System.Guid tenantId, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result<Edpf.Abstractions.Security.KeyHandle!>!>!
+Edpf.Abstractions.Tenancy.ITenantKeyProvider.RotateTenantKekAsync(System.Guid tenantId, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result<int>!>!
+Edpf.Abstractions.Tenancy.ITenantProvisioner
+Edpf.Abstractions.Tenancy.ITenantProvisioner.DeprovisionAsync(System.Guid tenantId, string! justification, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result!>!
+Edpf.Abstractions.Tenancy.ITenantProvisioner.ProvisionAsync(Edpf.Abstractions.Tenancy.TenantProvisioningRequest! request, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result<Edpf.Abstractions.Tenancy.TenantDescriptor!>!>!
 Edpf.Abstractions.Tenancy.ITenantResolver
 Edpf.Abstractions.Tenancy.ITenantResolver.ResolveAsync(string! resolutionKey, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result<Edpf.Abstractions.Tenancy.TenantDescriptor!>!>!
 Edpf.Abstractions.Tenancy.ITenantStore
@@ -436,9 +522,40 @@ Edpf.Abstractions.Tenancy.TenantIsolationMode
 Edpf.Abstractions.Tenancy.TenantIsolationMode.DatabasePerTenant = 2 -> Edpf.Abstractions.Tenancy.TenantIsolationMode
 Edpf.Abstractions.Tenancy.TenantIsolationMode.SchemaPerTenant = 1 -> Edpf.Abstractions.Tenancy.TenantIsolationMode
 Edpf.Abstractions.Tenancy.TenantIsolationMode.SharedSchema = 0 -> Edpf.Abstractions.Tenancy.TenantIsolationMode
+Edpf.Abstractions.Tenancy.TenantProvisioningRequest
+Edpf.Abstractions.Tenancy.TenantProvisioningRequest.IsolationMode.get -> Edpf.Abstractions.Tenancy.TenantIsolationMode
+Edpf.Abstractions.Tenancy.TenantProvisioningRequest.Name.get -> string!
+Edpf.Abstractions.Tenancy.TenantProvisioningRequest.Region.get -> string!
+Edpf.Abstractions.Tenancy.TenantProvisioningRequest.TenantProvisioningRequest(string! name, string! region, Edpf.Abstractions.Tenancy.TenantIsolationMode isolationMode) -> void
+Edpf.Abstractions.Tenancy.TenantQuota
+Edpf.Abstractions.Tenancy.TenantQuota.MaxConcurrentConnections.get -> int
+Edpf.Abstractions.Tenancy.TenantQuota.MaxRequestsPerMinute.get -> int
+Edpf.Abstractions.Tenancy.TenantQuota.MaxStorageBytes.get -> long
+Edpf.Abstractions.Tenancy.TenantQuota.TenantQuota(int maxRequestsPerMinute, long maxStorageBytes, int maxConcurrentConnections) -> void
+Edpf.Abstractions.Validation.ValidationFailure
+Edpf.Abstractions.Validation.ValidationFailure.FieldName.get -> string!
+Edpf.Abstractions.Validation.ValidationFailure.Message.get -> string!
+Edpf.Abstractions.Validation.ValidationFailure.RuleName.get -> string!
+Edpf.Abstractions.Validation.ValidationFailure.Severity.get -> Edpf.Abstractions.Validation.ValidationSeverity
+Edpf.Abstractions.Validation.ValidationFailure.ValidationFailure(string! fieldName, string! ruleName, string! message, Edpf.Abstractions.Validation.ValidationSeverity severity = Edpf.Abstractions.Validation.ValidationSeverity.Error) -> void
+Edpf.Abstractions.Validation.ValidationOutcome
+Edpf.Abstractions.Validation.ValidationOutcome.Failures.get -> System.Collections.Generic.IReadOnlyList<Edpf.Abstractions.Validation.ValidationFailure!>!
+Edpf.Abstractions.Validation.ValidationOutcome.IsValid.get -> bool
+Edpf.Abstractions.Validation.ValidationOutcome.ValidationOutcome(System.Collections.Generic.IReadOnlyList<Edpf.Abstractions.Validation.ValidationFailure!>! failures) -> void
+Edpf.Abstractions.Validation.ValidationSeverity
+Edpf.Abstractions.Validation.ValidationSeverity.Error = 2 -> Edpf.Abstractions.Validation.ValidationSeverity
+Edpf.Abstractions.Validation.ValidationSeverity.Info = 0 -> Edpf.Abstractions.Validation.ValidationSeverity
+Edpf.Abstractions.Validation.ValidationSeverity.Warning = 1 -> Edpf.Abstractions.Validation.ValidationSeverity
+override Edpf.Abstractions.Caching.CacheKey.Equals(object? obj) -> bool
+override Edpf.Abstractions.Caching.CacheKey.GetHashCode() -> int
+override Edpf.Abstractions.Caching.CacheKey.ToString() -> string!
 override Edpf.Abstractions.Configuration.SecretValue.Equals(object? obj) -> bool
 override Edpf.Abstractions.Configuration.SecretValue.GetHashCode() -> int
 override Edpf.Abstractions.Configuration.SecretValue.ToString() -> string!
+override Edpf.Abstractions.Data.BulkProgress.Equals(object? obj) -> bool
+override Edpf.Abstractions.Data.BulkProgress.GetHashCode() -> int
+override Edpf.Abstractions.Data.BulkRowFailure.Equals(object? obj) -> bool
+override Edpf.Abstractions.Data.BulkRowFailure.GetHashCode() -> int
 override Edpf.Abstractions.Data.SortColumn.Equals(object? obj) -> bool
 override Edpf.Abstractions.Data.SortColumn.GetHashCode() -> int
 override Edpf.Abstractions.Data.SortColumn.ToString() -> string!
@@ -454,7 +571,17 @@ override Edpf.Abstractions.Primitives.PageRequest.ToString() -> string!
 override Edpf.Abstractions.Security.KeyScope.Equals(object? obj) -> bool
 override Edpf.Abstractions.Security.KeyScope.GetHashCode() -> int
 override Edpf.Abstractions.Security.KeyScope.ToString() -> string!
+override Edpf.Abstractions.Storage.BlobPath.Equals(object? obj) -> bool
+override Edpf.Abstractions.Storage.BlobPath.GetHashCode() -> int
+override Edpf.Abstractions.Storage.BlobPath.ToString() -> string!
+override Edpf.Abstractions.Validation.ValidationFailure.ToString() -> string!
+static Edpf.Abstractions.Caching.CacheKey.ForTenant(System.Guid tenantId, string! entityName, params string![]! parts) -> Edpf.Abstractions.Caching.CacheKey!
+static Edpf.Abstractions.Caching.CacheKey.Global(string! justification, string! entityName, params string![]! parts) -> Edpf.Abstractions.Caching.CacheKey!
 static Edpf.Abstractions.Configuration.SecretValue.Empty.get -> Edpf.Abstractions.Configuration.SecretValue!
+static Edpf.Abstractions.Data.BulkProgress.operator !=(Edpf.Abstractions.Data.BulkProgress left, Edpf.Abstractions.Data.BulkProgress right) -> bool
+static Edpf.Abstractions.Data.BulkProgress.operator ==(Edpf.Abstractions.Data.BulkProgress left, Edpf.Abstractions.Data.BulkProgress right) -> bool
+static Edpf.Abstractions.Data.BulkRowFailure.operator !=(Edpf.Abstractions.Data.BulkRowFailure left, Edpf.Abstractions.Data.BulkRowFailure right) -> bool
+static Edpf.Abstractions.Data.BulkRowFailure.operator ==(Edpf.Abstractions.Data.BulkRowFailure left, Edpf.Abstractions.Data.BulkRowFailure right) -> bool
 static Edpf.Abstractions.Data.SortColumn.operator !=(Edpf.Abstractions.Data.SortColumn left, Edpf.Abstractions.Data.SortColumn right) -> bool
 static Edpf.Abstractions.Data.SortColumn.operator ==(Edpf.Abstractions.Data.SortColumn left, Edpf.Abstractions.Data.SortColumn right) -> bool
 static Edpf.Abstractions.Primitives.EntityId<TEntity>.Empty.get -> Edpf.Abstractions.Primitives.EntityId<TEntity>
@@ -478,3 +605,6 @@ static Edpf.Abstractions.Security.KeyScope.ForSubject(System.Guid tenantId, Syst
 static Edpf.Abstractions.Security.KeyScope.ForTenant(System.Guid tenantId) -> Edpf.Abstractions.Security.KeyScope
 static Edpf.Abstractions.Security.KeyScope.operator !=(Edpf.Abstractions.Security.KeyScope left, Edpf.Abstractions.Security.KeyScope right) -> bool
 static Edpf.Abstractions.Security.KeyScope.operator ==(Edpf.Abstractions.Security.KeyScope left, Edpf.Abstractions.Security.KeyScope right) -> bool
+static Edpf.Abstractions.Storage.BlobPath.BelongsTo(Edpf.Abstractions.Storage.BlobPath! path, System.Guid tenantId) -> bool
+static Edpf.Abstractions.Storage.BlobPath.Create(System.Guid tenantId, params string![]! segments) -> Edpf.Abstractions.Storage.BlobPath!
+static Edpf.Abstractions.Validation.ValidationOutcome.Valid.get -> Edpf.Abstractions.Validation.ValidationOutcome!

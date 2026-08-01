@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    ★ THE ADVERSARIAL ISOLATION SUITE ★
+    "The single most important test asset in the program" (Phase 12 §④).
+
+    Attempts cross-tenant access via every route and asserts each is blocked.
+    This suite re-runs at every subsequent gate, permanently, and is EXTENDED
+    by every phase that adds a data path — a mandatory line item in those
+    phases' Definition of Done (Phase 12 §⑦).
+  -->
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Edpf.Abstractions\Edpf.Abstractions.csproj" />
+    <ProjectReference Include="..\..\src\Edpf.Core\Edpf.Core.csproj" />
+    <ProjectReference Include="..\..\src\Edpf.Data\Edpf.Data.csproj" />
+    <ProjectReference Include="..\..\src\Edpf.Caching\Edpf.Caching.csproj" />
+    <ProjectReference Include="..\..\src\Edpf.Diagnostics\Edpf.Diagnostics.csproj" />
+    <ProjectReference Include="..\..\src\Edpf.Configuration\Edpf.Configuration.csproj" />
+  </ItemGroup>
+
+</Project>

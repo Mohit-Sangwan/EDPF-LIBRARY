@@ -14,6 +14,7 @@
     <Project Path="src/Edpf.Diagnostics/Edpf.Diagnostics.csproj" />
     <Project Path="src/Edpf.Extensions.DependencyInjection/Edpf.Extensions.DependencyInjection.csproj" />
     <Project Path="src/Edpf.Globalization/Edpf.Globalization.csproj" />
+    <Project Path="src/Edpf.Operations/Edpf.Operations.csproj" />
     <Project Path="src/Edpf.Security/Edpf.Security.csproj" />
   </Folder>
   <Folder Name="/tests/">

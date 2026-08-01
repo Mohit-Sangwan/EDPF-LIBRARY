@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Wave 7 — Operate (Phases 29-32).
+    SLOs and error budgets, burn-rate alerting, cost attribution, and the
+    benchmark regression gate. Tier 1 + Tier 2 (ADR-002): operations tooling
+    is not part of the Tier 3 reduced surface.
+  -->
+  <PropertyGroup>
+    <TargetFrameworks>$(EdpfPlatformTargetFrameworks)</TargetFrameworks>
+    <IsPackable>true</IsPackable>
+    <Description>Enterprise Data Platform Framework — SLOs, error budgets, burn-rate alerting and benchmark regression gating.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Edpf.Abstractions\Edpf.Abstractions.csproj" />
+    <ProjectReference Include="..\Edpf.Core\Edpf.Core.csproj" />
+  </ItemGroup>
+
+</Project>

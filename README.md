@@ -26,7 +26,7 @@ Gate G1 (Foundation) passed on engineering criteria.
 |---|---|
 | ADRs accepted | 23 (ADR-001 … ADR-023) |
 | Target frameworks building green | 5 (net472, net48, net6.0, net8.0, net10.0) |
-| Automated tests | 745 green |
+| Automated tests | 773 green |
 | Injection corpus | 226 assertions, zero successful injections |
 | Adversarial isolation routes | 12/12 covered, coverage machine-checked |
 | Live gate demonstrations | 24/24 passed against a real database |
@@ -41,7 +41,8 @@ Gate G1 (Foundation) passed on engineering criteria.
 | 4 — Trust | 18 Errors · 19 Audit · 20 Crypto · 21 AuthN/Z · 22 Compliance | G4 — [independent reviews outstanding](docs/phases/p18-p22-trust/14-completion-report.md#carried-forward-to-gate-g4) |
 | 5 — Data Platform & Domain | 23 Classification · 24 Clinical safety | G5 — [interop verification outstanding](docs/phases/p23-p24-data-platform-domain/14-completion-report.md#carried-forward-to-gate-g5) |
 | 6 — Integration & Runtime | 25 Scheduling · 26 Messaging · 27 i18n · 28 Feature flags | G6 — [broker verification outstanding](docs/phases/p25-p28-integration-runtime/14-completion-report.md#carried-forward-to-gate-g6) |
-| 7 — Operate | 29–32 | next |
+| 7 — Operate | 29 DR · 30 SLOs · 31 Performance · 32 Test matrix | G7 — [drills and matrix outstanding](docs/phases/p29-p32-operate/14-completion-report.md#carried-forward-to-gate-g7) |
+| 8 — Productize | 33–35 | next |
 
 > **Regulatory boundary.** EDPF provides data infrastructure and does not make
 > clinical decisions. A consumer building clinical decision support on EDPF is

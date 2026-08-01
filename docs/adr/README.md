@@ -22,6 +22,9 @@ current answer is the current answer.
 | [ADR-010](ADR-010-data-residency.md) | Data residency — region-pinned routing | Accepted |
 | [ADR-011](ADR-011-repository-topology.md) | Repository & package topology | Accepted |
 | [ADR-012](ADR-012-request-pipeline.md) | Request pipeline composition | Accepted |
+| [ADR-013](ADR-013-configuration-precedence.md) | Configuration precedence & reload semantics | Accepted |
+| [ADR-014](ADR-014-composition-lifetime-policy.md) | Composition & lifetime policy | Accepted |
+| [ADR-015](ADR-015-telemetry-redaction-policy.md) | Telemetry standard & redaction policy | Accepted |
 
 Template: [ADR-000-template.md](ADR-000-template.md).
 Smaller decisions go to the [technical decision log](../tdl/README.md).

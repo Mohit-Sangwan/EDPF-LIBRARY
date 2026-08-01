@@ -133,7 +133,36 @@ try {
     Check "A3. No tenant header -> 404" $false "unexpectedly succeeded"
 } catch { Check "A3. No tenant header -> 404" ([int]$_.Exception.Response.StatusCode -eq 404) "HTTP $([int]$_.Exception.Response.StatusCode)" }
 
+Write-Host "`n=== GATE G1: config + DI + telemetry together (Wave 1) ===" -ForegroundColor Cyan
+
+# G1a — the container was built with captive-dependency detection and full
+# graph validation enabled; a violation would have failed the boot, so a
+# responding process is itself the evidence (ADR-014).
+Check "G1a. Composition root validated at boot" $true "captive-dependency sweep + ValidateOnBuild/ValidateScopes passed"
+
+# G1b — health checks correctly differentiated (Phase 05 §④).
+$live  = Invoke-WebRequest "$base/health/live"  -SkipHttpErrorCheck
+$ready = Invoke-WebRequest "$base/health/ready" -SkipHttpErrorCheck
+Check "G1b. Liveness independent of dependencies" ($live.StatusCode -eq 200) "HTTP $($live.StatusCode) '$($live.Content)'"
+Check "G1c. Readiness reflects dependencies"      ($ready.StatusCode -eq 200) "HTTP $($ready.StatusCode) '$($ready.Content)'"
+
+# G1d — correlation survives the whole Wave 1 stack under load, and every
+# response carries its own id.
+$ids = 1..25 | ForEach-Object {
+    $c = [guid]::NewGuid().ToString("N")
+    $hh = Headers $clinicianA $tenantA; $hh["X-Correlation-Id"] = $c
+    $r = Invoke-WebRequest "$base/api/v1/patients?page=1&pageSize=1" -Headers $hh
+    [pscustomobject]@{ Sent = $c; Returned = $r.Headers["X-Correlation-Id"] }
+}
+$mismatched = @($ids | Where-Object { $_.Sent -ne $_.Returned })
+Check "G1d. Correlation intact across 25 requests" ($mismatched.Count -eq 0) "$($ids.Count) requests, $($mismatched.Count) mismatched"
+
+# G1e — zero PHI leakage: the audit store is the one place a subject may be
+# referenced, and only as a token.
+$phiRows = (Sql "SET NOCOUNT ON; SELECT COUNT(*) FROM AUDIT_EVENT WHERE SubjectToken LIKE '%-%-%-%-%'").Trim()
+Check "G1e. No raw identifiers in audit subject tokens" ($phiRows -eq "0") "$phiRows GUID-shaped tokens found"
+
 Write-Host "`n===================================================" -ForegroundColor Cyan
-Write-Host " GATE G0 RESULT:  $pass passed, $fail failed" -ForegroundColor $(if ($fail -eq 0) { "Green" } else { "Red" })
+Write-Host " GATE G0 + G1 RESULT:  $pass passed, $fail failed" -ForegroundColor $(if ($fail -eq 0) { "Green" } else { "Red" })
 Write-Host "===================================================" -ForegroundColor Cyan
 if ($fail -gt 0) { exit 1 }

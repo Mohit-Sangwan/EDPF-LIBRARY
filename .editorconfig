@@ -139,3 +139,13 @@ dotnet_diagnostic.IDE0161.severity = error
 
 # BinaryFormatter and friends: never.
 dotnet_diagnostic.SYSLIB0011.severity = error
+
+# ── Path-scoped exceptions ──────────────────────────────────────────────────
+
+# Secret stores hand ownership of a SecretValue to the caller inside a
+# Result<T>. CA2000 cannot model ownership transfer through a wrapper type and
+# reports every factory as a leak. The contract is documented on ISecretStore:
+# the caller disposes. Scoped to the store implementations only, so a genuine
+# undisposed resource elsewhere still fails the build.
+[src/Edpf.Configuration/Secrets/*.cs]
+dotnet_diagnostic.CA2000.severity = none

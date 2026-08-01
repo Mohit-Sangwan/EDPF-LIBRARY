@@ -1,13 +1,17 @@
 using Edpf.Abstractions.Audit;
+using Edpf.Abstractions.Configuration;
 using Edpf.Abstractions.Consistency;
 using Edpf.Abstractions.Data;
+using Edpf.Abstractions.Diagnostics;
 using Edpf.Abstractions.Primitives;
 using Edpf.Abstractions.Security;
 using Edpf.Abstractions.Tenancy;
-using Edpf.Core.Correlation;
-using Edpf.Core.Tenancy;
-using Edpf.Core.Time;
+using Edpf.Configuration.Secrets;
 using Edpf.Diagnostics;
+using Edpf.Diagnostics.Metrics;
+using Edpf.Diagnostics.Redaction;
+using Edpf.Extensions.DependencyInjection;
+using Edpf.Extensions.DependencyInjection.Validation;
 using Edpf.WalkingSkeleton.Api.Domain;
 using Edpf.WalkingSkeleton.Api.Features.Compliance;
 using Edpf.WalkingSkeleton.Api.Features.Dev;
@@ -21,7 +25,9 @@ using Edpf.WalkingSkeleton.Api.Infrastructure.Tenancy;
 using Edpf.WalkingSkeleton.Api.Pipeline;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.IdentityModel.Tokens;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
@@ -48,10 +54,24 @@ if (!builder.Environment.IsDevelopment()
         $"{ErrorCodes.ConfigurationInvalid}: Jwt:SigningKeyBase64 must be configured outside Development.");
 }
 
-// ── Shared kernel ──────────────────────────────────────────────────────────
-builder.Services.AddSingleton<IClock>(SystemClock.Instance);
-builder.Services.AddSingleton<ITenantContextAccessor, TenantContextAccessor>();
-builder.Services.AddSingleton<ICorrelationContextAccessor, CorrelationContextAccessor>();
+// ── Shared kernel via the Phase 04 composition root (ADR-014) ─────────────
+// One feature-module call replaces the hand-wired kernel registrations; the
+// lifetime policy now lives in one place instead of per host.
+builder.Services.AddEdpfCore(builder.Configuration);
+
+// ── Secret custody (Phase 03, ADR-013) ────────────────────────────────────
+// Environment first (the orchestrator's injected material), then an
+// in-memory layer the dev harness can seed. Production layers a vault store
+// on top of the same chain without any consumer changing.
+builder.Services.AddSingleton<ISecretStore>(sp => new ChainedSecretStore(
+[
+    new EnvironmentSecretStore(),
+    new InMemorySecretStore(sp.GetRequiredService<IClock>()),
+]));
+
+// ── Redaction (Phase 05, ADR-015) ─────────────────────────────────────────
+builder.Services.AddSingleton<ISensitiveDataRedactor>(new SensitiveDataRedactor());
+builder.Services.AddSingleton<EdpfMetrics>();
 
 // ── Persistence: provider chosen by configuration (SQL Server | PostgreSQL) ─
 string provider = builder.Configuration["Database:Provider"] ?? "SqlServer";
@@ -124,7 +144,23 @@ builder.Services.AddOpenTelemetry()
         .AddOtlpExporter());
 
 builder.Services.AddProblemDetails();
-builder.Services.AddHealthChecks().AddDbContextCheck<SkeletonDbContext>();
+
+// Health checks, correctly differentiated (Phase 05 §④): liveness answers
+// "is the process up", readiness "can it serve traffic". A dependency outage
+// must drain this instance without killing it.
+builder.Services.AddHealthChecks()
+    .AddCheck("self", () => HealthCheckResult.Healthy(), tags: ["live"])
+    .AddDbContextCheck<SkeletonDbContext>("database", tags: ["ready"]);
+
+// ADR-014: the graph is swept for captive dependencies before the container
+// is built, and the container validates scopes and the whole graph at boot —
+// in every environment, not only Development.
+CaptiveDependencyDetector.ThrowIfAny(builder.Services);
+builder.Host.UseDefaultServiceProvider(options =>
+{
+    options.ValidateScopes = true;
+    options.ValidateOnBuild = true;
+});
 
 var app = builder.Build();
 
@@ -149,7 +185,17 @@ PipelineStages.ComposedOrder.Add(PipelineStages.Audit);        // 9. audit emiss
 PipelineStages.ComposedOrder.Add(PipelineStages.Telemetry);    // 10. OTel emission (automatic)
 PipelineStages.ComposedOrder.Add(PipelineStages.Response);     // 11. response / problem details
 
-app.MapHealthChecks("/health");
+// Liveness never touches a dependency: a database outage must not cause the
+// orchestrator to restart a healthy process. Readiness does, so traffic drains.
+app.MapHealthChecks("/health/live", new HealthCheckOptions
+{
+    Predicate = check => check.Tags.Contains("live"),
+});
+app.MapHealthChecks("/health/ready", new HealthCheckOptions
+{
+    Predicate = check => check.Tags.Contains("ready"),
+});
+app.MapHealthChecks("/health"); // aggregate, kept for the Phase 02 harness
 app.MapPatientEndpoints();
 app.MapComplianceEndpoints();
 

@@ -1,4 +1,5 @@
 #nullable enable
+const Edpf.Abstractions.Configuration.SecretValue.Redacted = "***" -> string!
 const Edpf.Abstractions.Primitives.ErrorCodes.AuditUnavailable = "EDPF-AUDIT-9001" -> string!
 const Edpf.Abstractions.Primitives.ErrorCodes.AuthenticationFailed = "EDPF-AUTH-2001" -> string!
 const Edpf.Abstractions.Primitives.ErrorCodes.AuthorizationFailed = "EDPF-AUTHZ-2101" -> string!
@@ -48,6 +49,35 @@ Edpf.Abstractions.Audit.IAuditChainVerifier
 Edpf.Abstractions.Audit.IAuditChainVerifier.VerifyAsync(System.Guid tenantId, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result<Edpf.Abstractions.Audit.AuditChainVerification!>!>!
 Edpf.Abstractions.Audit.IAuditWriter
 Edpf.Abstractions.Audit.IAuditWriter.WriteAsync(Edpf.Abstractions.Audit.AuditEventDescriptor! auditEvent, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result!>!
+Edpf.Abstractions.Configuration.IConfigurationValidator<TOptions>
+Edpf.Abstractions.Configuration.IConfigurationValidator<TOptions>.Validate(TOptions! options) -> System.Collections.Generic.IReadOnlyList<string!>!
+Edpf.Abstractions.Configuration.ISecretRotationHandler
+Edpf.Abstractions.Configuration.ISecretRotationHandler.OnRotatedAsync(Edpf.Abstractions.Configuration.SecretRotationView! rotation, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result!>!
+Edpf.Abstractions.Configuration.ISecretRotationHandler.SecretKey.get -> string!
+Edpf.Abstractions.Configuration.ISecretStore
+Edpf.Abstractions.Configuration.ISecretStore.GetAsync(string! key, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result<Edpf.Abstractions.Configuration.SecretValue!>!>!
+Edpf.Abstractions.Configuration.ISecretStore.GetForRotationAsync(string! key, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result<Edpf.Abstractions.Configuration.SecretRotationView!>!>!
+Edpf.Abstractions.Configuration.ISecretStore.Name.get -> string!
+Edpf.Abstractions.Configuration.ISecretStore.SetAsync(string! key, Edpf.Abstractions.Configuration.SecretValue! value, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result!>!
+Edpf.Abstractions.Configuration.SecretRotationEvent
+Edpf.Abstractions.Configuration.SecretRotationEvent.OverlapExpiresUtc.get -> System.DateTimeOffset?
+Edpf.Abstractions.Configuration.SecretRotationEvent.RotatedUtc.get -> System.DateTimeOffset
+Edpf.Abstractions.Configuration.SecretRotationEvent.SecretKey.get -> string!
+Edpf.Abstractions.Configuration.SecretRotationEvent.SecretRotationEvent(string! secretKey, string! storeName, System.DateTimeOffset rotatedUtc, System.DateTimeOffset? overlapExpiresUtc) -> void
+Edpf.Abstractions.Configuration.SecretRotationEvent.StoreName.get -> string!
+Edpf.Abstractions.Configuration.SecretRotationView
+Edpf.Abstractions.Configuration.SecretRotationView.Current.get -> Edpf.Abstractions.Configuration.SecretValue!
+Edpf.Abstractions.Configuration.SecretRotationView.IsRotating.get -> bool
+Edpf.Abstractions.Configuration.SecretRotationView.OverlapExpiresUtc.get -> System.DateTimeOffset?
+Edpf.Abstractions.Configuration.SecretRotationView.Previous.get -> Edpf.Abstractions.Configuration.SecretValue?
+Edpf.Abstractions.Configuration.SecretRotationView.SecretRotationView(Edpf.Abstractions.Configuration.SecretValue! current, Edpf.Abstractions.Configuration.SecretValue? previous, System.DateTimeOffset? overlapExpiresUtc) -> void
+Edpf.Abstractions.Configuration.SecretValue
+Edpf.Abstractions.Configuration.SecretValue.Dispose() -> void
+Edpf.Abstractions.Configuration.SecretValue.Equals(Edpf.Abstractions.Configuration.SecretValue? other) -> bool
+Edpf.Abstractions.Configuration.SecretValue.IsEmpty.get -> bool
+Edpf.Abstractions.Configuration.SecretValue.Length.get -> int
+Edpf.Abstractions.Configuration.SecretValue.Reveal() -> string!
+Edpf.Abstractions.Configuration.SecretValue.SecretValue(string! value) -> void
 Edpf.Abstractions.Consistency.IdempotencyRecord
 Edpf.Abstractions.Consistency.IdempotencyRecord.CreatedUtc.get -> System.DateTimeOffset
 Edpf.Abstractions.Consistency.IdempotencyRecord.IdempotencyKey.get -> string!
@@ -73,6 +103,10 @@ Edpf.Abstractions.Data.ITenantScopedEntity
 Edpf.Abstractions.Data.ITenantScopedEntity.TenantId.get -> System.Guid
 Edpf.Abstractions.Data.IUnitOfWork
 Edpf.Abstractions.Data.IUnitOfWork.CommitAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result!>!
+Edpf.Abstractions.Diagnostics.ISensitiveDataRedactor
+Edpf.Abstractions.Diagnostics.ISensitiveDataRedactor.CarriesClassifiedData(System.Type! type) -> bool
+Edpf.Abstractions.Diagnostics.ISensitiveDataRedactor.Redact(object? value) -> object?
+Edpf.Abstractions.Diagnostics.ISensitiveDataRedactor.RedactText(string? value) -> string!
 Edpf.Abstractions.Primitives.DataClassificationAttribute
 Edpf.Abstractions.Primitives.DataClassificationAttribute.DataClassificationAttribute(Edpf.Abstractions.Primitives.DataClassificationLevel level) -> void
 Edpf.Abstractions.Primitives.DataClassificationAttribute.Level.get -> Edpf.Abstractions.Primitives.DataClassificationLevel
@@ -215,6 +249,9 @@ Edpf.Abstractions.Tenancy.TenantIsolationMode
 Edpf.Abstractions.Tenancy.TenantIsolationMode.DatabasePerTenant = 2 -> Edpf.Abstractions.Tenancy.TenantIsolationMode
 Edpf.Abstractions.Tenancy.TenantIsolationMode.SchemaPerTenant = 1 -> Edpf.Abstractions.Tenancy.TenantIsolationMode
 Edpf.Abstractions.Tenancy.TenantIsolationMode.SharedSchema = 0 -> Edpf.Abstractions.Tenancy.TenantIsolationMode
+override Edpf.Abstractions.Configuration.SecretValue.Equals(object? obj) -> bool
+override Edpf.Abstractions.Configuration.SecretValue.GetHashCode() -> int
+override Edpf.Abstractions.Configuration.SecretValue.ToString() -> string!
 override Edpf.Abstractions.Primitives.EntityId<TEntity>.Equals(object? obj) -> bool
 override Edpf.Abstractions.Primitives.EntityId<TEntity>.GetHashCode() -> int
 override Edpf.Abstractions.Primitives.EntityId<TEntity>.ToString() -> string!
@@ -227,6 +264,7 @@ override Edpf.Abstractions.Primitives.PageRequest.ToString() -> string!
 override Edpf.Abstractions.Security.KeyScope.Equals(object? obj) -> bool
 override Edpf.Abstractions.Security.KeyScope.GetHashCode() -> int
 override Edpf.Abstractions.Security.KeyScope.ToString() -> string!
+static Edpf.Abstractions.Configuration.SecretValue.Empty.get -> Edpf.Abstractions.Configuration.SecretValue!
 static Edpf.Abstractions.Primitives.EntityId<TEntity>.Empty.get -> Edpf.Abstractions.Primitives.EntityId<TEntity>
 static Edpf.Abstractions.Primitives.EntityId<TEntity>.From(System.Guid value) -> Edpf.Abstractions.Primitives.EntityId<TEntity>
 static Edpf.Abstractions.Primitives.EntityId<TEntity>.New() -> Edpf.Abstractions.Primitives.EntityId<TEntity>

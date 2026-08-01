@@ -17,6 +17,8 @@
     <ProjectReference Include="..\..\..\src\Edpf.Abstractions\Edpf.Abstractions.csproj" />
     <ProjectReference Include="..\..\..\src\Edpf.Core\Edpf.Core.csproj" />
     <ProjectReference Include="..\..\..\src\Edpf.Diagnostics\Edpf.Diagnostics.csproj" />
+    <ProjectReference Include="..\..\..\src\Edpf.Configuration\Edpf.Configuration.csproj" />
+    <ProjectReference Include="..\..\..\src\Edpf.Extensions.DependencyInjection\Edpf.Extensions.DependencyInjection.csproj" />
   </ItemGroup>
 
   <ItemGroup>

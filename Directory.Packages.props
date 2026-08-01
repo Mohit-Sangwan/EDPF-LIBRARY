@@ -6,6 +6,28 @@
     if it does. Version bumps are pull requests against this file only.
   -->
 
+  <!--
+    Framework libraries. The 9.0.x line targets netstandard2.0, so one version
+    serves all five TFMs including Tier 3 (ADR-002) — no per-TFM divergence
+    in the platform-core dependency graph.
+  -->
+  <ItemGroup Label="PlatformCore">
+    <PackageVersion Include="Microsoft.Extensions.Configuration" Version="9.0.18" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.18" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.18" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="9.0.18" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="9.0.18" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.CommandLine" Version="9.0.18" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.FileExtensions" Version="9.0.18" />
+    <PackageVersion Include="Microsoft.Extensions.Options" Version="9.0.18" />
+    <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.18" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="9.0.18" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.18" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.18" />
+    <PackageVersion Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="9.0.18" />
+    <PackageVersion Include="System.Diagnostics.DiagnosticSource" Version="9.0.18" />
+  </ItemGroup>
+
   <ItemGroup Label="BuildInfrastructure">
     <PackageVersion Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" />
     <PackageVersion Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="5.6.0" />

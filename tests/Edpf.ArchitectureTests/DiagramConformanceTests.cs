@@ -1,4 +1,5 @@
 using Edpf.Abstractions.Security;
+using Edpf.Configuration;
 using Edpf.WalkingSkeleton.Api.Infrastructure.Audit;
 using Edpf.WalkingSkeleton.Api.Pipeline;
 
@@ -53,5 +54,37 @@ public sealed class DiagramConformanceTests
         ];
 
         Assert.Equal(expected, PipelineStages.CanonicalOrder);
+    }
+
+    /// <summary>
+    /// ADR-013: configuration precedence is exactly the declared order,
+    /// lowest priority first. Changing it requires superseding the ADR.
+    /// </summary>
+    [Fact]
+    public void ConfigurationPrecedence_Order_MatchesAdr013()
+    {
+        ConfigurationSourceKind[] expected =
+        [
+            ConfigurationSourceKind.BuiltInDefaults,
+            ConfigurationSourceKind.AppSettings,
+            ConfigurationSourceKind.AppSettingsEnvironment,
+            ConfigurationSourceKind.LegacyXml,
+            ConfigurationSourceKind.UserSecrets,
+            ConfigurationSourceKind.EnvironmentVariables,
+            ConfigurationSourceKind.CommandLine,
+            ConfigurationSourceKind.SecretStore,
+        ];
+
+        Assert.Equal(expected, EdpfConfigurationPrecedence.Order);
+    }
+
+    /// <summary>
+    /// ADR-013: the secret store holds the highest precedence — it is the
+    /// only source trusted with credentials.
+    /// </summary>
+    [Fact]
+    public void ConfigurationPrecedence_SecretStore_IsHighestPriority()
+    {
+        Assert.Equal(ConfigurationSourceKind.SecretStore, EdpfConfigurationPrecedence.Order[^1]);
     }
 }

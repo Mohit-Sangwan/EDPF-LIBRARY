@@ -19,16 +19,22 @@ Logistics, Education.
 
 ## Current state
 
-**Wave 0 complete** — Phases 00 (Discovery & Decisions), 01 (Foundations) and
-02 (Walking Skeleton) are done; Gate G0 passed on engineering criteria.
+**Waves 0 and 1 complete** — Phases 00–05. Gate G0 (Viability) and Gate G1
+(Foundation) passed on engineering criteria.
 
 | | |
 |---|---|
-| ADRs accepted | 12 (ADR-001 … ADR-012) |
+| ADRs accepted | 15 (ADR-001 … ADR-015) |
 | Target frameworks building green | 5 (net472, net48, net6.0, net8.0, net10.0) |
-| Automated tests | 84 green (unit, architecture, component, conformance contract) |
-| Live gate demonstrations | 19/19 passed against a real database |
+| Automated tests | 164 green (unit, architecture, component, conformance contract) |
+| Live gate demonstrations | 24/24 passed against a real database |
 | Public API surface | tracked, diffed in CI |
+
+| Wave | Phases | Gate |
+|---|---|---|
+| 0 — Inception & Proof | 00 Discovery · 01 Foundations · 02 Walking Skeleton | G0 ✔ |
+| 1 — Platform Core | 03 Configuration & Secrets · 04 DI & Composition · 05 Observability | G1 ✔ |
+| 2 — Data Access Core | 06–11 | next |
 
 ## Quick start
 
@@ -66,6 +72,12 @@ envelope. Destroying the subject's key makes the data unrecoverable while the
 tamper-evident audit chain still verifies. One outbox message rides the same
 transaction and dispatches exactly once. Every failure is an RFC 9457
 document carrying the correlation id that ties the whole request together.
+
+Wave 1 adds the systems underneath: the container refuses to start if any
+singleton captures a scoped service, secrets render as `***` through every
+route including interpolation and serialization, a bad configuration reload is
+rejected rather than half-applied, liveness stays up when the database goes
+down, and no PHI reaches a log sink by any of ten adversarial routes.
 
 All of it runs on both SQL Server and PostgreSQL, on two runtimes, in CI.
 

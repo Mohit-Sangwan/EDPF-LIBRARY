@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Phase 27 — Internationalization & Localization.
+    A hard blocker for public-sector procurement in most non-English
+    jurisdictions, and absent from the original specification entirely.
+  -->
+  <PropertyGroup>
+    <TargetFrameworks>$(EdpfLibraryTargetFrameworks)</TargetFrameworks>
+    <IsPackable>true</IsPackable>
+    <Description>Enterprise Data Platform Framework — culture resolution, time policy, currency and text handling.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Edpf.Abstractions\Edpf.Abstractions.csproj" />
+    <ProjectReference Include="..\Edpf.Core\Edpf.Core.csproj" />
+  </ItemGroup>
+
+</Project>

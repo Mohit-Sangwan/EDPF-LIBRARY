@@ -149,3 +149,12 @@ dotnet_diagnostic.SYSLIB0011.severity = error
 # undisposed resource elsewhere still fails the build.
 [src/Edpf.Configuration/Secrets/*.cs]
 dotnet_diagnostic.CA2000.severity = none
+
+# TextService exists to draw the line between ordinal comparison (for
+# identity) and cultural comparison (for humans). CA1309 correctly demands
+# ordinal everywhere else, and is wrong for the one method whose contract is
+# "compare the way this culture sorts" — Swedish sorts ä after z, German sorts
+# it with a, and a patient list must follow the reader's culture. Scoped to
+# this file so the rule keeps protecting every other comparison in the repo.
+[src/Edpf.Globalization/TextService.cs]
+dotnet_diagnostic.CA1309.severity = none

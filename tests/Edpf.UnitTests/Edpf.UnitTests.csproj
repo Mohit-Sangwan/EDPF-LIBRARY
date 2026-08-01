@@ -14,6 +14,7 @@
     <ProjectReference Include="..\..\src\Edpf.Caching\Edpf.Caching.csproj" />
     <ProjectReference Include="..\..\src\Edpf.Security\Edpf.Security.csproj" />
     <ProjectReference Include="..\..\src\Edpf.DataPlatform\Edpf.DataPlatform.csproj" />
+    <ProjectReference Include="..\..\src\Edpf.Globalization\Edpf.Globalization.csproj" />
     <ProjectReference Include="..\..\src\Edpf.Extensions.DependencyInjection\Edpf.Extensions.DependencyInjection.csproj" />
   </ItemGroup>
 

@@ -26,7 +26,7 @@ Gate G1 (Foundation) passed on engineering criteria.
 |---|---|
 | ADRs accepted | 23 (ADR-001 … ADR-023) |
 | Target frameworks building green | 5 (net472, net48, net6.0, net8.0, net10.0) |
-| Automated tests | 693 green |
+| Automated tests | 745 green |
 | Injection corpus | 226 assertions, zero successful injections |
 | Adversarial isolation routes | 12/12 covered, coverage machine-checked |
 | Live gate demonstrations | 24/24 passed against a real database |
@@ -40,7 +40,8 @@ Gate G1 (Foundation) passed on engineering criteria.
 | 3 — Data Services | 12 Tenancy · 13 Bulk · 14 Blob · 15 Cache · 16 Search · 17 Validation | G3 — contracts done, [backend verification outstanding](docs/phases/p12-p17-data-services/14-completion-report.md#carried-forward-to-gate-g3) |
 | 4 — Trust | 18 Errors · 19 Audit · 20 Crypto · 21 AuthN/Z · 22 Compliance | G4 — [independent reviews outstanding](docs/phases/p18-p22-trust/14-completion-report.md#carried-forward-to-gate-g4) |
 | 5 — Data Platform & Domain | 23 Classification · 24 Clinical safety | G5 — [interop verification outstanding](docs/phases/p23-p24-data-platform-domain/14-completion-report.md#carried-forward-to-gate-g5) |
-| 6 — Integration & Runtime | 25–28 | next |
+| 6 — Integration & Runtime | 25 Scheduling · 26 Messaging · 27 i18n · 28 Feature flags | G6 — [broker verification outstanding](docs/phases/p25-p28-integration-runtime/14-completion-report.md#carried-forward-to-gate-g6) |
+| 7 — Operate | 29–32 | next |
 
 > **Regulatory boundary.** EDPF provides data infrastructure and does not make
 > clinical decisions. A consumer building clinical decision support on EDPF is
@@ -112,6 +113,14 @@ unmapped fields by default, and shifts dates per-subject so clinical intervals
 survive while absolute dates do not. Authorization scopes run
 org → facility → department → unit → resource in one model, with containment
 matched on whole segments so `cardio` does not silently include `cardiology`.
+
+Waves 5 and 6 handle the errors that reach patients and operators. A dose
+conversion **refuses** to cross dimensions or guess an unknown unit, because
+5 mg given as 5 mcg is a thousand-fold error. A DST-ambiguous scheduled time
+is reported as skipped or repeated rather than silently resolved. Currency
+minor units are per-currency — hardcoding two decimals breaks yen and Kuwaiti
+dinar in opposite directions. And `"FILE".ToLower()` in Turkish gives `fıle`,
+which is why identity comparison here is always ordinal.
 
 All of it runs on both SQL Server and PostgreSQL, on two runtimes, in CI.
 

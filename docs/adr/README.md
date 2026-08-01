@@ -25,6 +25,12 @@ current answer is the current answer.
 | [ADR-013](ADR-013-configuration-precedence.md) | Configuration precedence & reload semantics | Accepted |
 | [ADR-014](ADR-014-composition-lifetime-policy.md) | Composition & lifetime policy | Accepted |
 | [ADR-015](ADR-015-telemetry-redaction-policy.md) | Telemetry standard & redaction policy | Accepted |
+| [ADR-016](ADR-016-capability-negotiation.md) | Capability negotiation | Accepted |
+| [ADR-017](ADR-017-connection-routing-resilience.md) | Connection routing & resilience | Accepted |
+| [ADR-018](ADR-018-query-construction-safety.md) | Query construction safety | Accepted |
+| [ADR-019](ADR-019-idempotency-contract.md) | Idempotency contract | Accepted |
+| [ADR-020](ADR-020-concurrency-default.md) | Concurrency default | Accepted |
+| [ADR-021](ADR-021-zero-downtime-migration.md) | Zero-downtime migration discipline | Accepted |
 
 Template: [ADR-000-template.md](ADR-000-template.md).
 Smaller decisions go to the [technical decision log](../tdl/README.md).

@@ -1,5 +1,10 @@
+using System.Reflection;
+using Edpf.Abstractions.Consistency;
+using Edpf.Abstractions.Data;
+using Edpf.Abstractions.Query;
 using Edpf.Abstractions.Security;
 using Edpf.Configuration;
+using Edpf.Data.Query;
 using Edpf.WalkingSkeleton.Api.Infrastructure.Audit;
 using Edpf.WalkingSkeleton.Api.Pipeline;
 
@@ -86,5 +91,66 @@ public sealed class DiagramConformanceTests
     public void ConfigurationPrecedence_SecretStore_IsHighestPriority()
     {
         Assert.Equal(ConfigurationSourceKind.SecretStore, EdpfConfigurationPrecedence.Order[^1]);
+    }
+
+    /// <summary>
+    /// ADR-018: the filter-operator set is closed. If an operator could be
+    /// supplied as a string anywhere, the framework's central injection
+    /// defence would be optional rather than structural.
+    /// </summary>
+    [Fact]
+    public void FilterOperators_AreAClosedEnum_NotStrings()
+    {
+        Assert.True(typeof(FilterOperator).IsEnum);
+
+        // No public API in the query surface accepts an operator as text.
+        IEnumerable<MethodInfo> operatorTakingMethods = typeof(Specification<>).Assembly
+            .GetExportedTypes()
+            .SelectMany(t => t.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static))
+            .Where(m => m.Name.Contains("Where", StringComparison.Ordinal));
+
+        foreach (MethodInfo method in operatorTakingMethods)
+        {
+            Assert.Contains(method.GetParameters(), p => p.ParameterType == typeof(FilterOperator));
+        }
+    }
+
+    /// <summary>
+    /// ADR-021: expand–migrate–contract is a closed, ordered set — a
+    /// migration cannot declare a phase outside the discipline.
+    /// </summary>
+    [Fact]
+    public void MigrationPhases_MatchAdr021()
+    {
+        Assert.Equal(
+            [MigrationPhase.Expand, MigrationPhase.Migrate, MigrationPhase.Contract],
+            Enum.GetValues<MigrationPhase>());
+    }
+
+    /// <summary>
+    /// ADR-020: <see cref="ConcurrencyStrategy.Fail"/> is the default, so a
+    /// caller that specifies nothing is told about conflicts rather than
+    /// silently losing an update.
+    /// </summary>
+    [Fact]
+    public void ConcurrencyStrategy_DefaultsToFail()
+    {
+        Assert.Equal(ConcurrencyStrategy.Fail, default(ConcurrencyStrategy));
+    }
+
+    /// <summary>
+    /// Phase 09 §④: compensation failure is a distinct terminal status that
+    /// demands escalation, not a variant of "failed".
+    /// </summary>
+    [Fact]
+    public void SagaStatus_DistinguishesCompensationFailure()
+    {
+        var escalating = new SagaExecution(
+            "T", SagaStatus.CompensationFailed, [], "step", null);
+        var compensated = new SagaExecution(
+            "T", SagaStatus.Compensated, [], "step", null);
+
+        Assert.True(escalating.RequiresEscalation);
+        Assert.False(compensated.RequiresEscalation);
     }
 }

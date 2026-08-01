@@ -8,6 +8,7 @@
     <Project Path="src/Edpf.Compatibility/Edpf.Compatibility.csproj" />
     <Project Path="src/Edpf.Configuration/Edpf.Configuration.csproj" />
     <Project Path="src/Edpf.Core/Edpf.Core.csproj" />
+    <Project Path="src/Edpf.Data/Edpf.Data.csproj" />
     <Project Path="src/Edpf.Diagnostics/Edpf.Diagnostics.csproj" />
     <Project Path="src/Edpf.Extensions.DependencyInjection/Edpf.Extensions.DependencyInjection.csproj" />
   </Folder>

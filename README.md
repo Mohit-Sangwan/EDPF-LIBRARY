@@ -19,14 +19,15 @@ Logistics, Education.
 
 ## Current state
 
-**Waves 0 and 1 complete** — Phases 00–05. Gate G0 (Viability) and Gate G1
-(Foundation) passed on engineering criteria.
+**Waves 0 and 1 complete; Wave 2 contracts complete.** Gate G0 (Viability) and
+Gate G1 (Foundation) passed on engineering criteria.
 
 | | |
 |---|---|
-| ADRs accepted | 15 (ADR-001 … ADR-015) |
+| ADRs accepted | 21 (ADR-001 … ADR-021) |
 | Target frameworks building green | 5 (net472, net48, net6.0, net8.0, net10.0) |
-| Automated tests | 164 green (unit, architecture, component, conformance contract) |
+| Automated tests | 446 green (unit, architecture, component, conformance contract) |
+| Injection corpus | 226 assertions, zero successful injections |
 | Live gate demonstrations | 24/24 passed against a real database |
 | Public API surface | tracked, diffed in CI |
 
@@ -34,7 +35,8 @@ Logistics, Education.
 |---|---|---|
 | 0 — Inception & Proof | 00 Discovery · 01 Foundations · 02 Walking Skeleton | G0 ✔ |
 | 1 — Platform Core | 03 Configuration & Secrets · 04 DI & Composition · 05 Observability | G1 ✔ |
-| 2 — Data Access Core | 06–11 | next |
+| 2 — Data Access Core | 06 Providers · 07 Routing · 08 Query · 09 Consistency · 10 Repository · 11 Migrations | G2 — contracts done, [engine-bound verification outstanding](docs/phases/p06-p11-data-access-core/14-completion-report.md#carried-forward-to-gate-g2) |
+| 3 — Data Services | 12–17 | next |
 
 ## Quick start
 
@@ -78,6 +80,14 @@ singleton captures a scoped service, secrets render as `***` through every
 route including interpolation and serialization, a bad configuration reload is
 rejected rather than half-applied, liveness stays up when the database goes
 down, and no PHI reaches a log sink by any of ten adversarial routes.
+
+Wave 2 makes two properties structural rather than disciplinary. **Injection
+is unrepresentable**: identifiers come from metadata and are rejected if
+illegal rather than escaped, operators come from a closed enum, and values are
+always parameters — so a hostile payload and a benign one compile to
+byte-identical SQL. **The tenant predicate is unavoidable**: it is emitted
+first, unconditionally, and an unresolved tenant is refused rather than read as
+"all tenants".
 
 All of it runs on both SQL Server and PostgreSQL, on two runtimes, in CI.
 

@@ -91,18 +91,152 @@ Edpf.Abstractions.Consistency.IIdempotencyStore.FindAsync(System.Guid tenantId, 
 Edpf.Abstractions.Consistency.IIdempotencyStore.SaveAsync(Edpf.Abstractions.Consistency.IdempotencyRecord! record, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result!>!
 Edpf.Abstractions.Consistency.IOutboxDispatcher
 Edpf.Abstractions.Consistency.IOutboxDispatcher.DispatchPendingAsync(int batchSize, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result<int>!>!
+Edpf.Abstractions.Consistency.ISaga<TState>
+Edpf.Abstractions.Consistency.ISaga<TState>.SagaType.get -> string!
+Edpf.Abstractions.Consistency.ISaga<TState>.Steps.get -> System.Collections.Generic.IReadOnlyList<Edpf.Abstractions.Consistency.ISagaStep<TState!>!>!
+Edpf.Abstractions.Consistency.ISaga<TState>.Timeout.get -> System.TimeSpan
+Edpf.Abstractions.Consistency.ISagaCoordinator
+Edpf.Abstractions.Consistency.ISagaCoordinator.RunAsync<TState>(Edpf.Abstractions.Consistency.ISaga<TState!>! saga, TState! state, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result<Edpf.Abstractions.Consistency.SagaExecution!>!>!
+Edpf.Abstractions.Consistency.ISagaStep<TState>
+Edpf.Abstractions.Consistency.ISagaStep<TState>.CompensateAsync(TState! state, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result!>!
+Edpf.Abstractions.Consistency.ISagaStep<TState>.ExecuteAsync(TState! state, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result!>!
+Edpf.Abstractions.Consistency.ISagaStep<TState>.Name.get -> string!
+Edpf.Abstractions.Consistency.SagaExecution
+Edpf.Abstractions.Consistency.SagaExecution.CompletedSteps.get -> System.Collections.Generic.IReadOnlyList<string!>!
+Edpf.Abstractions.Consistency.SagaExecution.FailedStep.get -> string?
+Edpf.Abstractions.Consistency.SagaExecution.Failure.get -> Edpf.Abstractions.Primitives.Error?
+Edpf.Abstractions.Consistency.SagaExecution.RequiresEscalation.get -> bool
+Edpf.Abstractions.Consistency.SagaExecution.SagaExecution(string! sagaType, Edpf.Abstractions.Consistency.SagaStatus status, System.Collections.Generic.IReadOnlyList<string!>! completedSteps, string? failedStep, Edpf.Abstractions.Primitives.Error? failure) -> void
+Edpf.Abstractions.Consistency.SagaExecution.SagaType.get -> string!
+Edpf.Abstractions.Consistency.SagaExecution.Status.get -> Edpf.Abstractions.Consistency.SagaStatus
+Edpf.Abstractions.Consistency.SagaStatus
+Edpf.Abstractions.Consistency.SagaStatus.Compensated = 3 -> Edpf.Abstractions.Consistency.SagaStatus
+Edpf.Abstractions.Consistency.SagaStatus.Compensating = 2 -> Edpf.Abstractions.Consistency.SagaStatus
+Edpf.Abstractions.Consistency.SagaStatus.CompensationFailed = 4 -> Edpf.Abstractions.Consistency.SagaStatus
+Edpf.Abstractions.Consistency.SagaStatus.Completed = 1 -> Edpf.Abstractions.Consistency.SagaStatus
+Edpf.Abstractions.Consistency.SagaStatus.Running = 0 -> Edpf.Abstractions.Consistency.SagaStatus
+Edpf.Abstractions.Consistency.SagaStatus.TimedOut = 5 -> Edpf.Abstractions.Consistency.SagaStatus
+Edpf.Abstractions.Data.ConcurrencyStrategy
+Edpf.Abstractions.Data.ConcurrencyStrategy.Fail = 0 -> Edpf.Abstractions.Data.ConcurrencyStrategy
+Edpf.Abstractions.Data.ConcurrencyStrategy.LastWriteWins = 1 -> Edpf.Abstractions.Data.ConcurrencyStrategy
+Edpf.Abstractions.Data.ConcurrencyStrategy.Merge = 2 -> Edpf.Abstractions.Data.ConcurrencyStrategy
+Edpf.Abstractions.Data.DatabaseEndpoint
+Edpf.Abstractions.Data.DatabaseEndpoint.DatabaseEndpoint(string! name, string! region, bool isPrimary) -> void
+Edpf.Abstractions.Data.DatabaseEndpoint.IsPrimary.get -> bool
+Edpf.Abstractions.Data.DatabaseEndpoint.Name.get -> string!
+Edpf.Abstractions.Data.DatabaseEndpoint.Region.get -> string!
 Edpf.Abstractions.Data.IAuditableEntity
 Edpf.Abstractions.Data.IAuditableEntity.CreatedUtc.get -> System.DateTimeOffset
 Edpf.Abstractions.Data.IAuditableEntity.ModifiedUtc.get -> System.DateTimeOffset?
+Edpf.Abstractions.Data.IConcurrencyToken
+Edpf.Abstractions.Data.IConcurrencyToken.Version.get -> byte[]!
+Edpf.Abstractions.Data.IConflictResolver<TEntity>
+Edpf.Abstractions.Data.IConflictResolver<TEntity>.ResolveAsync(TEntity! attempted, TEntity! current, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result<TEntity!>!>!
+Edpf.Abstractions.Data.IConnectionRouter
+Edpf.Abstractions.Data.IConnectionRouter.RouteAsync(Edpf.Abstractions.Data.ReadWriteIntent intent, Edpf.Abstractions.Tenancy.ITenantContext! tenant, Edpf.Abstractions.Data.SessionConsistencyToken? sessionToken, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result<Edpf.Abstractions.Data.DatabaseEndpoint!>!>!
+Edpf.Abstractions.Data.IDataProvider
+Edpf.Abstractions.Data.IDataProvider.Capabilities.get -> Edpf.Abstractions.Data.IProviderCapabilities!
+Edpf.Abstractions.Data.IDataProvider.Dialect.get -> Edpf.Abstractions.Data.ISqlDialect!
+Edpf.Abstractions.Data.IDataProvider.IsTransient(int nativeErrorCode) -> bool
+Edpf.Abstractions.Data.IDataProvider.Name.get -> string!
+Edpf.Abstractions.Data.IDataProvider.TranslateError(int nativeErrorCode, string! nativeMessage) -> Edpf.Abstractions.Primitives.Error!
+Edpf.Abstractions.Data.IDataProvider.TypeMapper.get -> Edpf.Abstractions.Data.ITypeMapper!
+Edpf.Abstractions.Data.IMigration
+Edpf.Abstractions.Data.IMigration.IsIrreversible.get -> bool
+Edpf.Abstractions.Data.IMigration.Name.get -> string!
+Edpf.Abstractions.Data.IMigration.Phase.get -> Edpf.Abstractions.Data.MigrationPhase
+Edpf.Abstractions.Data.IMigration.RequiresDowntime.get -> bool
+Edpf.Abstractions.Data.IMigration.Version.get -> long
+Edpf.Abstractions.Data.IMigrationLease
+Edpf.Abstractions.Data.IMigrationLease.ExpiresUtc.get -> System.DateTimeOffset
+Edpf.Abstractions.Data.IMigrationLease.HolderId.get -> string!
+Edpf.Abstractions.Data.IMigrationLease.ReleaseAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result!>!
+Edpf.Abstractions.Data.IMigrationLease.RenewAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result!>!
+Edpf.Abstractions.Data.IMigrationLock
+Edpf.Abstractions.Data.IMigrationLock.TryAcquireAsync(string! holderId, System.TimeSpan leaseDuration, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Data.IMigrationLease?>!
+Edpf.Abstractions.Data.IMigrationRunner
+Edpf.Abstractions.Data.IMigrationRunner.MigrateAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result<Edpf.Abstractions.Data.MigrationRunReport!>!>!
+Edpf.Abstractions.Data.IMigrationRunner.PlanAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result<Edpf.Abstractions.Data.MigrationPlan!>!>!
+Edpf.Abstractions.Data.IProviderCapabilities
+Edpf.Abstractions.Data.IProviderCapabilities.MaxBatchSize.get -> int
+Edpf.Abstractions.Data.IProviderCapabilities.MaxIdentifierLength.get -> int
+Edpf.Abstractions.Data.IProviderCapabilities.MaxParameterCount.get -> int
+Edpf.Abstractions.Data.IProviderCapabilities.SupportsBulkCopy.get -> bool
+Edpf.Abstractions.Data.IProviderCapabilities.SupportsIdentityRetrieval.get -> bool
+Edpf.Abstractions.Data.IProviderCapabilities.SupportsJsonQuery.get -> bool
+Edpf.Abstractions.Data.IProviderCapabilities.SupportsKeysetPagination.get -> bool
+Edpf.Abstractions.Data.IProviderCapabilities.SupportsRowLevelSecurity.get -> bool
+Edpf.Abstractions.Data.IProviderCapabilities.SupportsSavepoints.get -> bool
+Edpf.Abstractions.Data.IProviderCapabilities.SupportsStreaming.get -> bool
+Edpf.Abstractions.Data.IProviderCapabilities.SupportsTableValuedParameters.get -> bool
+Edpf.Abstractions.Data.IProviderCapabilities.SupportsUpsert.get -> bool
+Edpf.Abstractions.Data.IProviderCapabilities.SupportsZeroDowntimeDdl.get -> bool
+Edpf.Abstractions.Data.IProviderRegistry
+Edpf.Abstractions.Data.IProviderRegistry.All.get -> System.Collections.Generic.IReadOnlyCollection<Edpf.Abstractions.Data.IDataProvider!>!
+Edpf.Abstractions.Data.IProviderRegistry.Resolve(string! providerName) -> Edpf.Abstractions.Primitives.Result<Edpf.Abstractions.Data.IDataProvider!>!
 Edpf.Abstractions.Data.IReadRepository<TEntity, TKey>
 Edpf.Abstractions.Data.IReadRepository<TEntity, TKey>.GetByIdAsync(TKey id, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result<TEntity!>!>!
 Edpf.Abstractions.Data.IReadRepository<TEntity, TKey>.ListAsync(Edpf.Abstractions.Primitives.PageRequest page, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result<Edpf.Abstractions.Primitives.PagedResult<TEntity!>!>!>!
+Edpf.Abstractions.Data.IReplicaSelector
+Edpf.Abstractions.Data.IReplicaSelector.PolicyName.get -> string!
+Edpf.Abstractions.Data.IReplicaSelector.Select(System.Collections.Generic.IReadOnlyList<Edpf.Abstractions.Data.DatabaseEndpoint!>! candidates) -> Edpf.Abstractions.Data.DatabaseEndpoint?
 Edpf.Abstractions.Data.IRepository<TEntity, TKey>
 Edpf.Abstractions.Data.IRepository<TEntity, TKey>.AddAsync(TEntity! entity, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result<TEntity!>!>!
+Edpf.Abstractions.Data.ISchemaDriftDetector
+Edpf.Abstractions.Data.ISchemaDriftDetector.DetectAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result<System.Collections.Generic.IReadOnlyList<string!>!>!>!
+Edpf.Abstractions.Data.ISoftDeletable
+Edpf.Abstractions.Data.ISoftDeletable.DeletedUtc.get -> System.DateTimeOffset?
+Edpf.Abstractions.Data.ISoftDeletable.IsDeleted.get -> bool
+Edpf.Abstractions.Data.ISqlDialect
+Edpf.Abstractions.Data.ISqlDialect.BooleanLiteral(bool value) -> string!
+Edpf.Abstractions.Data.ISqlDialect.Concat(System.Collections.Generic.IReadOnlyList<string!>! expressions) -> string!
+Edpf.Abstractions.Data.ISqlDialect.IdentityRetrievalClause() -> string!
+Edpf.Abstractions.Data.ISqlDialect.JsonValue(string! columnExpression, string! jsonPathParameter) -> string!
+Edpf.Abstractions.Data.ISqlDialect.KeysetPredicate(System.Collections.Generic.IReadOnlyList<Edpf.Abstractions.Data.SortColumn>! orderedColumns, System.Collections.Generic.IReadOnlyList<string!>! cursorParameters) -> string!
+Edpf.Abstractions.Data.ISqlDialect.PaginationClause(string! skipParameter, string! takeParameter) -> string!
+Edpf.Abstractions.Data.ISqlDialect.Parameter(string! parameterName) -> string!
+Edpf.Abstractions.Data.ISqlDialect.ParameterPrefix.get -> string!
+Edpf.Abstractions.Data.ISqlDialect.ProviderName.get -> string!
+Edpf.Abstractions.Data.ISqlDialect.QuoteIdentifier(string! identifier) -> string!
+Edpf.Abstractions.Data.ISqlDialect.UtcNowExpression() -> string!
 Edpf.Abstractions.Data.ITenantScopedEntity
 Edpf.Abstractions.Data.ITenantScopedEntity.TenantId.get -> System.Guid
+Edpf.Abstractions.Data.ITypeMapper
+Edpf.Abstractions.Data.ITypeMapper.FromEngineValue(object? value, System.Type! targetType) -> Edpf.Abstractions.Primitives.Result<object?>!
+Edpf.Abstractions.Data.ITypeMapper.SupportedClrTypes.get -> System.Collections.Generic.IReadOnlyCollection<System.Type!>!
+Edpf.Abstractions.Data.ITypeMapper.ToEngineType(System.Type! clrType) -> Edpf.Abstractions.Primitives.Result<string!>!
 Edpf.Abstractions.Data.IUnitOfWork
 Edpf.Abstractions.Data.IUnitOfWork.CommitAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result!>!
+Edpf.Abstractions.Data.MigrationPhase
+Edpf.Abstractions.Data.MigrationPhase.Contract = 2 -> Edpf.Abstractions.Data.MigrationPhase
+Edpf.Abstractions.Data.MigrationPhase.Expand = 0 -> Edpf.Abstractions.Data.MigrationPhase
+Edpf.Abstractions.Data.MigrationPhase.Migrate = 1 -> Edpf.Abstractions.Data.MigrationPhase
+Edpf.Abstractions.Data.MigrationPlan
+Edpf.Abstractions.Data.MigrationPlan.BlockingWarnings.get -> System.Collections.Generic.IReadOnlyList<string!>!
+Edpf.Abstractions.Data.MigrationPlan.MigrationPlan(System.Collections.Generic.IReadOnlyList<Edpf.Abstractions.Data.IMigration!>! pending, System.Collections.Generic.IReadOnlyList<string!>! blockingWarnings) -> void
+Edpf.Abstractions.Data.MigrationPlan.Pending.get -> System.Collections.Generic.IReadOnlyList<Edpf.Abstractions.Data.IMigration!>!
+Edpf.Abstractions.Data.MigrationPlan.RequiresApproval.get -> bool
+Edpf.Abstractions.Data.MigrationRunReport
+Edpf.Abstractions.Data.MigrationRunReport.Applied.get -> System.Collections.Generic.IReadOnlyList<long>!
+Edpf.Abstractions.Data.MigrationRunReport.Duration.get -> System.TimeSpan
+Edpf.Abstractions.Data.MigrationRunReport.MigrationRunReport(System.Collections.Generic.IReadOnlyList<long>! applied, bool skippedBecauseLockHeld, System.TimeSpan duration) -> void
+Edpf.Abstractions.Data.MigrationRunReport.SkippedBecauseLockHeld.get -> bool
+Edpf.Abstractions.Data.ReadWriteIntent
+Edpf.Abstractions.Data.ReadWriteIntent.Read = 1 -> Edpf.Abstractions.Data.ReadWriteIntent
+Edpf.Abstractions.Data.ReadWriteIntent.ReadConsistent = 2 -> Edpf.Abstractions.Data.ReadWriteIntent
+Edpf.Abstractions.Data.ReadWriteIntent.Write = 0 -> Edpf.Abstractions.Data.ReadWriteIntent
+Edpf.Abstractions.Data.SessionConsistencyToken
+Edpf.Abstractions.Data.SessionConsistencyToken.RequiresPrimary(System.DateTimeOffset now) -> bool
+Edpf.Abstractions.Data.SessionConsistencyToken.SessionConsistencyToken(string! sessionId, System.DateTimeOffset writtenUtc, System.TimeSpan stalenessWindow) -> void
+Edpf.Abstractions.Data.SessionConsistencyToken.SessionId.get -> string!
+Edpf.Abstractions.Data.SessionConsistencyToken.StalenessWindow.get -> System.TimeSpan
+Edpf.Abstractions.Data.SessionConsistencyToken.WrittenUtc.get -> System.DateTimeOffset
+Edpf.Abstractions.Data.SortColumn
+Edpf.Abstractions.Data.SortColumn.ColumnName.get -> string!
+Edpf.Abstractions.Data.SortColumn.Descending.get -> bool
+Edpf.Abstractions.Data.SortColumn.Equals(Edpf.Abstractions.Data.SortColumn other) -> bool
+Edpf.Abstractions.Data.SortColumn.SortColumn() -> void
+Edpf.Abstractions.Data.SortColumn.SortColumn(string! columnName, bool descending = false) -> void
 Edpf.Abstractions.Diagnostics.ISensitiveDataRedactor
 Edpf.Abstractions.Diagnostics.ISensitiveDataRedactor.CarriesClassifiedData(System.Type! type) -> bool
 Edpf.Abstractions.Diagnostics.ISensitiveDataRedactor.Redact(object? value) -> object?
@@ -181,6 +315,59 @@ Edpf.Abstractions.Primitives.Result<T>.Map<TOut>(System.Func<T, TOut>! map) -> E
 Edpf.Abstractions.Primitives.Result<T>.Match<TOut>(System.Func<T, TOut>! onSuccess, System.Func<Edpf.Abstractions.Primitives.Error!, TOut>! onFailure) -> TOut
 Edpf.Abstractions.Primitives.Result<T>.TryGetValue(out T value) -> bool
 Edpf.Abstractions.Primitives.Result<T>.Value.get -> T
+Edpf.Abstractions.Query.CombinationNode
+Edpf.Abstractions.Query.CombinationNode.Accept<TResult>(Edpf.Abstractions.Query.IFilterVisitor<TResult>! visitor) -> TResult
+Edpf.Abstractions.Query.CombinationNode.Children.get -> System.Collections.Generic.IReadOnlyList<Edpf.Abstractions.Query.IFilterNode!>!
+Edpf.Abstractions.Query.CombinationNode.CombinationNode(Edpf.Abstractions.Query.FilterLogic logic, System.Collections.Generic.IReadOnlyList<Edpf.Abstractions.Query.IFilterNode!>! children) -> void
+Edpf.Abstractions.Query.CombinationNode.Logic.get -> Edpf.Abstractions.Query.FilterLogic
+Edpf.Abstractions.Query.ComparisonNode
+Edpf.Abstractions.Query.ComparisonNode.Accept<TResult>(Edpf.Abstractions.Query.IFilterVisitor<TResult>! visitor) -> TResult
+Edpf.Abstractions.Query.ComparisonNode.ComparisonNode(string! fieldName, Edpf.Abstractions.Query.FilterOperator op, System.Collections.Generic.IReadOnlyList<object?>! values) -> void
+Edpf.Abstractions.Query.ComparisonNode.FieldName.get -> string!
+Edpf.Abstractions.Query.ComparisonNode.Operator.get -> Edpf.Abstractions.Query.FilterOperator
+Edpf.Abstractions.Query.ComparisonNode.Values.get -> System.Collections.Generic.IReadOnlyList<object?>!
+Edpf.Abstractions.Query.FilterLogic
+Edpf.Abstractions.Query.FilterLogic.And = 0 -> Edpf.Abstractions.Query.FilterLogic
+Edpf.Abstractions.Query.FilterLogic.Or = 1 -> Edpf.Abstractions.Query.FilterLogic
+Edpf.Abstractions.Query.FilterOperator
+Edpf.Abstractions.Query.FilterOperator.Between = 11 -> Edpf.Abstractions.Query.FilterOperator
+Edpf.Abstractions.Query.FilterOperator.Contains = 8 -> Edpf.Abstractions.Query.FilterOperator
+Edpf.Abstractions.Query.FilterOperator.EndsWith = 7 -> Edpf.Abstractions.Query.FilterOperator
+Edpf.Abstractions.Query.FilterOperator.Equal = 0 -> Edpf.Abstractions.Query.FilterOperator
+Edpf.Abstractions.Query.FilterOperator.GreaterThan = 2 -> Edpf.Abstractions.Query.FilterOperator
+Edpf.Abstractions.Query.FilterOperator.GreaterThanOrEqual = 3 -> Edpf.Abstractions.Query.FilterOperator
+Edpf.Abstractions.Query.FilterOperator.In = 9 -> Edpf.Abstractions.Query.FilterOperator
+Edpf.Abstractions.Query.FilterOperator.IsNotNull = 13 -> Edpf.Abstractions.Query.FilterOperator
+Edpf.Abstractions.Query.FilterOperator.IsNull = 12 -> Edpf.Abstractions.Query.FilterOperator
+Edpf.Abstractions.Query.FilterOperator.LessThan = 4 -> Edpf.Abstractions.Query.FilterOperator
+Edpf.Abstractions.Query.FilterOperator.LessThanOrEqual = 5 -> Edpf.Abstractions.Query.FilterOperator
+Edpf.Abstractions.Query.FilterOperator.NotEqual = 1 -> Edpf.Abstractions.Query.FilterOperator
+Edpf.Abstractions.Query.FilterOperator.NotIn = 10 -> Edpf.Abstractions.Query.FilterOperator
+Edpf.Abstractions.Query.FilterOperator.StartsWith = 6 -> Edpf.Abstractions.Query.FilterOperator
+Edpf.Abstractions.Query.IEntityMetadata
+Edpf.Abstractions.Query.IEntityMetadata.EntityName.get -> string!
+Edpf.Abstractions.Query.IEntityMetadata.Fields.get -> System.Collections.Generic.IReadOnlyDictionary<string!, Edpf.Abstractions.Query.IFieldMetadata!>!
+Edpf.Abstractions.Query.IEntityMetadata.ResolveField(string! fieldName) -> Edpf.Abstractions.Primitives.Result<Edpf.Abstractions.Query.IFieldMetadata!>!
+Edpf.Abstractions.Query.IEntityMetadata.TableName.get -> string!
+Edpf.Abstractions.Query.IFieldMetadata
+Edpf.Abstractions.Query.IFieldMetadata.Classification.get -> Edpf.Abstractions.Primitives.DataClassificationLevel
+Edpf.Abstractions.Query.IFieldMetadata.ClrType.get -> System.Type!
+Edpf.Abstractions.Query.IFieldMetadata.ColumnName.get -> string!
+Edpf.Abstractions.Query.IFieldMetadata.IsFilterable.get -> bool
+Edpf.Abstractions.Query.IFieldMetadata.IsProjectable.get -> bool
+Edpf.Abstractions.Query.IFieldMetadata.IsSortable.get -> bool
+Edpf.Abstractions.Query.IFieldMetadata.Name.get -> string!
+Edpf.Abstractions.Query.IFilterNode
+Edpf.Abstractions.Query.IFilterNode.Accept<TResult>(Edpf.Abstractions.Query.IFilterVisitor<TResult>! visitor) -> TResult
+Edpf.Abstractions.Query.IFilterVisitor<TResult>
+Edpf.Abstractions.Query.IFilterVisitor<TResult>.VisitCombination(Edpf.Abstractions.Query.CombinationNode! node) -> TResult
+Edpf.Abstractions.Query.IFilterVisitor<TResult>.VisitComparison(Edpf.Abstractions.Query.ComparisonNode! node) -> TResult
+Edpf.Abstractions.Query.ISpecification<TEntity>
+Edpf.Abstractions.Query.ISpecification<TEntity>.Filter.get -> Edpf.Abstractions.Query.IFilterNode?
+Edpf.Abstractions.Query.ISpecification<TEntity>.IncludeDeleted.get -> bool
+Edpf.Abstractions.Query.ISpecification<TEntity>.NoTracking.get -> bool
+Edpf.Abstractions.Query.ISpecification<TEntity>.Projection.get -> System.Collections.Generic.IReadOnlyList<string!>!
+Edpf.Abstractions.Query.ISpecification<TEntity>.Sort.get -> System.Collections.Generic.IReadOnlyList<Edpf.Abstractions.Data.SortColumn>!
 Edpf.Abstractions.Security.EncryptionEnvelope
 Edpf.Abstractions.Security.EncryptionEnvelope.AlgorithmId.get -> short
 Edpf.Abstractions.Security.EncryptionEnvelope.Ciphertext.get -> byte[]!
@@ -252,6 +439,9 @@ Edpf.Abstractions.Tenancy.TenantIsolationMode.SharedSchema = 0 -> Edpf.Abstracti
 override Edpf.Abstractions.Configuration.SecretValue.Equals(object? obj) -> bool
 override Edpf.Abstractions.Configuration.SecretValue.GetHashCode() -> int
 override Edpf.Abstractions.Configuration.SecretValue.ToString() -> string!
+override Edpf.Abstractions.Data.SortColumn.Equals(object? obj) -> bool
+override Edpf.Abstractions.Data.SortColumn.GetHashCode() -> int
+override Edpf.Abstractions.Data.SortColumn.ToString() -> string!
 override Edpf.Abstractions.Primitives.EntityId<TEntity>.Equals(object? obj) -> bool
 override Edpf.Abstractions.Primitives.EntityId<TEntity>.GetHashCode() -> int
 override Edpf.Abstractions.Primitives.EntityId<TEntity>.ToString() -> string!
@@ -265,6 +455,8 @@ override Edpf.Abstractions.Security.KeyScope.Equals(object? obj) -> bool
 override Edpf.Abstractions.Security.KeyScope.GetHashCode() -> int
 override Edpf.Abstractions.Security.KeyScope.ToString() -> string!
 static Edpf.Abstractions.Configuration.SecretValue.Empty.get -> Edpf.Abstractions.Configuration.SecretValue!
+static Edpf.Abstractions.Data.SortColumn.operator !=(Edpf.Abstractions.Data.SortColumn left, Edpf.Abstractions.Data.SortColumn right) -> bool
+static Edpf.Abstractions.Data.SortColumn.operator ==(Edpf.Abstractions.Data.SortColumn left, Edpf.Abstractions.Data.SortColumn right) -> bool
 static Edpf.Abstractions.Primitives.EntityId<TEntity>.Empty.get -> Edpf.Abstractions.Primitives.EntityId<TEntity>
 static Edpf.Abstractions.Primitives.EntityId<TEntity>.From(System.Guid value) -> Edpf.Abstractions.Primitives.EntityId<TEntity>
 static Edpf.Abstractions.Primitives.EntityId<TEntity>.New() -> Edpf.Abstractions.Primitives.EntityId<TEntity>

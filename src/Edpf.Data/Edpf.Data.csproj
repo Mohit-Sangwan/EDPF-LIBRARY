@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Wave 2 — Data Access Core (Phases 06–11).
+    Dialects, the query compiler, specifications and the migration/consistency
+    machinery. Governed by ADR-001 (wrap, don't build) and ADR-003 (no
+    cross-store 2PC): this assembly contains no ORM, only the unifying
+    abstraction and the compliance behaviour around it.
+  -->
+  <PropertyGroup>
+    <TargetFrameworks>$(EdpfLibraryTargetFrameworks)</TargetFrameworks>
+    <IsPackable>true</IsPackable>
+    <Description>Enterprise Data Platform Framework — provider abstraction, SQL dialects, and an injection-safe query compiler.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Edpf.Abstractions\Edpf.Abstractions.csproj" />
+    <ProjectReference Include="..\Edpf.Core\Edpf.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+  </ItemGroup>
+
+</Project>

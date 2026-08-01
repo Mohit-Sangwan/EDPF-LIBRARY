@@ -43,7 +43,16 @@ Gate G1 (Foundation) passed on engineering criteria.
 | 6 — Integration & Runtime | 25 Scheduling · 26 Messaging · 27 i18n · 28 Feature flags | G6 — [broker verification outstanding](docs/phases/p25-p28-integration-runtime/14-completion-report.md#carried-forward-to-gate-g6) |
 | 7 — Operate | 29 DR · 30 SLOs · 31 Performance · 32 Test matrix | G7 — [drills and matrix outstanding](docs/phases/p29-p32-operate/14-completion-report.md#carried-forward-to-gate-g7) |
 | 8 — Productize | 33 CLI & docs · 34 Packaging · 35 Reference apps | G8 — [external usability test outstanding](docs/phases/p33-p35-productize/14-completion-report.md#carried-forward-to-gate-g8) |
-| 9 — Harden & Release | 36–37 | next |
+| 9 — Harden & Release | 36 Security validation · 37 Release candidate | G9 — [external validation outstanding](docs/phases/p36-p37-harden-release/14-completion-report.md#gate-g9--the-honest-assessment) |
+
+**All nine waves worked.** See [PROGRAMME-STATUS.md](docs/PROGRAMME-STATUS.md)
+for what exists, what does not, and the six things a sponsor must do next —
+none of which are engineering.
+
+Adopting EDPF? Read the
+[shared-responsibility model](docs/compliance/shared-responsibility-model.md)
+first. Three of the four responsibility layers are yours, and that is what
+compliance consists of.
 
 ## The `edpf` CLI
 

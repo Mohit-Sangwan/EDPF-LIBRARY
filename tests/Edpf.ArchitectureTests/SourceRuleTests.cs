@@ -74,15 +74,26 @@ public sealed partial class SourceRuleTests
     private static partial Regex CryptographyUsing();
 
     /// <summary>
-    /// Z.10: crypto flows through ICryptoProvider — the kernel assemblies
-    /// never import System.Security.Cryptography; implementations live behind
-    /// the security seams (the skeleton's security infrastructure, later
-    /// Edpf.Security).
+    /// Z.10: crypto flows through <c>ICryptoProvider</c>. Every assembly
+    /// except the sanctioned implementation home must reach cryptography
+    /// through that seam rather than importing
+    /// <c>System.Security.Cryptography</c> directly.
     /// </summary>
+    /// <remarks>
+    /// <c>Edpf.Security</c> is the one exemption, because it *is* the
+    /// implementation — the rule exists so that crypto lives in one reviewed,
+    /// audited place, not so that it lives nowhere. Adding a second exemption
+    /// should be a deliberate architectural decision, which is why the list is
+    /// explicit here rather than a pattern.
+    /// </remarks>
     [Fact]
-    public void KernelSources_DoNotTouchCryptographyDirectly()
+    public void NonSecurityAssemblies_DoNotTouchCryptographyDirectly()
     {
+        string[] sanctionedCryptoAssemblies = ["Edpf.Security"];
+
         IEnumerable<string> violations = RepoRoot.SourceFiles("src")
+            .Where(f => !sanctionedCryptoAssemblies.Any(
+                assembly => f.Contains(assembly, StringComparison.Ordinal)))
             .Where(f => CodeMatches(f, CryptographyUsing()));
 
         Assert.Empty(violations);

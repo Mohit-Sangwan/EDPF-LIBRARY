@@ -24,9 +24,9 @@ Gate G1 (Foundation) passed on engineering criteria.
 
 | | |
 |---|---|
-| ADRs accepted | 21 (ADR-001 … ADR-021) |
+| ADRs accepted | 22 (ADR-001 … ADR-022) |
 | Target frameworks building green | 5 (net472, net48, net6.0, net8.0, net10.0) |
-| Automated tests | 527 green |
+| Automated tests | 627 green |
 | Injection corpus | 226 assertions, zero successful injections |
 | Adversarial isolation routes | 12/12 covered, coverage machine-checked |
 | Live gate demonstrations | 24/24 passed against a real database |
@@ -38,7 +38,8 @@ Gate G1 (Foundation) passed on engineering criteria.
 | 1 — Platform Core | 03 Configuration & Secrets · 04 DI & Composition · 05 Observability | G1 ✔ |
 | 2 — Data Access Core | 06 Providers · 07 Routing · 08 Query · 09 Consistency · 10 Repository · 11 Migrations | G2 — contracts done, [engine-bound verification outstanding](docs/phases/p06-p11-data-access-core/14-completion-report.md#carried-forward-to-gate-g2) |
 | 3 — Data Services | 12 Tenancy · 13 Bulk · 14 Blob · 15 Cache · 16 Search · 17 Validation | G3 — contracts done, [backend verification outstanding](docs/phases/p12-p17-data-services/14-completion-report.md#carried-forward-to-gate-g3) |
-| 4 — Trust | 18–22 | next |
+| 4 — Trust | 18 Errors · 19 Audit · 20 Crypto · 21 AuthN/Z · 22 Compliance | G4 — [independent reviews outstanding](docs/phases/p18-p22-trust/14-completion-report.md#carried-forward-to-gate-g4) |
+| 5 — Data Platform & Domain | 23–24 | next |
 
 ## Quick start
 
@@ -97,6 +98,14 @@ path cannot be constructed**; traversal is rejected rather than normalised. An
 the leak that looks obviously correct as `"patient:" + id`. A **validation
 failure cannot echo attacker input**. And a thousand concurrent requests on an
 expired cache key make exactly one origin call.
+
+Wave 4 is the trust layer. "Not found" and "not authorized" present
+**identically** outward, so errors are not an enumeration oracle.
+De-identification covers all eighteen HIPAA Safe Harbor identifiers, removes
+unmapped fields by default, and shifts dates per-subject so clinical intervals
+survive while absolute dates do not. Authorization scopes run
+org → facility → department → unit → resource in one model, with containment
+matched on whole segments so `cardio` does not silently include `cardiology`.
 
 All of it runs on both SQL Server and PostgreSQL, on two runtimes, in CI.
 

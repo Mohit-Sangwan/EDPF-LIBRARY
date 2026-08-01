@@ -31,6 +31,7 @@ current answer is the current answer.
 | [ADR-019](ADR-019-idempotency-contract.md) | Idempotency contract | Accepted |
 | [ADR-020](ADR-020-concurrency-default.md) | Concurrency default | Accepted |
 | [ADR-021](ADR-021-zero-downtime-migration.md) | Zero-downtime migration discipline | Accepted |
+| [ADR-022](ADR-022-audit-event-taxonomy.md) | Audit event taxonomy | Accepted |
 
 Template: [ADR-000-template.md](ADR-000-template.md).
 Smaller decisions go to the [technical decision log](../tdl/README.md).

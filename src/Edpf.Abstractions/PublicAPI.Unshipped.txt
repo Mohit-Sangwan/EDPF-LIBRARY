@@ -70,6 +70,36 @@ Edpf.Abstractions.Caching.ICacheProvider.GetOrCreateAsync<T>(Edpf.Abstractions.C
 Edpf.Abstractions.Caching.ICacheProvider.IsAvailable.get -> bool
 Edpf.Abstractions.Caching.ICacheProvider.RemoveAsync(Edpf.Abstractions.Caching.CacheKey! key, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result!>!
 Edpf.Abstractions.Caching.ICacheProvider.SetAsync<T>(Edpf.Abstractions.Caching.CacheKey! key, T! value, System.TimeSpan expiry, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result!>!
+Edpf.Abstractions.Compliance.ConsentDecision
+Edpf.Abstractions.Compliance.ConsentDecision.Basis.get -> Edpf.Abstractions.Compliance.LawfulBasis
+Edpf.Abstractions.Compliance.ConsentDecision.ConsentVersion.get -> string?
+Edpf.Abstractions.Compliance.ConsentDecision.IsPermitted.get -> bool
+Edpf.Abstractions.Compliance.ConsentDecision.Reason.get -> string!
+Edpf.Abstractions.Compliance.IConsentEvaluator
+Edpf.Abstractions.Compliance.IConsentEvaluator.EvaluateAsync(Edpf.Abstractions.Compliance.ProcessingRequest! request, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result<Edpf.Abstractions.Compliance.ConsentDecision!>!>!
+Edpf.Abstractions.Compliance.ILegalHoldStore
+Edpf.Abstractions.Compliance.ILegalHoldStore.FindActiveHoldAsync(System.Guid tenantId, string! subjectToken, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Compliance.LegalHold?>!
+Edpf.Abstractions.Compliance.LawfulBasis
+Edpf.Abstractions.Compliance.LawfulBasis.Consent = 1 -> Edpf.Abstractions.Compliance.LawfulBasis
+Edpf.Abstractions.Compliance.LawfulBasis.Contract = 2 -> Edpf.Abstractions.Compliance.LawfulBasis
+Edpf.Abstractions.Compliance.LawfulBasis.LegalObligation = 3 -> Edpf.Abstractions.Compliance.LawfulBasis
+Edpf.Abstractions.Compliance.LawfulBasis.LegitimateInterests = 6 -> Edpf.Abstractions.Compliance.LawfulBasis
+Edpf.Abstractions.Compliance.LawfulBasis.None = 0 -> Edpf.Abstractions.Compliance.LawfulBasis
+Edpf.Abstractions.Compliance.LawfulBasis.PublicTask = 5 -> Edpf.Abstractions.Compliance.LawfulBasis
+Edpf.Abstractions.Compliance.LawfulBasis.VitalInterests = 4 -> Edpf.Abstractions.Compliance.LawfulBasis
+Edpf.Abstractions.Compliance.LegalHold
+Edpf.Abstractions.Compliance.LegalHold.ExpiresUtc.get -> System.DateTimeOffset
+Edpf.Abstractions.Compliance.LegalHold.HoldReference.get -> string!
+Edpf.Abstractions.Compliance.LegalHold.IsActive(System.DateTimeOffset now) -> bool
+Edpf.Abstractions.Compliance.LegalHold.Justification.get -> string!
+Edpf.Abstractions.Compliance.LegalHold.LegalHold(string! holdReference, string! justification, System.DateTimeOffset placedUtc, System.DateTimeOffset expiresUtc) -> void
+Edpf.Abstractions.Compliance.LegalHold.PlacedUtc.get -> System.DateTimeOffset
+Edpf.Abstractions.Compliance.ProcessingRequest
+Edpf.Abstractions.Compliance.ProcessingRequest.DataCategories.get -> System.Collections.Generic.IReadOnlyList<Edpf.Abstractions.Primitives.DataClassificationLevel>!
+Edpf.Abstractions.Compliance.ProcessingRequest.ProcessingRequest(System.Guid tenantId, string! subjectToken, string! purpose, System.Collections.Generic.IReadOnlyList<Edpf.Abstractions.Primitives.DataClassificationLevel>! dataCategories) -> void
+Edpf.Abstractions.Compliance.ProcessingRequest.Purpose.get -> string!
+Edpf.Abstractions.Compliance.ProcessingRequest.SubjectToken.get -> string!
+Edpf.Abstractions.Compliance.ProcessingRequest.TenantId.get -> System.Guid
 Edpf.Abstractions.Configuration.IConfigurationValidator<TOptions>
 Edpf.Abstractions.Configuration.IConfigurationValidator<TOptions>.Validate(TOptions! options) -> System.Collections.Generic.IReadOnlyList<string!>!
 Edpf.Abstractions.Configuration.ISecretRotationHandler
@@ -289,6 +319,51 @@ Edpf.Abstractions.Diagnostics.ISensitiveDataRedactor
 Edpf.Abstractions.Diagnostics.ISensitiveDataRedactor.CarriesClassifiedData(System.Type! type) -> bool
 Edpf.Abstractions.Diagnostics.ISensitiveDataRedactor.Redact(object? value) -> object?
 Edpf.Abstractions.Diagnostics.ISensitiveDataRedactor.RedactText(string? value) -> string!
+Edpf.Abstractions.Errors.EdpfAuthorizationException
+Edpf.Abstractions.Errors.EdpfAuthorizationException.EdpfAuthorizationException(Edpf.Abstractions.Primitives.Error! error, System.Exception? innerException = null) -> void
+Edpf.Abstractions.Errors.EdpfCapabilityNotSupportedException
+Edpf.Abstractions.Errors.EdpfCapabilityNotSupportedException.EdpfCapabilityNotSupportedException(Edpf.Abstractions.Primitives.Error! error, System.Exception? innerException = null) -> void
+Edpf.Abstractions.Errors.EdpfComplianceException
+Edpf.Abstractions.Errors.EdpfComplianceException.EdpfComplianceException(Edpf.Abstractions.Primitives.Error! error, System.Exception? innerException = null) -> void
+Edpf.Abstractions.Errors.EdpfConcurrencyException
+Edpf.Abstractions.Errors.EdpfConcurrencyException.EdpfConcurrencyException(Edpf.Abstractions.Primitives.Error! error, System.Exception? innerException = null) -> void
+Edpf.Abstractions.Errors.EdpfCryptoException
+Edpf.Abstractions.Errors.EdpfCryptoException.EdpfCryptoException(Edpf.Abstractions.Primitives.Error! error, System.Exception? innerException = null) -> void
+Edpf.Abstractions.Errors.EdpfException
+Edpf.Abstractions.Errors.EdpfException.Code.get -> string!
+Edpf.Abstractions.Errors.EdpfException.EdpfException(Edpf.Abstractions.Primitives.Error! error, System.Exception? innerException = null) -> void
+Edpf.Abstractions.Errors.EdpfException.Error.get -> Edpf.Abstractions.Primitives.Error!
+Edpf.Abstractions.Errors.EdpfKeyDestroyedException
+Edpf.Abstractions.Errors.EdpfKeyDestroyedException.EdpfKeyDestroyedException(Edpf.Abstractions.Primitives.Error! error, System.Exception? innerException = null) -> void
+Edpf.Abstractions.Errors.EdpfNotFoundException
+Edpf.Abstractions.Errors.EdpfNotFoundException.EdpfNotFoundException(Edpf.Abstractions.Primitives.Error! error, System.Exception? innerException = null) -> void
+Edpf.Abstractions.Errors.EdpfProviderException
+Edpf.Abstractions.Errors.EdpfProviderException.EdpfProviderException(Edpf.Abstractions.Primitives.Error! error, System.Exception? innerException = null) -> void
+Edpf.Abstractions.Errors.EdpfTenantScopeException
+Edpf.Abstractions.Errors.EdpfTenantScopeException.EdpfTenantScopeException(Edpf.Abstractions.Primitives.Error! error, System.Exception? innerException = null) -> void
+Edpf.Abstractions.Errors.EdpfTransientException
+Edpf.Abstractions.Errors.EdpfTransientException.EdpfTransientException(Edpf.Abstractions.Primitives.Error! error, System.Exception? innerException = null) -> void
+Edpf.Abstractions.Errors.EdpfValidationException
+Edpf.Abstractions.Errors.EdpfValidationException.EdpfValidationException(Edpf.Abstractions.Primitives.Error! error, System.Exception? innerException = null) -> void
+Edpf.Abstractions.Identity.AuthorizationDecision
+Edpf.Abstractions.Identity.AuthorizationDecision.IsAllowed.get -> bool
+Edpf.Abstractions.Identity.AuthorizationDecision.Reason.get -> string!
+Edpf.Abstractions.Identity.AuthorizationDecision.RequiredPermission.get -> string!
+Edpf.Abstractions.Identity.AuthorizationDecision.Scope.get -> Edpf.Abstractions.Identity.AuthorizationScope?
+Edpf.Abstractions.Identity.AuthorizationScope
+Edpf.Abstractions.Identity.AuthorizationScope.Contains(Edpf.Abstractions.Identity.AuthorizationScope! other) -> bool
+Edpf.Abstractions.Identity.AuthorizationScope.Equals(Edpf.Abstractions.Identity.AuthorizationScope? other) -> bool
+Edpf.Abstractions.Identity.AuthorizationScope.Level.get -> Edpf.Abstractions.Identity.ScopeLevel
+Edpf.Abstractions.Identity.AuthorizationScope.Parent() -> Edpf.Abstractions.Identity.AuthorizationScope?
+Edpf.Abstractions.Identity.AuthorizationScope.Segments.get -> System.Collections.Generic.IReadOnlyList<string!>!
+Edpf.Abstractions.Identity.AuthorizationScope.TenantId.get -> System.Guid
+Edpf.Abstractions.Identity.AuthorizationScope.Value.get -> string!
+Edpf.Abstractions.Identity.ScopeLevel
+Edpf.Abstractions.Identity.ScopeLevel.Department = 2 -> Edpf.Abstractions.Identity.ScopeLevel
+Edpf.Abstractions.Identity.ScopeLevel.Facility = 1 -> Edpf.Abstractions.Identity.ScopeLevel
+Edpf.Abstractions.Identity.ScopeLevel.Organization = 0 -> Edpf.Abstractions.Identity.ScopeLevel
+Edpf.Abstractions.Identity.ScopeLevel.Resource = 4 -> Edpf.Abstractions.Identity.ScopeLevel
+Edpf.Abstractions.Identity.ScopeLevel.Unit = 3 -> Edpf.Abstractions.Identity.ScopeLevel
 Edpf.Abstractions.Primitives.DataClassificationAttribute
 Edpf.Abstractions.Primitives.DataClassificationAttribute.DataClassificationAttribute(Edpf.Abstractions.Primitives.DataClassificationLevel level) -> void
 Edpf.Abstractions.Primitives.DataClassificationAttribute.Level.get -> Edpf.Abstractions.Primitives.DataClassificationLevel
@@ -432,6 +507,12 @@ Edpf.Abstractions.Search.SearchResults<TDocument>.Documents.get -> System.Collec
 Edpf.Abstractions.Search.SearchResults<TDocument>.FacetCounts.get -> System.Collections.Generic.IReadOnlyDictionary<string!, System.Collections.Generic.IReadOnlyDictionary<string!, long>!>!
 Edpf.Abstractions.Search.SearchResults<TDocument>.SearchResults(System.Collections.Generic.IReadOnlyList<TDocument!>! documents, long totalHits, System.Collections.Generic.IReadOnlyDictionary<string!, System.Collections.Generic.IReadOnlyDictionary<string!, long>!>! facetCounts) -> void
 Edpf.Abstractions.Search.SearchResults<TDocument>.TotalHits.get -> long
+Edpf.Abstractions.Security.DeidentificationResult
+Edpf.Abstractions.Security.DeidentificationResult.DeidentificationResult(System.Collections.Generic.IReadOnlyDictionary<string!, object?>! values, System.Collections.Generic.IReadOnlyCollection<Edpf.Abstractions.Security.SafeHarborIdentifier>! removedIdentifiers, System.Collections.Generic.IReadOnlyCollection<string!>! unmappedFields) -> void
+Edpf.Abstractions.Security.DeidentificationResult.IsComplete.get -> bool
+Edpf.Abstractions.Security.DeidentificationResult.RemovedIdentifiers.get -> System.Collections.Generic.IReadOnlyCollection<Edpf.Abstractions.Security.SafeHarborIdentifier>!
+Edpf.Abstractions.Security.DeidentificationResult.UnmappedFields.get -> System.Collections.Generic.IReadOnlyCollection<string!>!
+Edpf.Abstractions.Security.DeidentificationResult.Values.get -> System.Collections.Generic.IReadOnlyDictionary<string!, object?>!
 Edpf.Abstractions.Security.EncryptionEnvelope
 Edpf.Abstractions.Security.EncryptionEnvelope.AlgorithmId.get -> short
 Edpf.Abstractions.Security.EncryptionEnvelope.Ciphertext.get -> byte[]!
@@ -449,6 +530,9 @@ Edpf.Abstractions.Security.IAlgorithmRegistry.Resolve(short algorithmId) -> Edpf
 Edpf.Abstractions.Security.ICryptoProvider
 Edpf.Abstractions.Security.ICryptoProvider.DecryptAsync(Edpf.Abstractions.Security.EncryptionEnvelope! envelope, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result<byte[]!>!>!
 Edpf.Abstractions.Security.ICryptoProvider.EncryptAsync(byte[]! plaintext, Edpf.Abstractions.Security.KeyScope scope, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result<Edpf.Abstractions.Security.EncryptionEnvelope!>!>!
+Edpf.Abstractions.Security.IDeidentifier
+Edpf.Abstractions.Security.IDeidentifier.ApplySafeHarbor(System.Collections.Generic.IReadOnlyDictionary<string!, object?>! values, Edpf.Abstractions.Security.SafeHarborPolicy! policy) -> Edpf.Abstractions.Security.DeidentificationResult!
+Edpf.Abstractions.Security.IDeidentifier.ShiftDate(System.DateTime date, string! subjectToken) -> System.DateTime
 Edpf.Abstractions.Security.IHashingService
 Edpf.Abstractions.Security.IHashingService.HmacSha256(byte[]! key, byte[]! data) -> byte[]!
 Edpf.Abstractions.Security.IHashingService.Sha256(byte[]! data) -> byte[]!
@@ -477,6 +561,31 @@ Edpf.Abstractions.Security.KeyScope.IsSubjectScoped.get -> bool
 Edpf.Abstractions.Security.KeyScope.KeyScope() -> void
 Edpf.Abstractions.Security.KeyScope.SubjectId.get -> System.Guid?
 Edpf.Abstractions.Security.KeyScope.TenantId.get -> System.Guid
+Edpf.Abstractions.Security.SafeHarborIdentifier
+Edpf.Abstractions.Security.SafeHarborIdentifier.AccountNumber = 10 -> Edpf.Abstractions.Security.SafeHarborIdentifier
+Edpf.Abstractions.Security.SafeHarborIdentifier.BiometricIdentifier = 16 -> Edpf.Abstractions.Security.SafeHarborIdentifier
+Edpf.Abstractions.Security.SafeHarborIdentifier.CertificateOrLicenceNumber = 11 -> Edpf.Abstractions.Security.SafeHarborIdentifier
+Edpf.Abstractions.Security.SafeHarborIdentifier.DateElement = 3 -> Edpf.Abstractions.Security.SafeHarborIdentifier
+Edpf.Abstractions.Security.SafeHarborIdentifier.DeviceIdentifier = 13 -> Edpf.Abstractions.Security.SafeHarborIdentifier
+Edpf.Abstractions.Security.SafeHarborIdentifier.EmailAddress = 6 -> Edpf.Abstractions.Security.SafeHarborIdentifier
+Edpf.Abstractions.Security.SafeHarborIdentifier.FaxNumber = 5 -> Edpf.Abstractions.Security.SafeHarborIdentifier
+Edpf.Abstractions.Security.SafeHarborIdentifier.FullFacePhotograph = 17 -> Edpf.Abstractions.Security.SafeHarborIdentifier
+Edpf.Abstractions.Security.SafeHarborIdentifier.GeographicSubdivision = 2 -> Edpf.Abstractions.Security.SafeHarborIdentifier
+Edpf.Abstractions.Security.SafeHarborIdentifier.HealthPlanBeneficiaryNumber = 9 -> Edpf.Abstractions.Security.SafeHarborIdentifier
+Edpf.Abstractions.Security.SafeHarborIdentifier.IpAddress = 15 -> Edpf.Abstractions.Security.SafeHarborIdentifier
+Edpf.Abstractions.Security.SafeHarborIdentifier.MedicalRecordNumber = 8 -> Edpf.Abstractions.Security.SafeHarborIdentifier
+Edpf.Abstractions.Security.SafeHarborIdentifier.Name = 1 -> Edpf.Abstractions.Security.SafeHarborIdentifier
+Edpf.Abstractions.Security.SafeHarborIdentifier.None = 0 -> Edpf.Abstractions.Security.SafeHarborIdentifier
+Edpf.Abstractions.Security.SafeHarborIdentifier.OtherUniqueIdentifier = 18 -> Edpf.Abstractions.Security.SafeHarborIdentifier
+Edpf.Abstractions.Security.SafeHarborIdentifier.SocialSecurityNumber = 7 -> Edpf.Abstractions.Security.SafeHarborIdentifier
+Edpf.Abstractions.Security.SafeHarborIdentifier.TelephoneNumber = 4 -> Edpf.Abstractions.Security.SafeHarborIdentifier
+Edpf.Abstractions.Security.SafeHarborIdentifier.VehicleIdentifier = 12 -> Edpf.Abstractions.Security.SafeHarborIdentifier
+Edpf.Abstractions.Security.SafeHarborIdentifier.WebUrl = 14 -> Edpf.Abstractions.Security.SafeHarborIdentifier
+Edpf.Abstractions.Security.SafeHarborPolicy
+Edpf.Abstractions.Security.SafeHarborPolicy.FieldIdentifiers.get -> System.Collections.Generic.IReadOnlyDictionary<string!, Edpf.Abstractions.Security.SafeHarborIdentifier>!
+Edpf.Abstractions.Security.SafeHarborPolicy.RejectUnmappedFields.get -> bool
+Edpf.Abstractions.Security.SafeHarborPolicy.SafeHarborPolicy(System.Collections.Generic.IReadOnlyDictionary<string!, Edpf.Abstractions.Security.SafeHarborIdentifier>! fieldIdentifiers, string? subjectTokenField = null, bool rejectUnmappedFields = true) -> void
+Edpf.Abstractions.Security.SafeHarborPolicy.SubjectTokenField.get -> string?
 Edpf.Abstractions.Storage.BlobPath
 Edpf.Abstractions.Storage.BlobPath.Equals(Edpf.Abstractions.Storage.BlobPath? other) -> bool
 Edpf.Abstractions.Storage.BlobPath.RelativePath.get -> string!
@@ -559,6 +668,9 @@ override Edpf.Abstractions.Data.BulkRowFailure.GetHashCode() -> int
 override Edpf.Abstractions.Data.SortColumn.Equals(object? obj) -> bool
 override Edpf.Abstractions.Data.SortColumn.GetHashCode() -> int
 override Edpf.Abstractions.Data.SortColumn.ToString() -> string!
+override Edpf.Abstractions.Identity.AuthorizationScope.Equals(object? obj) -> bool
+override Edpf.Abstractions.Identity.AuthorizationScope.GetHashCode() -> int
+override Edpf.Abstractions.Identity.AuthorizationScope.ToString() -> string!
 override Edpf.Abstractions.Primitives.EntityId<TEntity>.Equals(object? obj) -> bool
 override Edpf.Abstractions.Primitives.EntityId<TEntity>.GetHashCode() -> int
 override Edpf.Abstractions.Primitives.EntityId<TEntity>.ToString() -> string!
@@ -577,6 +689,8 @@ override Edpf.Abstractions.Storage.BlobPath.ToString() -> string!
 override Edpf.Abstractions.Validation.ValidationFailure.ToString() -> string!
 static Edpf.Abstractions.Caching.CacheKey.ForTenant(System.Guid tenantId, string! entityName, params string![]! parts) -> Edpf.Abstractions.Caching.CacheKey!
 static Edpf.Abstractions.Caching.CacheKey.Global(string! justification, string! entityName, params string![]! parts) -> Edpf.Abstractions.Caching.CacheKey!
+static Edpf.Abstractions.Compliance.ConsentDecision.Permit(Edpf.Abstractions.Compliance.LawfulBasis basis, string! reason, string? consentVersion = null) -> Edpf.Abstractions.Compliance.ConsentDecision!
+static Edpf.Abstractions.Compliance.ConsentDecision.Refuse(string! reason) -> Edpf.Abstractions.Compliance.ConsentDecision!
 static Edpf.Abstractions.Configuration.SecretValue.Empty.get -> Edpf.Abstractions.Configuration.SecretValue!
 static Edpf.Abstractions.Data.BulkProgress.operator !=(Edpf.Abstractions.Data.BulkProgress left, Edpf.Abstractions.Data.BulkProgress right) -> bool
 static Edpf.Abstractions.Data.BulkProgress.operator ==(Edpf.Abstractions.Data.BulkProgress left, Edpf.Abstractions.Data.BulkProgress right) -> bool
@@ -584,6 +698,10 @@ static Edpf.Abstractions.Data.BulkRowFailure.operator !=(Edpf.Abstractions.Data.
 static Edpf.Abstractions.Data.BulkRowFailure.operator ==(Edpf.Abstractions.Data.BulkRowFailure left, Edpf.Abstractions.Data.BulkRowFailure right) -> bool
 static Edpf.Abstractions.Data.SortColumn.operator !=(Edpf.Abstractions.Data.SortColumn left, Edpf.Abstractions.Data.SortColumn right) -> bool
 static Edpf.Abstractions.Data.SortColumn.operator ==(Edpf.Abstractions.Data.SortColumn left, Edpf.Abstractions.Data.SortColumn right) -> bool
+static Edpf.Abstractions.Errors.EdpfException.TaxonomyTypes.get -> System.Collections.Generic.IReadOnlyList<System.Type!>!
+static Edpf.Abstractions.Identity.AuthorizationDecision.Allow(string! permission, Edpf.Abstractions.Identity.AuthorizationScope? scope, string! reason) -> Edpf.Abstractions.Identity.AuthorizationDecision!
+static Edpf.Abstractions.Identity.AuthorizationDecision.Deny(string! permission, Edpf.Abstractions.Identity.AuthorizationScope? scope, string! reason) -> Edpf.Abstractions.Identity.AuthorizationDecision!
+static Edpf.Abstractions.Identity.AuthorizationScope.Create(System.Guid tenantId, params string![]! segments) -> Edpf.Abstractions.Identity.AuthorizationScope!
 static Edpf.Abstractions.Primitives.EntityId<TEntity>.Empty.get -> Edpf.Abstractions.Primitives.EntityId<TEntity>
 static Edpf.Abstractions.Primitives.EntityId<TEntity>.From(System.Guid value) -> Edpf.Abstractions.Primitives.EntityId<TEntity>
 static Edpf.Abstractions.Primitives.EntityId<TEntity>.New() -> Edpf.Abstractions.Primitives.EntityId<TEntity>

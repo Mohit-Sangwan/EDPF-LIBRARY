@@ -26,7 +26,7 @@ Gate G1 (Foundation) passed on engineering criteria.
 |---|---|
 | ADRs accepted | 23 (ADR-001 … ADR-023) |
 | Target frameworks building green | 5 (net472, net48, net6.0, net8.0, net10.0) |
-| Automated tests | 773 green |
+| Automated tests | 792 green |
 | Injection corpus | 226 assertions, zero successful injections |
 | Adversarial isolation routes | 12/12 covered, coverage machine-checked |
 | Live gate demonstrations | 24/24 passed against a real database |
@@ -42,7 +42,21 @@ Gate G1 (Foundation) passed on engineering criteria.
 | 5 — Data Platform & Domain | 23 Classification · 24 Clinical safety | G5 — [interop verification outstanding](docs/phases/p23-p24-data-platform-domain/14-completion-report.md#carried-forward-to-gate-g5) |
 | 6 — Integration & Runtime | 25 Scheduling · 26 Messaging · 27 i18n · 28 Feature flags | G6 — [broker verification outstanding](docs/phases/p25-p28-integration-runtime/14-completion-report.md#carried-forward-to-gate-g6) |
 | 7 — Operate | 29 DR · 30 SLOs · 31 Performance · 32 Test matrix | G7 — [drills and matrix outstanding](docs/phases/p29-p32-operate/14-completion-report.md#carried-forward-to-gate-g7) |
-| 8 — Productize | 33–35 | next |
+| 8 — Productize | 33 CLI & docs · 34 Packaging · 35 Reference apps | G8 — [external usability test outstanding](docs/phases/p33-p35-productize/14-completion-report.md#carried-forward-to-gate-g8) |
+| 9 — Harden & Release | 36–37 | next |
+
+## The `edpf` CLI
+
+```bash
+dotnet build tools/Edpf.Cli -c Release
+```
+
+| Command | What it does |
+|---|---|
+| `edpf doctor` | Checks for conditions that break EDPF at runtime, not build time — missing tzdata, invariant globalization, committed signing keys |
+| `edpf classify-schema <csv>` | Scans a data sample for unclassified PII/PHI and reports classification drift. Exits non-zero on a check-digit-confirmed finding, so it gates a merge |
+| `edpf check-licenses <csv>` | Licence-policy gate; a non-compliant transitive licence fails the build (ADR-009) |
+| `edpf check-api <old> <new>` | Diffs public-API baselines and reports the SemVer bump the change requires |
 
 > **Regulatory boundary.** EDPF provides data infrastructure and does not make
 > clinical decisions. A consumer building clinical decision support on EDPF is

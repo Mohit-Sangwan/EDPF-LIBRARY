@@ -2,9 +2,9 @@
 
 **Date:** 2026-08-02 · **Baseline:** Revision 12.0 (frozen)
 
-Phases 00–37, plus the Appendix H/I additions 05b, 08c, 17c, 23d, 24b and 24f, have
-been worked through in order. This document is the single place a sponsor can
-see what exists, what does not, and why.
+Phases 00–37, plus the Appendix H/I additions 05b, 08c, 17c, 23d, 24b, 24f
+and 26f, have been worked through in order. This document is the single place
+a sponsor can see what exists, what does not, and why.
 
 ---
 
@@ -12,9 +12,9 @@ see what exists, what does not, and why.
 
 | | |
 |---|---|
-| Waves worked | 9 of 9 (Phases 00–37, plus 05b, 08c, 17c, 23d, 24b and 24f) |
-| ADRs accepted | 29 |
-| Automated tests | 1043, all passing |
+| Waves worked | 9 of 9 (Phases 00–37, plus 05b, 08c, 17c, 23d, 24b, 24f and 26f) |
+| ADRs accepted | 30 |
+| Automated tests | 1082, all passing |
 | Target frameworks | 5, building clean with warnings as errors |
 | Gates passed on engineering criteria | **G0, G1** |
 | Gates with outstanding criteria | G2–G9 |
@@ -84,6 +84,7 @@ made **structurally impossible** rather than merely discouraged:
 | A mislabelled specimen cannot come from a missing separator | Variable-length GS1 fields separated; separator inside a value refused, not escaped | Round-trip and refusal tests |
 | An uncalibrated instrument's reading cannot be recorded | Entitlement checked before content, so a *normal-looking* value is rejected too; an unrecorded calibration is invalid, not valid-by-default | Device platform tests |
 | A true emergency cannot be discarded as an outlier | Separate plausible and expected bands, three dispositions — impossible is rejected, abnormal-but-real is flagged for a human | Artefact/emergency tests |
+| An incremental sync cannot silently skip records | Composite (timestamp, id) cursor; mandatory safety lag with no default; offset pagination refused unless the set is declared frozen | 1,000 records at one instant read exactly once |
 
 ---
 

@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Phase 26f — Enterprise Connector Framework.
+
+    "A uniform connector model — auth, pagination, rate-limit handling,
+     incremental sync via watermark or CDC, schema mapping, error and retry
+     semantics, and connector-level audit — so each integration is
+     configuration plus a thin adapter rather than a bespoke project."
+
+    The value is concentrated in the parts every bespoke integration gets
+    wrong the same way: the watermark boundary, the clock-skew window, and
+    offset pagination over a set that is still changing. Those are pure logic
+    and they are what this package makes hard to get wrong.
+
+    Tier 1 + Tier 2 (ADR-002).
+  -->
+  <PropertyGroup>
+    <TargetFrameworks>$(EdpfPlatformTargetFrameworks)</TargetFrameworks>
+    <IsPackable>true</IsPackable>
+    <Description>Enterprise Data Platform Framework — gap-free incremental sync, keyset pagination and rate-limit handling for integration connectors.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Edpf.Abstractions\Edpf.Abstractions.csproj" />
+    <ProjectReference Include="..\Edpf.Core\Edpf.Core.csproj" />
+  </ItemGroup>
+
+</Project>

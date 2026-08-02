@@ -9,6 +9,7 @@
     <Project Path="src/Edpf.Caching/Edpf.Caching.csproj" />
     <Project Path="src/Edpf.Compatibility/Edpf.Compatibility.csproj" />
     <Project Path="src/Edpf.Configuration/Edpf.Configuration.csproj" />
+    <Project Path="src/Edpf.Connectors/Edpf.Connectors.csproj" />
     <Project Path="src/Edpf.Core/Edpf.Core.csproj" />
     <Project Path="src/Edpf.Data/Edpf.Data.csproj" />
     <Project Path="src/Edpf.DataPlatform/Edpf.DataPlatform.csproj" />

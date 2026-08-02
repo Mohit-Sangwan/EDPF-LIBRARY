@@ -17,6 +17,7 @@
     <ProjectReference Include="..\..\src\Edpf.Barcode\Edpf.Barcode.csproj" />
     <ProjectReference Include="..\..\src\Edpf.DataQuality\Edpf.DataQuality.csproj" />
     <ProjectReference Include="..\..\src\Edpf.Devices\Edpf.Devices.csproj" />
+    <ProjectReference Include="..\..\src\Edpf.Connectors\Edpf.Connectors.csproj" />
     <ProjectReference Include="..\..\src\Edpf.Caching\Edpf.Caching.csproj" />
     <ProjectReference Include="..\..\src\Edpf.Security\Edpf.Security.csproj" />
     <ProjectReference Include="..\..\src\Edpf.DataPlatform\Edpf.DataPlatform.csproj" />

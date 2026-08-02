@@ -25,7 +25,13 @@
   <ItemGroup>
     <ProjectReference Include="..\Edpf.Abstractions\Edpf.Abstractions.csproj" />
     <ProjectReference Include="..\Edpf.Core\Edpf.Core.csproj" />
-    <ProjectReference Include="..\Edpf.Metadata\Edpf.Metadata.csproj" />
   </ItemGroup>
+
+  <!--
+    No reference to Edpf.Metadata. Comparison rules are declared per field by
+    whoever runs the migration (ADR-032) rather than derived from metadata —
+    a legacy source's shape is exactly what the new system's metadata does not
+    yet describe, which is the whole reason the migration exists.
+  -->
 
 </Project>

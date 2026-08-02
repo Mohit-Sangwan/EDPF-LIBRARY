@@ -97,3 +97,42 @@ being gated by it.
 
 **Gate G9: NOT passed.** The v0.9 engineering baseline is complete; the
 release is not.
+
+---
+
+## Addendum — 2026-08-02
+
+The figures above (792 tests, 23 ADRs) were accurate when this report was
+written and are **left unchanged deliberately**: it is a record of what Wave 9
+found, not a live dashboard. Editing them would misrepresent what was known at
+the time.
+
+Since then, eleven further phases from Appendices H and I have been worked —
+**05b, 08b, 08c, 17c, 23d, 24b, 24f, 26f, 33b, 34b, 35b** — adding nine
+packages and eleven ADRs. Current figures live in
+[PROGRAMME-STATUS.md](../../PROGRAMME-STATUS.md), which is the document that is
+kept current.
+
+**None of it changes the Gate G9 assessment.** Every one of those phases was
+constrained the same way this report describes: what could be built and
+verified without infrastructure, external parties or elapsed time was built;
+what could not was deferred with a stated reason. The four criteria that
+cannot be self-satisfied — independent cryptographic review, independent
+security and architecture review, a red-team exercise, and an external-team
+usability test — are untouched by eleven more phases of engineering, and would
+be untouched by eleven more after that.
+
+Two of those phases are worth a sponsor's attention because they changed what
+is *claimable* rather than adding capability:
+
+- **Phase 05b** found that no metadata repository existed in `src/` at all,
+  which the master document's own Appendix I.0 predicted as an ordering defect.
+  The dynamic-query safety model had only test doubles to resolve against.
+- **Phase 08b** found `IFieldMetadata.RequiredScope` declared, stored,
+  published on the API surface — and read by nothing. A field-level access
+  control that a reviewer would reasonably have believed was working.
+
+Both were defects in work this report had already called complete. That is the
+argument for the four outstanding review criteria stated more sharply than the
+report itself puts it: **the person who wrote the code is the person least
+able to find what they did not write.**

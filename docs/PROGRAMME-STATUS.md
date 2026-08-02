@@ -112,6 +112,8 @@ Worth recording, because they are the argument for the approach:
 | Six assemblies added after ADR-024 sat outside the core-neutrality test's scope — the rule was enforced against a stale list | Phase 24f, widening the list before adding a seventh | As clinical vocabulary re-entering the core through whichever package nobody had listed. All six turned out neutral, but they were neutral *unguarded* |
 | `IFieldMetadata.RequiredScope` was declared, stored, published on the API surface — and **read by nothing**. Any field marked as needing a permission was projected to everyone | Grepping its usages before starting Phase 08b; three hits, all declaration | As a field-level access control that a reviewer would reasonably believe was working. Worse than never adding the property, because its presence stops people looking |
 | Numeric canonicalisation produced different text for `1.50` and `1.5` — `decimal` preserves scale, so the values compare equal *as decimals* while their strings differ, and the fingerprint compares strings | Phase 35b canonicalisation test, written from the stated intent rather than from the implementation's output | As every fixed-point legacy column reconciling as fully different — the noise that makes a migration report unreadable, and therefore unread |
+| A documentation link promised a requirements file that was never written | [Consolidation audit](phases/consolidation-audit.md) — link check across `docs/` | As a reader concluding the site was broken rather than the document missing |
+| Two packages declared a project reference they never used, widening their published dependency graph | Consolidation audit — reference-usage scan | As consumers of two packages pulling in a dependency for nothing |
 
 ---
 
@@ -164,3 +166,21 @@ Nothing on this list is engineering:
 The engineering that could be done without infrastructure, external parties
 or elapsed time has been done. What remains is a different kind of work, and
 it belongs to the programme rather than to the codebase.
+
+---
+
+## One thing this document should be read against
+
+Two of the last eleven phases found defects in work already reported complete:
+a metadata repository that did not exist, and a field-level access control that
+was declared and never read. Both had passed their own phase's exit criteria.
+
+That is the sharpest available argument for the four criteria above that cannot
+be self-satisfied. **The person who wrote the code is the person least able to
+find what they did not write** — and the evidence for that is not a principle,
+it is two entries in the defect table below, found only because a later phase
+happened to look.
+
+The [consolidation audit](phases/consolidation-audit.md) records what a
+systematic pass over the same work found afterwards, and what it deliberately
+chose not to turn into another rule.

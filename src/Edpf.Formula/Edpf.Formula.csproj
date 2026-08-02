@@ -27,7 +27,15 @@
   <ItemGroup>
     <ProjectReference Include="..\Edpf.Abstractions\Edpf.Abstractions.csproj" />
     <ProjectReference Include="..\Edpf.Core\Edpf.Core.csproj" />
-    <ProjectReference Include="..\Edpf.Metadata\Edpf.Metadata.csproj" />
   </ItemGroup>
+
+  <!--
+    No reference to Edpf.Metadata, deliberately. Field references resolve
+    through IFormulaContext, which this assembly defines — so a host can
+    supply values from Phase 05b metadata, from a test fixture, or from
+    anywhere else, and the engine stays usable without the metadata platform.
+    An unused reference here would have widened the dependency graph of every
+    formula consumer for nothing.
+  -->
 
 </Project>

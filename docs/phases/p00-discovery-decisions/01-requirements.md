@@ -59,5 +59,7 @@ tenant at the top decile; 5 GB maximum single blob (DICOM studies);
 ## Requirements traceability
 
 Functional and business requirements (FR/BR) trace from Book 6 Part 2. The
-walking skeleton satisfies the subset listed in
-[p02/01-requirements.md](../p02-walking-skeleton/01-requirements.md).
+subset the walking skeleton demonstrates is described in
+[p02/00-README.md](../p02-walking-skeleton/00-README.md), and what it was
+verified to do is in
+[p02/14-completion-report.md](../p02-walking-skeleton/14-completion-report.md).

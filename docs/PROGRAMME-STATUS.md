@@ -3,7 +3,7 @@
 **Date:** 2026-08-02 · **Baseline:** Revision 12.0 (frozen)
 
 Phases 00–37, plus the Appendix H/I additions 05b, 08b, 08c, 17c, 23d, 24b, 24f,
-26f, 33b and 35b, have been worked through in order. This document is the single place
+26f, 33b, 34b and 35b, have been worked through in order. This document is the single place
 a sponsor can see what exists, what does not, and why.
 
 ---
@@ -12,9 +12,9 @@ a sponsor can see what exists, what does not, and why.
 
 | | |
 |---|---|
-| Waves worked | 9 of 9 (Phases 00–37, plus 05b, 08b, 08c, 17c, 23d, 24b, 24f, 26f, 33b and 35b) |
-| ADRs accepted | 33 |
-| Automated tests | 1157, all passing |
+| Waves worked | 9 of 9 (Phases 00–37, plus 05b, 08b, 08c, 17c, 23d, 24b, 24f, 26f, 33b, 34b and 35b) |
+| ADRs accepted | 34 |
+| Automated tests | 1180, all passing |
 | Target frameworks | 5, building clean with warnings as errors |
 | Gates passed on engineering criteria | **G0, G1** |
 | Gates with outstanding criteria | G2–G9 |
@@ -90,6 +90,7 @@ made **structurally impossible** rather than merely discouraged:
 | An irreversible cutover step cannot be taken by accident | Retiring legacy is a separate method with a typed acknowledgement, reachable only from one stage; every earlier stage reverses | Cutover sequence tests |
 | An export cannot emit a cell that executes on the recipient's machine | Leading `=`, `+`, `-`, `@`, tab and CR neutralised with a text marker; quoting explicitly not relied on, since Excel parses `"=1+1"` as a formula | 6 hostile payloads plus the whitespace-prefixed forms |
 | An export cannot become the way around field authorization | The same check applied at the export point (ADR-031's own revisit trigger, fired); no unlimited cap; the artefact inherits its highest classification | Export boundary tests |
+| A lapsed licence cannot stop a clinician opening a chart | `ModuleGate.Register` **throws** on `core.read`, `core.audit.write`, `core.breakglass` and `core.export.subjectaccess`; those stay available with no entitlement applied at all | Entitlement tests — the configuration expressing the hazard cannot be built |
 
 ---
 
@@ -116,9 +117,10 @@ Worth recording, because they are the argument for the approach:
 
 ## Recurring cost: ADR-002
 
-The tiered target-framework decision surfaced **five times** as a concrete
+The tiered target-framework decision has surfaced **seven times** as a concrete
 design constraint — `IsExternalInit`, `DateOnly`, `Index`/`Range`, static
-`HashData`, `[GeneratedRegex]`. Each was resolved with a portable equivalent
+`HashData`, `[GeneratedRegex]`, `ReadOnlySpan<byte>` in a zero-dependency
+assembly, and RSASSA-PSS being absent from .NET Framework's default RSA. Each was resolved with a portable equivalent
 or an explicit tiering decision, never with a polyfill in `Edpf.Abstractions`
 (EDPF0001) or a stray `#if` (EDPF0002).
 

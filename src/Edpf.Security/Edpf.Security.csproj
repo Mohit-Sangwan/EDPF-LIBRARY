@@ -17,4 +17,27 @@
     <ProjectReference Include="..\Edpf.Core\Edpf.Core.csproj" />
   </ItemGroup>
 
+  <!--
+    ADR-002, seventh occurrence — resolved by tiering the FILE, not by an #if.
+
+    RsaSignatureVerifier needs two things .NET Framework does not provide:
+    RSA.ImportSubjectPublicKeyInfo (added in .NET Core 3.0), and RSASSA-PSS,
+    which RSA.Create() on Framework returns an RSACryptoServiceProvider for and
+    which throws on PSS padding.
+
+    The alternatives were both worse. Dropping to PKCS#1 v1.5 would weaken a
+    signature format being DEFINED here rather than interoperated with — there
+    is no legacy verifier to accommodate. An #if would put conditional
+    compilation outside Edpf.Compatibility, which EDPF0002 forbids.
+
+    So entitlement verification is Tier 1 + Tier 2. That is the right answer on
+    its merits anyway: entitlements are checked by on-premises servers and
+    installers, not by the WinForms device hosts that justify Tier 3
+    (Phase 24f). A Tier 3 consumer needing this must reach it through a
+    modern-framework process.
+  -->
+  <ItemGroup Condition="$([MSBuild]::GetTargetFrameworkIdentifier('$(TargetFramework)')) == '.NETFramework'">
+    <Compile Remove="RsaSignatureVerifier.cs" />
+  </ItemGroup>
+
 </Project>

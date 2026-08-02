@@ -24,9 +24,9 @@ Gate G1 (Foundation) passed on engineering criteria.
 
 | | |
 |---|---|
-| ADRs accepted | 33 (ADR-001 … ADR-033) |
+| ADRs accepted | 34 (ADR-001 … ADR-034) |
 | Target frameworks building green | 5 (net472, net48, net6.0, net8.0, net10.0) |
-| Automated tests | 1157 green |
+| Automated tests | 1180 green |
 | Injection corpus | 226 assertions, zero successful injections |
 | Adversarial isolation routes | 12/12 covered, coverage machine-checked, 48 tests |
 | Live gate demonstrations | 24/24 passed against a real database |
@@ -160,7 +160,8 @@ src/          Edpf.Abstractions (contracts, zero deps) · Edpf.Core (shared
               Edpf.Devices (Tier 3 — the net472/net48 justification) ·
               Edpf.Connectors (gap-free incremental sync — ADR-030) ·
               Edpf.Migration (brownfield verification — ADR-032) ·
-              Edpf.Reporting (export as a security boundary — ADR-033)
+              Edpf.Reporting (export as a security boundary — ADR-033) ·
+              Edpf.Licensing (offline entitlement — ADR-034)
 providers/    per-engine providers, licence-isolated (Wave 2)
 verticals/    Edpf.Healthcare.Domain — optional; consumes only the public
               surface, and the core never references it back (ADR-024)
@@ -176,7 +177,7 @@ docs/         adr/ · tdl/ · phases/ · compliance/
 | Start here | |
 |---|---|
 | [Appendix Z](docs/standards/appendix-z-implementation-standards.md) | The engineering rulebook — read on day one, return to for every PR |
-| [Architecture decisions](docs/adr/README.md) | The thirty-three binding decisions, each with its revisit triggers |
+| [Architecture decisions](docs/adr/README.md) | The thirty-four binding decisions, each with its revisit triggers |
 | [Phase folders](docs/phases/) | What each phase delivered, verified, and decided |
 | [Compliance controls](docs/compliance/compliance-control-matrix.md) | Control → HIPAA/GDPR/ISO/SOC 2 clause mapping |
 | [Data classification](docs/compliance/data-classification.md) | Handling rules per level |

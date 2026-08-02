@@ -567,6 +567,8 @@ Edpf.Abstractions.Security.ICryptoProvider.EncryptAsync(byte[]! plaintext, Edpf.
 Edpf.Abstractions.Security.IDeidentifier
 Edpf.Abstractions.Security.IDeidentifier.ApplySafeHarbor(System.Collections.Generic.IReadOnlyDictionary<string!, object?>! values, Edpf.Abstractions.Security.SafeHarborPolicy! policy) -> Edpf.Abstractions.Security.DeidentificationResult!
 Edpf.Abstractions.Security.IDeidentifier.ShiftDate(System.DateTime date, string! subjectToken) -> System.DateTime
+Edpf.Abstractions.Security.IDetachedSignatureVerifier
+Edpf.Abstractions.Security.IDetachedSignatureVerifier.Verify(byte[]! payload, byte[]! signature) -> bool
 Edpf.Abstractions.Security.IHashingService
 Edpf.Abstractions.Security.IHashingService.HmacSha256(byte[]! key, byte[]! data) -> byte[]!
 Edpf.Abstractions.Security.IHashingService.Sha256(byte[]! data) -> byte[]!

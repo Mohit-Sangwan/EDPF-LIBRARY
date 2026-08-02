@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Phase 34b — Enterprise Installers: offline / air-gapped entitlement
+    validation.
+
+    Two constraints shape everything here.
+
+    OFFLINE MEANS NO REVOCATION. An air-gapped hospital server cannot ask
+    whether a licence was withdrawn. So an offline entitlement is short-lived
+    and re-issued rather than long-lived and revocable, and its expiry is the
+    only revocation mechanism that exists.
+
+    A LICENCE CHECK MUST NEVER BECOME A PATIENT-SAFETY HAZARD. Entitlement
+    gates FEATURES. It does not gate reading data that already exists, writing
+    audit, or break-glass. A commercial control that can lock clinicians out
+    of the record during an outage is a hazard the vendor introduced, and
+    ModuleGate refuses to express it.
+
+    Note the absence of a package reference to any crypto library: signature
+    verification arrives through IDetachedSignatureVerifier, whose only
+    implementation lives in Edpf.Security (Z.10).
+
+    Tier 1 + Tier 2 (ADR-002).
+  -->
+  <PropertyGroup>
+    <TargetFrameworks>$(EdpfPlatformTargetFrameworks)</TargetFrameworks>
+    <IsPackable>true</IsPackable>
+    <Description>Enterprise Data Platform Framework — offline entitlement validation with clock-rollback resistance, and module gating that cannot disable safety-critical paths.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Edpf.Abstractions\Edpf.Abstractions.csproj" />
+    <ProjectReference Include="..\Edpf.Core\Edpf.Core.csproj" />
+  </ItemGroup>
+
+</Project>

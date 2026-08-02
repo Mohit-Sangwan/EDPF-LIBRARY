@@ -42,6 +42,7 @@ current answer is the current answer.
 | [ADR-030](ADR-030-incremental-sync-completeness.md) | Incremental sync is gap-free by construction | Accepted |
 | [ADR-031](ADR-031-field-authorization.md) | Filtering and sorting are reading; a denied field looks absent | Accepted |
 | [ADR-032](ADR-032-migration-verification.md) | Migration equivalence is proven per record, canonicalisation declared | Accepted |
+| [ADR-033](ADR-033-export-is-a-security-boundary.md) | An export is a bulk read, a travelling artefact, and a program | Accepted |
 
 Template: [ADR-000-template.md](ADR-000-template.md).
 Smaller decisions go to the [technical decision log](../tdl/README.md).

@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Phase 33b — Enterprise Reporting and Export.
+
+    Framed deliberately as a SECURITY boundary rather than a formatting
+    concern, because that is what an export actually is:
+
+      - It is a bulk read, and bulk reads are where query-level controls get
+        bypassed. ADR-031 names "a second enforcement point appears — bulk
+        export" as its own revisit trigger. This is that second point.
+
+      - The artefact leaves the building. Everything ADR-028 says about
+        quality reports applies with more force to an export, which contains
+        the data rather than describing it.
+
+      - The output executes on the recipient's machine. A spreadsheet is a
+        program, and a CSV cell beginning with '=' is code (CWE-1236).
+
+    Rendering — PDF/A, Word, real Excel — is a different problem with a
+    different dependency footprint and is not here. See the phase report.
+
+    Tier 1 + Tier 2 (ADR-002).
+  -->
+  <PropertyGroup>
+    <TargetFrameworks>$(EdpfPlatformTargetFrameworks)</TargetFrameworks>
+    <IsPackable>true</IsPackable>
+    <Description>Enterprise Data Platform Framework — export as a security boundary: formula-injection neutralisation, field authorization, mandatory caps and export audit.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Edpf.Abstractions\Edpf.Abstractions.csproj" />
+    <ProjectReference Include="..\Edpf.Core\Edpf.Core.csproj" />
+    <ProjectReference Include="..\Edpf.Metadata\Edpf.Metadata.csproj" />
+  </ItemGroup>
+
+</Project>

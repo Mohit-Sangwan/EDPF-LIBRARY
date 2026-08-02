@@ -3,7 +3,7 @@
 **Date:** 2026-08-02 · **Baseline:** Revision 12.0 (frozen)
 
 Phases 00–37, plus the Appendix H/I additions 05b, 08b, 08c, 17c, 23d, 24b, 24f,
-26f and 35b, have been worked through in order. This document is the single place
+26f, 33b and 35b, have been worked through in order. This document is the single place
 a sponsor can see what exists, what does not, and why.
 
 ---
@@ -12,9 +12,9 @@ a sponsor can see what exists, what does not, and why.
 
 | | |
 |---|---|
-| Waves worked | 9 of 9 (Phases 00–37, plus 05b, 08b, 08c, 17c, 23d, 24b, 24f, 26f and 35b) |
-| ADRs accepted | 32 |
-| Automated tests | 1124, all passing |
+| Waves worked | 9 of 9 (Phases 00–37, plus 05b, 08b, 08c, 17c, 23d, 24b, 24f, 26f, 33b and 35b) |
+| ADRs accepted | 33 |
+| Automated tests | 1157, all passing |
 | Target frameworks | 5, building clean with warnings as errors |
 | Gates passed on engineering criteria | **G0, G1** |
 | Gates with outstanding criteria | G2–G9 |
@@ -88,6 +88,8 @@ made **structurally impossible** rather than merely discouraged:
 | A protected field cannot be read through a filter or a sort | Reading is reading in every clause; refusal is byte-identical to a field that does not exist; omitted permissions deny | Message-substitution equality test; isolation route 8 |
 | A migration cannot be signed off on a row count | Equivalence proven per record by fingerprint; canonicalisation declared field by field with a written justification; a reconciler comparing nothing is refused at construction | Swapped-values dataset with matching counts reported as fully different |
 | An irreversible cutover step cannot be taken by accident | Retiring legacy is a separate method with a typed acknowledgement, reachable only from one stage; every earlier stage reverses | Cutover sequence tests |
+| An export cannot emit a cell that executes on the recipient's machine | Leading `=`, `+`, `-`, `@`, tab and CR neutralised with a text marker; quoting explicitly not relied on, since Excel parses `"=1+1"` as a formula | 6 hostile payloads plus the whitespace-prefixed forms |
+| An export cannot become the way around field authorization | The same check applied at the export point (ADR-031's own revisit trigger, fired); no unlimited cap; the artefact inherits its highest classification | Export boundary tests |
 
 ---
 

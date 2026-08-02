@@ -117,3 +117,11 @@ route rather than a thirteenth.
 - **A second enforcement point appears** — bulk export, a reporting endpoint,
   a direct provider path. Each is a place this decision can be bypassed, and
   each needs the check or an explicit exemption.
+
+  > **Fired once, 2026-08-02.** Phase 33b added bulk export.
+  > [ADR-033](ADR-033-export-is-a-security-boundary.md) applies the check at
+  > that point, with one deliberate difference: an export **withholds** an
+  > unreadable column and records it, where the query compiler refuses. The
+  > reasoning is in ADR-033 §4 — a report definition is run by many people, and
+  > failing the whole run for one recipient's missing permission leads to the
+  > permission being granted to everyone.

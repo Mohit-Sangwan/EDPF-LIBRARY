@@ -13,7 +13,7 @@ a sponsor can see what exists, what does not, and why.
 | | |
 |---|---|
 | Waves worked | 9 of 9 (Phases 00–37, plus 05b, 08b, 08c, 17c, 23d, 24b, 24f, 26f, 33b, 34b and 35b) |
-| ADRs accepted | 34 |
+| ADRs accepted | 35 |
 | Automated tests | 1180, all passing |
 | Target frameworks | 5, building clean with warnings as errors |
 | Gates passed on engineering criteria | **G0, G1** |
@@ -114,6 +114,8 @@ Worth recording, because they are the argument for the approach:
 | Numeric canonicalisation produced different text for `1.50` and `1.5` — `decimal` preserves scale, so the values compare equal *as decimals* while their strings differ, and the fingerprint compares strings | Phase 35b canonicalisation test, written from the stated intent rather than from the implementation's output | As every fixed-point legacy column reconciling as fully different — the noise that makes a migration report unreadable, and therefore unread |
 | A documentation link promised a requirements file that was never written | [Consolidation audit](phases/consolidation-audit.md) — link check across `docs/` | As a reader concluding the site was broken rather than the document missing |
 | Two packages declared a project reference they never used, widening their published dependency graph | Consolidation audit — reference-usage scan | As consumers of two packages pulling in a dependency for nothing |
+| The Z.9 benchmark regression gate had **never been run**: no baseline was ever captured and no tooling existed to capture one, so the gate had nothing to compare against and could not fire | Running the benchmarks for the first time | As a performance gate everyone believed was watching. Same shape as the `RequiredScope` defect — a control that cannot fire is indistinguishable from an absent one |
+| A 5% timing tolerance is meaningless on developer hardware — measured confidence margins ran 29%–273% of the mean | The same first run, reading the margins rather than the means | As a gate that fires at random, gets ignored, and is eventually disabled. Allocation counts are exact, so that half is trustworthy today ([ADR-035](adr/ADR-035-benchmark-gate-enforces-allocation.md)) |
 
 ---
 

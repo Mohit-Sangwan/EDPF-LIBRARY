@@ -44,6 +44,7 @@ current answer is the current answer.
 | [ADR-032](ADR-032-migration-verification.md) | Migration equivalence is proven per record, canonicalisation declared | Accepted |
 | [ADR-033](ADR-033-export-is-a-security-boundary.md) | An export is a bulk read, a travelling artefact, and a program | Accepted |
 | [ADR-034](ADR-034-entitlement-never-gates-safety.md) | Entitlement gates features, never care | Accepted |
+| [ADR-035](ADR-035-benchmark-gate-enforces-allocation.md) | The benchmark gate enforces allocation and advises on time | Accepted |
 
 Template: [ADR-000-template.md](ADR-000-template.md).
 Smaller decisions go to the [technical decision log](../tdl/README.md).

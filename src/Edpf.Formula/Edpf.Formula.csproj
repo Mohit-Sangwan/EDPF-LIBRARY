@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Phase 08c — Formula & Expression Engine.
+
+    User-authorable formulas for billing rules, tax computation, insurance
+    package calculation, clinical scores and KPI definitions. Field references
+    resolve through Phase 05b metadata (ADR-025).
+
+    Two constraints shape every file here, and both come from the master
+    document verbatim:
+
+      "decimal-precision arithmetic (never floating point — a rounding error
+       in a dosage or an invoice is not a cosmetic defect)"
+
+      "A user-authored formula is untrusted input regardless of who authored
+       it."
+
+    Tier 1 + Tier 2 (ADR-002).
+  -->
+  <PropertyGroup>
+    <TargetFrameworks>$(EdpfPlatformTargetFrameworks)</TargetFrameworks>
+    <IsPackable>true</IsPackable>
+    <Description>Enterprise Data Platform Framework — sandboxed, decimal-precision formula evaluation over metadata-resolved fields.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Edpf.Abstractions\Edpf.Abstractions.csproj" />
+    <ProjectReference Include="..\Edpf.Core\Edpf.Core.csproj" />
+    <ProjectReference Include="..\Edpf.Metadata\Edpf.Metadata.csproj" />
+  </ItemGroup>
+
+</Project>

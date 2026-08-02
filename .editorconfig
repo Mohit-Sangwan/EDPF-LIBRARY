@@ -158,3 +158,12 @@ dotnet_diagnostic.CA2000.severity = none
 # this file so the rule keeps protecting every other comparison in the repo.
 [src/Edpf.Globalization/TextService.cs]
 dotnet_diagnostic.CA1309.severity = none
+
+# CA1308 says "normalize to uppercase", and it is right: lowercasing loses
+# information in some cultures, so uppercase is the safe direction for
+# comparison keys. It is wrong for the formula library's LOWER function, whose
+# entire contract is "return this text lowercased" — the lowercase result IS
+# the output, not a normalization step on the way to a comparison. Scoped to
+# this file so the rule keeps guarding every normalization elsewhere.
+[src/Edpf.Formula/FormulaLibrary.cs]
+dotnet_diagnostic.CA1308.severity = none

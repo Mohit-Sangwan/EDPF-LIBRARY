@@ -87,4 +87,28 @@ public static class Guard
 
         return value;
     }
+
+    /// <summary>
+    /// Rejects a non-positive value, for the resource ceilings and budgets
+    /// that only mean anything above zero.
+    /// </summary>
+    /// <param name="value">The value to check.</param>
+    /// <param name="parameterName">The caller's parameter name.</param>
+    /// <returns><paramref name="value"/>, greater than zero.</returns>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="value"/> is zero or negative.</exception>
+    /// <remarks>
+    /// A ceiling of zero disables the thing it was meant to limit — a step
+    /// budget of zero refuses every formula, and a negative one is never
+    /// reached at all. Both read as "no limit" to whoever configured it.
+    /// </remarks>
+    public static int Positive(int value, string parameterName)
+    {
+        if (value <= 0)
+        {
+            throw new ArgumentOutOfRangeException(
+                parameterName, value, "Value must be greater than zero.");
+        }
+
+        return value;
+    }
 }

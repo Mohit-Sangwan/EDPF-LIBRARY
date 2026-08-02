@@ -13,6 +13,7 @@
     <Project Path="src/Edpf.DataPlatform/Edpf.DataPlatform.csproj" />
     <Project Path="src/Edpf.Diagnostics/Edpf.Diagnostics.csproj" />
     <Project Path="src/Edpf.Extensions.DependencyInjection/Edpf.Extensions.DependencyInjection.csproj" />
+    <Project Path="src/Edpf.Formula/Edpf.Formula.csproj" />
     <Project Path="src/Edpf.Globalization/Edpf.Globalization.csproj" />
     <Project Path="src/Edpf.Metadata/Edpf.Metadata.csproj" />
     <Project Path="src/Edpf.Operations/Edpf.Operations.csproj" />

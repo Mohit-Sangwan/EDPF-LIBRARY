@@ -52,6 +52,18 @@ public sealed partial class CoreNeutralityTests
         "Edpf.Globalization",
         "Edpf.Operations",
         "Edpf.Extensions.DependencyInjection",
+
+        // Added as the platform grew. Every one of these was written after the
+        // rule existed and had to be kept neutral deliberately — Edpf.Devices
+        // most of all, since a device platform for a hospital is where clinical
+        // vocabulary wants to leak in hardest. Its plausibility bands live in
+        // verticals/Edpf.Healthcare.Domain for exactly that reason.
+        "Edpf.Metadata",
+        "Edpf.Formula",
+        "Edpf.Rules",
+        "Edpf.Barcode",
+        "Edpf.DataQuality",
+        "Edpf.Devices",
     ];
 
     [Fact]

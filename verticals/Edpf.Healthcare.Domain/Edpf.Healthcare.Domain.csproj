@@ -30,6 +30,7 @@
     <ProjectReference Include="..\..\src\Edpf.Abstractions\Edpf.Abstractions.csproj" />
     <ProjectReference Include="..\..\src\Edpf.Core\Edpf.Core.csproj" />
     <ProjectReference Include="..\..\src\Edpf.DataPlatform\Edpf.DataPlatform.csproj" />
+    <ProjectReference Include="..\..\src\Edpf.Devices\Edpf.Devices.csproj" />
   </ItemGroup>
 
 </Project>

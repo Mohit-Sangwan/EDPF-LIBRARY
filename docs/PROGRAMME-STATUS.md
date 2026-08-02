@@ -2,7 +2,7 @@
 
 **Date:** 2026-08-02 · **Baseline:** Revision 12.0 (frozen)
 
-Phases 00–37, plus the Appendix H/I additions 05b, 08c, 17c, 23d and 24b, have
+Phases 00–37, plus the Appendix H/I additions 05b, 08c, 17c, 23d, 24b and 24f, have
 been worked through in order. This document is the single place a sponsor can
 see what exists, what does not, and why.
 
@@ -12,9 +12,9 @@ see what exists, what does not, and why.
 
 | | |
 |---|---|
-| Waves worked | 9 of 9 (Phases 00–37, plus 05b, 08c, 17c, 23d and 24b) |
-| ADRs accepted | 28 |
-| Automated tests | 1010, all passing |
+| Waves worked | 9 of 9 (Phases 00–37, plus 05b, 08c, 17c, 23d, 24b and 24f) |
+| ADRs accepted | 29 |
+| Automated tests | 1043, all passing |
 | Target frameworks | 5, building clean with warnings as errors |
 | Gates passed on engineering criteria | **G0, G1** |
 | Gates with outstanding criteria | G2–G9 |
@@ -82,6 +82,8 @@ made **structurally impossible** rather than merely discouraged:
 | A user-authored formula cannot reach I/O or reflection | No AST node for member access or invocation; capabilities absent from the assembly | 12 hostile sources refused; assembly-scope architecture test |
 | A quality report cannot disclose the data it describes | Classified columns yield shape only; small-cell suppression regardless of classification | Profile tests across all six classification levels |
 | A mislabelled specimen cannot come from a missing separator | Variable-length GS1 fields separated; separator inside a value refused, not escaped | Round-trip and refusal tests |
+| An uncalibrated instrument's reading cannot be recorded | Entitlement checked before content, so a *normal-looking* value is rejected too; an unrecorded calibration is invalid, not valid-by-default | Device platform tests |
+| A true emergency cannot be discarded as an outlier | Separate plausible and expected bands, three dispositions — impossible is rejected, abnormal-but-real is flagged for a human | Artefact/emergency tests |
 
 ---
 
@@ -100,6 +102,7 @@ Worth recording, because they are the argument for the approach:
 | No metadata repository existed in `src/` at all — the query compiler's whitelist had only test doubles to resolve against | Phase 05b, checking the document's own Appendix I.0 finding against this repository | As custom fields being unqueryable, then routed around the safety model |
 | Two redaction policies disagreed on `Internal` — the new metadata-driven one redacted it, the shipped ADR-015 one did not | Phase 05b cross-check test | As a field's protection depending on which subsystem looked at it |
 | A GTIN-14 test vector I wrote had the wrong check digit | The Phase 17c implementation, on first run | Nowhere — but only because expectations came from GS1's published examples rather than from the encoder. Had they been derived from the code, a wrong encoder would have passed |
+| Six assemblies added after ADR-024 sat outside the core-neutrality test's scope — the rule was enforced against a stale list | Phase 24f, widening the list before adding a seventh | As clinical vocabulary re-entering the core through whichever package nobody had listed. All six turned out neutral, but they were neutral *unguarded* |
 
 ---
 
@@ -116,6 +119,18 @@ visibly at design decisions rather than accumulating as conditional
 compilation. One instance produced a genuine improvement —
 `SafeHarborIdentifier.None` now positively records "someone classified this
 field and found it safe", which is the evidence an auditor wants.
+
+**Phase 24f is the first time the decision's *benefit* was collected.**
+Until then Tier 3 had been paid for six times and cashed in zero. `Edpf.Devices`
+is the capability ADR-002 named as the justification for keeping net472/net48:
+locally-attached laboratory instruments live in desktop and Windows Service
+hosts, and those hosts are the ones still on .NET Framework in the hospitals
+that own the analyzers. It built clean across all five target frameworks on the
+first attempt — which is what the six prior encounters with the rule bought.
+
+If those devices ever move to hosts running modern .NET, ADR-002's cost/benefit
+changes and both decisions should be reopened together. ADR-029 records that as
+an explicit revisit trigger.
 
 ---
 

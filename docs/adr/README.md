@@ -38,6 +38,7 @@ current answer is the current answer.
 | [ADR-026](ADR-026-formula-sandbox.md) | Formulas are a closed grammar over decimal, never a scripting host | Accepted |
 | [ADR-027](ADR-027-decision-table-hit-policy.md) | Decision tables declare a hit policy; ambiguity is refused | Accepted |
 | [ADR-028](ADR-028-profiling-discloses-nothing.md) | Quality profiles disclose shape, never content | Accepted |
+| [ADR-029](ADR-029-device-readings-are-claims.md) | A device reading is a claim; entitlement before content | Accepted |
 
 Template: [ADR-000-template.md](ADR-000-template.md).
 Smaller decisions go to the [technical decision log](../tdl/README.md).

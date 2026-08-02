@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Phase 24f — Device & Peripheral Platform.
+
+    "RS-232/serial remains ubiquitous in laboratory analyzers, and a framework
+     targeting LIS that cannot read a serial port is not deployable."
+
+    ★ TIER 3 (net472/net48 included), and deliberately so. The master document
+    calls locally-attached peripherals "one of the few genuine justifications
+    for keeping net472/net48 support" — the hardware lives in desktop and
+    Windows Service hosts, and those hosts are the ones still on .NET
+    Framework in the hospitals that own the analyzers.
+
+    That constraint is real and it bites: no DateOnly, no record structs, no
+    Index/Range, no static HashData, no [GeneratedRegex] (ADR-002). It is
+    honoured with portable equivalents rather than #if or a polyfill.
+
+    Domain-neutral per ADR-024. A device registry, a calibration lifecycle and
+    a framing protocol serve laboratory analyzers, industrial scales and
+    payment terminals alike. Clinical plausibility ranges are DATA, and they
+    live in the healthcare vertical.
+  -->
+  <PropertyGroup>
+    <TargetFrameworks>$(EdpfLibraryTargetFrameworks)</TargetFrameworks>
+    <IsPackable>true</IsPackable>
+    <Description>Enterprise Data Platform Framework — device registry, calibration gating, plausibility validation and ASTM E1381 framing for locally-attached peripherals.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Edpf.Abstractions\Edpf.Abstractions.csproj" />
+    <ProjectReference Include="..\Edpf.Core\Edpf.Core.csproj" />
+  </ItemGroup>
+
+</Project>

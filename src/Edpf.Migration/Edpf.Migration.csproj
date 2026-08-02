@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Phase 35b — Brownfield Migration Kit.
+
+    Added because the risk register names "Nobody migrates off legacy" as a
+    CRITICAL risk (F25). A framework nobody can move onto is a framework
+    nobody adopts, and the blocker is rarely the new system — it is the
+    inability to prove the new one holds the same data as the old one.
+
+    So the centre of this package is verification, not transformation:
+    fingerprinting with DECLARED canonicalisation, reconciliation that proves
+    equivalence without disclosing values, dual-write divergence detection,
+    and a cutover with an explicit point of no return.
+
+    Tier 1 + Tier 2 (ADR-002). The migration runner is a modern tool even when
+    the system it is migrating from is not.
+  -->
+  <PropertyGroup>
+    <TargetFrameworks>$(EdpfPlatformTargetFrameworks)</TargetFrameworks>
+    <IsPackable>true</IsPackable>
+    <Description>Enterprise Data Platform Framework — migration verification, dual-write reconciliation and reversible cutover for brownfield adoption.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Edpf.Abstractions\Edpf.Abstractions.csproj" />
+    <ProjectReference Include="..\Edpf.Core\Edpf.Core.csproj" />
+    <ProjectReference Include="..\Edpf.Metadata\Edpf.Metadata.csproj" />
+  </ItemGroup>
+
+</Project>

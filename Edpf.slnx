@@ -20,6 +20,7 @@
     <Project Path="src/Edpf.Formula/Edpf.Formula.csproj" />
     <Project Path="src/Edpf.Globalization/Edpf.Globalization.csproj" />
     <Project Path="src/Edpf.Metadata/Edpf.Metadata.csproj" />
+    <Project Path="src/Edpf.Migration/Edpf.Migration.csproj" />
     <Project Path="src/Edpf.Operations/Edpf.Operations.csproj" />
     <Project Path="src/Edpf.Rules/Edpf.Rules.csproj" />
     <Project Path="src/Edpf.Security/Edpf.Security.csproj" />

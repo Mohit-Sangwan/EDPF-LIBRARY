@@ -13,6 +13,23 @@
 #     "Server=(localdb)\MSSQLLocalDB;Database=EdpfSkeletonDemo;Trusted_Connection=True;TrustServerCertificate=True"
 #   dotnet run --project Edpf.WalkingSkeleton.Api --framework net10.0
 #
+# ★ ON THE LOCALDB PATH, START FROM A CLEAN DATABASE:
+#
+#   sqlcmd -S "(localdb)\MSSQLLocalDB" -Q "IF DB_ID('EdpfSkeletonDemo') IS NOT NULL
+#     BEGIN ALTER DATABASE EdpfSkeletonDemo SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+#     DROP DATABASE EdpfSkeletonDemo; END"
+#
+# Docker gives a fresh container every time; LocalDB does not. The development
+# master key is ephemeral per process, so a database left over from an earlier
+# session holds tenant DEKs wrapped under a key this process does not have.
+# Unwrapping then fails with an AES-GCM tag mismatch, surfacing as a generic
+# 500 (EDPF-DATA-3004) on the very first create.
+#
+# That is the crypto failing closed, which is correct — a wrapped key that
+# will not unwrap must never be worked around. But the diagnosis is not
+# obvious from the response, which by design says nothing useful to a caller
+# (Phase 18). Hence this note.
+#
 # The same demonstrations run headless in CI on both Tier A providers via
 # Testcontainers — see tests/Edpf.WalkingSkeleton.Tests/Gate/.
 # ═══════════════════════════════════════════════════════════════════════════

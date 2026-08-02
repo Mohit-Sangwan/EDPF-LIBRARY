@@ -29,7 +29,7 @@ Gate G1 (Foundation) passed on engineering criteria.
 | Automated tests | 1180 green |
 | Injection corpus | 226 assertions, zero successful injections |
 | Adversarial isolation routes | 12/12 covered, coverage machine-checked, 48 tests |
-| Live gate demonstrations | 24/24 passed against a real database |
+| Live gate demonstrations | 24/24, last re-verified 2026-08-02 against SQL Server LocalDB |
 | Public API surface | tracked, diffed in CI |
 
 | Wave | Phases | Gate |

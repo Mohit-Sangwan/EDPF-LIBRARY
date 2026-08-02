@@ -16,6 +16,17 @@ namespace Edpf.WalkingSkeleton.Api.Pipeline;
 /// </summary>
 public sealed class IdempotencyFilter : IEndpointFilter
 {
+    /// <summary>
+    /// The options a replayed body is serialized with.
+    /// </summary>
+    /// <remarks>
+    /// <see cref="System.Text.Json.JsonSerializerDefaults.Web"/> — the same
+    /// convention minimal APIs apply to the original response. A replay that
+    /// does not match the original byte for byte is not a replay.
+    /// </remarks>
+    private static readonly System.Text.Json.JsonSerializerOptions ReplaySerialization =
+        new(System.Text.Json.JsonSerializerDefaults.Web);
+
     public async ValueTask<object?> InvokeAsync(
         EndpointFilterInvocationContext context, EndpointFilterDelegate next)
     {
@@ -58,7 +69,15 @@ public sealed class IdempotencyFilter : IEndpointFilter
             && outcome is IStatusCodeHttpResult { StatusCode: not null } statusResult)
         {
             var clock = http.RequestServices.GetRequiredService<IClock>();
-            string body = System.Text.Json.JsonSerializer.Serialize(valueResult.Value);
+
+            // Serialized with the SAME options ASP.NET used for the original
+            // response. JsonSerializer's own defaults are PascalCase; minimal
+            // APIs return camelCase (JsonSerializerDefaults.Web). Storing the
+            // default form made a replay structurally different from the
+            // response it was replaying — same data, different property names
+            // — so a client that parsed the original broke on the retry, which
+            // is precisely the case idempotency exists to make safe.
+            string body = System.Text.Json.JsonSerializer.Serialize(valueResult.Value, ReplaySerialization);
             await store.SaveAsync(
                 new IdempotencyRecord(
                     tenant.TenantId, key, requestHash, statusResult.StatusCode.Value, body, clock.UtcNow),

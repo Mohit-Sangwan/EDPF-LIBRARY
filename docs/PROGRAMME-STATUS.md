@@ -1,6 +1,6 @@
 # Programme status — all nine waves
 
-**Date:** 2026-08-02 · **Baseline:** Revision 12.0 (frozen)
+**Date:** 2026-08-03 · **Baseline:** Revision 12.0 (frozen)
 
 Phases 00–37, plus the Appendix H/I additions 05b, 08b, 08c, 17c, 23d, 24b, 24f,
 26f, 33b, 34b and 35b, have been worked through in order. This document is the single place
@@ -13,8 +13,8 @@ a sponsor can see what exists, what does not, and why.
 | | |
 |---|---|
 | Waves worked | 9 of 9 (Phases 00–37, plus 05b, 08b, 08c, 17c, 23d, 24b, 24f, 26f, 33b, 34b and 35b) |
-| ADRs accepted | 35 |
-| Automated tests | 1180, all passing |
+| ADRs accepted | 36 |
+| Automated tests | 1212, all passing (Docker-gated parity suite now included) |
 | Target frameworks | 5, building clean with warnings as errors |
 | Gates passed on engineering criteria | **G0, G1** |
 | Gates with outstanding criteria | G2–G9 |
@@ -32,6 +32,7 @@ external parties, or elapsed time, not by more code.
 | **G0 Viability** | 0 | ✅ Passed | Sponsor's recorded go/no-go |
 | **G1 Foundation** | 1 | ✅ Passed | — |
 | G2 Data Core | 2 | Contracts complete | Conformance batteries, chaos failover, streaming at scale — all need live engines |
+| ↳ *Tier A provider parity* | 2 | ✅ **Verified 2026-08-03** | — identical suite green on SQL Server and PostgreSQL via Testcontainers, 24/24. Found two real defects doing it ([ADR-036](adr/ADR-036-stored-form-must-equal-served-form.md)) |
 | G3 Services | 3 | Contracts complete | Redis, search cluster, blob storage, broker |
 | G4 Trust | 4 | Contracts complete | **Independent cryptographic and security reviews** |
 | G5 Domain | 5 | Contracts complete | FHIR/HL7/DICOM interop against live test servers |
@@ -90,6 +91,8 @@ made **structurally impossible** rather than merely discouraged:
 | An irreversible cutover step cannot be taken by accident | Retiring legacy is a separate method with a typed acknowledgement, reachable only from one stage; every earlier stage reverses | Cutover sequence tests |
 | An export cannot emit a cell that executes on the recipient's machine | Leading `=`, `+`, `-`, `@`, tab and CR neutralised with a text marker; quoting explicitly not relied on, since Excel parses `"=1+1"` as a formula | 6 hostile payloads plus the whitespace-prefixed forms |
 | An export cannot become the way around field authorization | The same check applied at the export point (ADR-031's own revisit trigger, fired); no unlimited cap; the artefact inherits its highest classification | Export boundary tests |
+| The audit chain verifies on every Tier A provider, not just the one that happens to round-trip timestamps | Instants normalised to microseconds **before** hashing, so the hashed value is the stored value; rounding matches PostgreSQL rather than truncating | Parity suite green on both providers; 8 normalisation unit tests |
+| An idempotent replay is byte-identical to the response it replays | Stored with the same serializer options the original response used | Parity suite — the defect failed on both providers |
 | A lapsed licence cannot stop a clinician opening a chart | `ModuleGate.Register` **throws** on `core.read`, `core.audit.write`, `core.breakglass` and `core.export.subjectaccess`; those stay available with no entitlement applied at all | Entitlement tests — the configuration expressing the hazard cannot be built |
 
 ---
@@ -115,6 +118,8 @@ Worth recording, because they are the argument for the approach:
 | A documentation link promised a requirements file that was never written | [Consolidation audit](phases/consolidation-audit.md) — link check across `docs/` | As a reader concluding the site was broken rather than the document missing |
 | Two packages declared a project reference they never used, widening their published dependency graph | Consolidation audit — reference-usage scan | As consumers of two packages pulling in a dependency for nothing |
 | The documented LocalDB path for the live demonstration works once and then fails opaquely: the database persists across runs while the development master key does not, so tenant DEKs will not unwrap and the first create returns a generic 500 | Re-running the gate demonstration and hitting it | As a new adopter following the written instructions, getting an uninformative error on their second attempt, and having no way to diagnose it — the exact shape of failure the G8 usability criterion exists to find |
+| **The audit chain could never verify on PostgreSQL.** The hash covers `OccurredUtc.UtcTicks` (100 ns); PostgreSQL stores microseconds and *rounds*, so the value hashed before the write differs from the value read back. SQL Server round-trips exactly, so it passed there | Running the Tier A provider-parity suite for the **first time** — it had been excluded by `Category!=RequiresDocker` on every previous run | **As a tamper-evidence mechanism that did not work on half the supported providers**, failing in a way indistinguishable from actual tampering. The entire compliance story rests on this chain |
+| **An idempotent replay returned a different response shape from the original** — `{"Id":…}` where the first call returned `{"id":…}` — because the filter stored the body with `JsonSerializer`'s PascalCase defaults while minimal APIs serve camelCase | The same parity run. **Provider-independent**: it failed identically on both, and the PowerShell demonstration had been passing it for months because `Invoke-RestMethod` property access is case-insensitive | As a client that parsed the original response breaking on the retry — precisely the case idempotency exists to make safe. A lenient test hid it; a strict one found it |
 | The Z.9 benchmark regression gate had **never been run**: no baseline was ever captured and no tooling existed to capture one, so the gate had nothing to compare against and could not fire | Running the benchmarks for the first time | As a performance gate everyone believed was watching. Same shape as the `RequiredScope` defect — a control that cannot fire is indistinguishable from an absent one |
 | A benchmark's **confidence margin is not its reproducibility**. Two consecutive full jobs, no code change, moved every benchmark by −22.6% to +48.6% while each run reported itself precise to under 2%. Allocation figures were byte-identical across the same runs | Running the gate twice instead of once, and diffing the runs rather than trusting the margin | As a 5% timing gate that fails on drift, gets diagnosed as flaky, and is switched off. **The rejected design was then executed against its own fresh baseline and failed the build at 6.5% with zero code change**, while all nine allocation figures matched ([ADR-035](adr/ADR-035-benchmark-gate-enforces-allocation.md)) |
 

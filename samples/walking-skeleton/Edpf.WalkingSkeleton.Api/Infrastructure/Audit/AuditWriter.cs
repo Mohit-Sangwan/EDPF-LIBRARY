@@ -3,6 +3,7 @@ using Edpf.Abstractions.Audit;
 using Edpf.Abstractions.Primitives;
 using Edpf.Abstractions.Security;
 using Edpf.Abstractions.Tenancy;
+using Edpf.Core.Time;
 using Edpf.WalkingSkeleton.Api.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -57,7 +58,14 @@ public sealed class AuditWriter(
                 AuditId = Guid.NewGuid(),
                 TenantId = tenant.TenantId,
                 Sequence = sequence,
-                OccurredUtc = clock.UtcNow,
+
+                // Normalised BEFORE hashing, because the hash must cover a
+                // value the store gives back unchanged. PostgreSQL keeps
+                // microseconds and rounds; SQL Server keeps 100 ns ticks. An
+                // un-normalised instant therefore verifies on one Tier A
+                // provider and fails on the other, and the failure is
+                // indistinguishable from tampering.
+                OccurredUtc = StorableInstant.Normalize(clock.UtcNow),
                 EventType = auditEvent.EventType,
                 SubjectToken = token.Value,
                 CorrelationId = auditEvent.CorrelationId,

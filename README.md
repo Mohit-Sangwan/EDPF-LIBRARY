@@ -24,9 +24,9 @@ Gate G1 (Foundation) passed on engineering criteria.
 
 | | |
 |---|---|
-| ADRs accepted | 35 (ADR-001 … ADR-035) |
+| ADRs accepted | 36 (ADR-001 … ADR-036) |
 | Target frameworks building green | 5 (net472, net48, net6.0, net8.0, net10.0) |
-| Automated tests | 1180 green |
+| Automated tests | 1212 green, Docker-gated provider parity included |
 | Injection corpus | 226 assertions, zero successful injections |
 | Adversarial isolation routes | 12/12 covered, coverage machine-checked, 48 tests |
 | Live gate demonstrations | 24/24, last re-verified 2026-08-02 against SQL Server LocalDB |
@@ -177,7 +177,7 @@ docs/         adr/ · tdl/ · phases/ · compliance/
 | Start here | |
 |---|---|
 | [Appendix Z](docs/standards/appendix-z-implementation-standards.md) | The engineering rulebook — read on day one, return to for every PR |
-| [Architecture decisions](docs/adr/README.md) | The thirty-five binding decisions, each with its revisit triggers |
+| [Architecture decisions](docs/adr/README.md) | The thirty-six binding decisions, each with its revisit triggers |
 | [Phase folders](docs/phases/) | What each phase delivered, verified, and decided |
 | [Compliance controls](docs/compliance/compliance-control-matrix.md) | Control → HIPAA/GDPR/ISO/SOC 2 clause mapping |
 | [Data classification](docs/compliance/data-classification.md) | Handling rules per level |

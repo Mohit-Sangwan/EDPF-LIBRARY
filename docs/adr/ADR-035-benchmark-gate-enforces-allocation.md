@@ -1,4 +1,4 @@
-# ADR-035 — The benchmark gate enforces allocation and advises on time
+# ADR-035 — The benchmark gate enforces allocation always, and time when the measurement supports it
 
 - **Status:** Accepted
 - **Date:** 2026-08-02
@@ -19,31 +19,41 @@ which is the same shape as the `RequiredScope` defect Phase 08b found.
 Running the benchmarks for the first time produced the measurements the gate
 needs, and one number that changes how it should be operated.
 
-**On a developer machine, the 95% confidence margin ranged from 29% to 273% of
-the mean.**
+**A benchmark reports two different numbers, and a gate needs the one
+BenchmarkDotNet does not print in the summary table.**
 
-| Benchmark | Mean | Margin | Margin as % of mean |
-| --- | ---: | ---: | ---: |
-| `DeserializeEnvelope[32 B]` | 41.0 ns | ±112.2 ns | 273% |
-| `SerializeRoundTrip[1 KB]` | 268.8 ns | ±580.9 ns | 216% |
-| `DeserializeEnvelope[64 KB]` | 5,966.8 ns | ±8,227.1 ns | 138% |
-| `EncryptField[64 KB]` | 17,564.5 ns | ±13,704.2 ns | 78% |
-| `DeserializeEnvelope[1 KB]` | 128.2 ns | ±37.2 ns | 29% |
+*Within-run precision* — the confidence margin — describes how tightly one
+run's samples cluster. On a full job here it is excellent: 0.7% to 1.9%.
 
-A 5% tolerance applied to a measurement uncertain to ±29% at best does not
-detect regressions. It reports them at random — and **a gate that cries wolf is
-a gate somebody disables**, which leaves the codebase worse off than having no
-gate and knowing it.
+*Between-run reproducibility* is what the gate actually depends on, because it
+compares today's run against a baseline captured days ago. Two consecutive full
+jobs on this machine, no code change between them:
+
+| Benchmark | Run A | Run B | Change | Run B's own margin |
+| --- | ---: | ---: | ---: | ---: |
+| `SerializeRoundTrip[64 KB]` | 9,969.5 ns | 14,811.5 ns | **+48.6%** | 1.9% |
+| `DeserializeEnvelope[1 KB]` | 107.0 ns | 150.5 ns | **+40.6%** | 0.8% |
+| `EncryptField[32 B]` | 898.8 ns | 1,250.1 ns | **+39.1%** | 0.7% |
+| `SerializeRoundTrip[32 B]` | 140.8 ns | 109.0 ns | **−22.6%** | 0.9% |
+
+Every benchmark moved by more than 22% while every run called itself precise to
+under 2%. **The two statistics differ by roughly a factor of thirty.**
+
+*(An earlier draft of this ADR proposed calibrating enforcement per benchmark
+from the confidence margin. That was wrong: the margin would have marked all
+nine enforceable, and the gate would then have failed the build on the very
+next run with no code change. Running the comparison is what showed it.)*
 
 **Allocation is different in kind, not degree.** BenchmarkDotNet *counts*
-allocated bytes rather than sampling them. The figures repeat exactly:
-136 B, 1,128 B, 65,642 B. There is no confidence interval because there is no
-sampling.
+allocated bytes rather than sampling them. Across those same two runs every
+figure was byte-identical — 136, 240, 392, 1,128, 1,232, 2,376, 65,642, 65,744,
+131,400 — with no confidence interval, because there is no sampling.
 
 ## Decision
 
-**The gate enforces allocation at 5% and reports timing as advisory, unless
-run on hardware someone has declared quiet.**
+**Allocation is always enforced. A timing regression is enforced when that
+benchmark's own recorded noise is below the tolerance, and reported as advisory
+when it is not.**
 
 1. **Allocation regressions fail the build.** The measurement is deterministic,
    so a 5% tolerance means what it says. Allocation is also the dimension that
@@ -51,20 +61,24 @@ run on hardware someone has declared quiet.**
    path, a `ToList()` inside a loop, an accidental closure capture — all of
    which show up as bytes long before they show up as milliseconds.
 
-2. **Timing regressions print as advisories by default.** They are worth
-   seeing; they are not worth failing a build on, from a machine whose noise
-   floor is six times the tolerance.
+2. **Timing regressions are advisory** on any machine whose between-run drift
+   nobody has measured — which is every developer workstation and most shared
+   CI runners.
 
-3. **`-EnforceTiming` exists for a dedicated runner.** Fixed hardware, no
-   other load, full BenchmarkDotNet job. On that machine the 5% timing gate is
-   meaningful and should be switched on.
+3. **The confidence margin is recorded but is explicitly not the enforcement
+   criterion.** It is useful context and it answers the wrong question; the
+   script says so at the decision point, so the next person to look does not
+   repeat the mistake.
 
-4. **The captured baseline records its own noise.** `worstMarginFraction` sits
-   in the baseline file next to the measurements, and capture warns when it
-   exceeds the tolerance. A reader can therefore see how much of the 5% budget
-   is measurement error before deciding whether to believe a timing verdict.
+4. **A baseline must come from a full job.** `-Short` exists for smoke-testing
+   the plumbing and warns loudly; margins there run 29%–273%.
 
-5. **Benchmark identity includes its parameters.** `EncryptField` at 32 bytes
+5. **`-EnforceTiming` is for a dedicated runner whose between-run drift has
+   been measured** — by capturing several baselines and comparing them, which
+   is the only way to know. Switching it on because the margins look small is
+   the exact error this ADR records.
+
+6. **Benchmark identity includes its parameters.** `EncryptField` at 32 bytes
    and at 64 KB are different benchmarks that happen to share a method name;
    collapsing them would compare a small-payload run against a large-payload
    baseline and report a 2,700% regression.
@@ -73,15 +87,16 @@ run on hardware someone has declared quiet.**
 
 ### Accepted costs
 
-- **Timing regressions can land undetected** on ordinary developer hardware
-  until someone runs the gate somewhere quiet. That is a real gap, and it is
-  preferable to a red build that everybody has learned to ignore.
+- **Timing regressions go unenforced on ordinary hardware.** A genuine 10%
+  slowdown prints as an advisory and can be scrolled past. That is a real gap,
+  and it is preferable to a gate that fails on drift and gets switched off
+  within a fortnight.
 - **The baseline is machine-specific and must be recaptured per runner.** A
   baseline from one machine gates nothing on another. The file records the
   machine and processor count so a mismatch is visible rather than silent.
-- **Allocation-only enforcement misses algorithmic regressions that allocate
-  nothing** — an O(n²) loop over a stack-allocated span, say. Real, and not
-  covered.
+- **Neither dimension catches an algorithmic regression that allocates nothing
+  and is too fast to measure precisely** — an O(n²) loop over a stack-allocated
+  span, say. Real, and not covered.
 
 ### What this does not claim
 
@@ -95,10 +110,15 @@ run on hardware someone has declared quiet.**
 
 ## Revisit triggers
 
-- **A dedicated benchmark runner is provisioned.** Recapture there, switch on
-  `-EnforceTiming`, and this ADR's central compromise disappears.
-- **Timing advisories are routinely ignored.** Then they are noise in a
-  different form and should either be enforced properly or removed.
+- **A dedicated benchmark runner is provisioned.** Measure its between-run
+  drift by capturing several baselines and diffing them; if that drift is below
+  5%, switch on `-EnforceTiming` and this ADR's central compromise disappears.
+- **Allocation figures start varying between runs.** That would mean the
+  determinism the enforced half rests on has stopped holding, and the whole
+  arrangement needs rethinking.
+- **Someone proposes enforcing timing because the confidence margins look
+  small.** That is the specific error recorded above, and the answer is to
+  measure between-run drift instead.
 - **A benchmark is added whose cost is time-only** — no allocation to watch —
   because the enforced half of the gate would then be blind to it.
 - **Allocation figures start varying between runs.** That would mean the

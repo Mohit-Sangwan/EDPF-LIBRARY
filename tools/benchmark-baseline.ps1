@@ -14,20 +14,37 @@
 
     ── READ THIS BEFORE TRUSTING A TIME REGRESSION ──────────────────────────
 
-    Timing measurements carry noise. On a developer machine with a browser
-    open, the 95% confidence margin on these benchmarks has been observed
-    between 29% and 273% of the mean. A 5% tolerance against a measurement
-    that uncertain does not detect regressions; it reports them at random,
-    and a gate that cries wolf is a gate somebody disables.
+    A benchmark reports two very different things, and confusing them is the
+    trap this script exists to avoid.
 
-    ALLOCATION IS DIFFERENT. BenchmarkDotNet counts allocated bytes rather
-    than sampling them, so the figure is deterministic and repeats exactly.
-    The allocation half of this gate is trustworthy today; the timing half
-    needs a quiet, dedicated, fixed-hardware runner before its verdict means
-    anything.
+    WITHIN-RUN PRECISION is the confidence margin: how tightly one run's
+    samples cluster. On a full job here it is 0.7%-1.9%, which looks excellent.
 
-    That is why -TimeToleranceOnQuietHardwareOnly defaults to reporting time
-    findings as advisory. Set -EnforceTiming on a controlled runner.
+    BETWEEN-RUN REPRODUCIBILITY is what a gate actually needs, because it
+    compares today's run against a baseline captured days ago. Two consecutive
+    full jobs on this machine, no code change:
+
+        EncryptField[32 B]            898.8 ns -> 1,250.1 ns   +39.1%
+        DeserializeEnvelope[1 KB]     107.0 ns ->   150.5 ns   +40.6%
+        SerializeRoundTrip[64 KB]   9,969.5 ns -> 14,811.5 ns  +48.6%
+        SerializeRoundTrip[32 B]      140.8 ns ->   109.0 ns   -22.6%
+
+    Every benchmark moved by more than 22% while each run called itself
+    precise to under 2%. The two statistics differ by a factor of about thirty,
+    so a 5% timing gate on shared hardware fails the build on the next run with
+    no code change at all.
+
+    ALLOCATION IS DIFFERENT IN KIND. BenchmarkDotNet COUNTS allocated bytes
+    rather than sampling them. Across those same two runs every figure was
+    byte-identical: 136, 240, 392, 1128, 1232, 2376, 65642, 65744, 131400.
+    Allocation is always enforced, and it is the dimension that catches the
+    defects worth catching anyway.
+
+    Timing is therefore advisory unless -EnforceTiming is passed, which is
+    appropriate only on a dedicated runner whose between-run drift someone has
+    actually measured.
+
+    Never capture a baseline with -Short: margins there run 29%-273%.
 
 .PARAMETER Capture
     Record this run as the new baseline instead of comparing against it.
@@ -151,6 +168,20 @@ foreach ($current in $measurements) {
     if ($timeChange -gt $tolerance) {
         $line = "{0}: mean {1} ns -> {2} ns ({3:P1})." -f
             $current.Name, $before.MeanNanoseconds, $current.MeanNanoseconds, $timeChange
+
+        # Advisory unless someone has declared the hardware quiet.
+        #
+        # The recorded MarginFraction is NOT used to decide this, and that is
+        # a deliberate correction. The margin is WITHIN-RUN precision — how
+        # tightly one run's samples cluster. What a gate needs is BETWEEN-RUN
+        # reproducibility, and on this machine the two differ by a factor of
+        # about thirty: two consecutive full jobs moved every benchmark by
+        # between -22.6% and +48.6% while each reported itself precise to
+        # under 2%.
+        #
+        # Calibrating enforcement on the margin would therefore have enforced
+        # every benchmark and failed the build on the very next run with no
+        # code change at all.
         if ($EnforceTiming) { $failures += $line } else { $advisories += $line }
     }
 }

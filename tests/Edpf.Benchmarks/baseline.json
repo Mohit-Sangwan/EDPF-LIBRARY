@@ -1,0 +1,63 @@
+{
+  "capturedUtc": "2026-08-02T13:28:35.4612436Z",
+  "machine": "ASPL227",
+  "processorCount": 12,
+  "job": "default",
+  "worstMarginFraction": 0.019,
+  "measurements": [
+    {
+      "Name": "EncryptField[PlaintextBytes=32]",
+      "MeanNanoseconds": 1250.13,
+      "AllocatedBytes": 136,
+      "MarginFraction": 0.0072
+    },
+    {
+      "Name": "DeserializeEnvelope[PlaintextBytes=32]",
+      "MeanNanoseconds": 66.69,
+      "AllocatedBytes": 240,
+      "MarginFraction": 0.0102
+    },
+    {
+      "Name": "SerializeRoundTrip[PlaintextBytes=32]",
+      "MeanNanoseconds": 109.01,
+      "AllocatedBytes": 392,
+      "MarginFraction": 0.0091
+    },
+    {
+      "Name": "EncryptField[PlaintextBytes=1024]",
+      "MeanNanoseconds": 1596.06,
+      "AllocatedBytes": 1128,
+      "MarginFraction": 0.0094
+    },
+    {
+      "Name": "DeserializeEnvelope[PlaintextBytes=1024]",
+      "MeanNanoseconds": 150.47,
+      "AllocatedBytes": 1232,
+      "MarginFraction": 0.0079
+    },
+    {
+      "Name": "SerializeRoundTrip[PlaintextBytes=1024]",
+      "MeanNanoseconds": 284.04,
+      "AllocatedBytes": 2376,
+      "MarginFraction": 0.0078
+    },
+    {
+      "Name": "EncryptField[PlaintextBytes=65536]",
+      "MeanNanoseconds": 22778.78,
+      "AllocatedBytes": 65642,
+      "MarginFraction": 0.0135
+    },
+    {
+      "Name": "DeserializeEnvelope[PlaintextBytes=65536]",
+      "MeanNanoseconds": 7200.17,
+      "AllocatedBytes": 65744,
+      "MarginFraction": 0.0087
+    },
+    {
+      "Name": "SerializeRoundTrip[PlaintextBytes=65536]",
+      "MeanNanoseconds": 14811.47,
+      "AllocatedBytes": 131400,
+      "MarginFraction": 0.019
+    }
+  ]
+}

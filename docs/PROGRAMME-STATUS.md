@@ -11,9 +11,9 @@ is the single place a sponsor can see what exists, what does not, and why.
 
 | | |
 |---|---|
-| Waves worked | 9 of 9 (Phases 00–37, plus 05b, 08c and 24b) |
-| ADRs accepted | 26 |
-| Automated tests | 911, all passing |
+| Waves worked | 9 of 9 (Phases 00–37, plus 05b, 08c, 17c and 24b) |
+| ADRs accepted | 27 |
+| Automated tests | 967, all passing |
 | Target frameworks | 5, building clean with warnings as errors |
 | Gates passed on engineering criteria | **G0, G1** |
 | Gates with outstanding criteria | G2–G9 |

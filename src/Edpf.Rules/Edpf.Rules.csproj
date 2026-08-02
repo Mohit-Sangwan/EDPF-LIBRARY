@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Phase 17c — the rules platform, promoted out of the clinical vertical
+    (24c) into core per Appendix I.1: every vertical needs rules, not just
+    healthcare.
+
+    The master document's constraint is absolute and shapes the whole design:
+
+      "Constrained expression evaluation only — no scripting host, ever (an
+       embedded script engine in a clinical system is a remote-code-execution
+       surface)."
+
+    So this package builds ON Edpf.Formula rather than beside it. ADR-026
+    records "a second expression evaluator appears anywhere in the codebase"
+    as a revisit trigger; the reference below is how that trigger stays
+    unpulled.
+
+    Tier 1 + Tier 2 (ADR-002).
+  -->
+  <PropertyGroup>
+    <TargetFrameworks>$(EdpfPlatformTargetFrameworks)</TargetFrameworks>
+    <IsPackable>true</IsPackable>
+    <Description>Enterprise Data Platform Framework — decision tables and business rules with explicit hit policies, effective dating and simulation.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Edpf.Abstractions\Edpf.Abstractions.csproj" />
+    <ProjectReference Include="..\Edpf.Core\Edpf.Core.csproj" />
+    <ProjectReference Include="..\Edpf.Formula\Edpf.Formula.csproj" />
+  </ItemGroup>
+
+</Project>

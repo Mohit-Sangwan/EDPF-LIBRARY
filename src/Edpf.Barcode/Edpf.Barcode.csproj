@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Phase 17c — barcode encoding.
+
+    "GS1-128 and DataMatrix (GS1 is mandatory for medication and specimen
+     traceability)."
+
+    Traceability is why this is not a rendering concern. A specimen label with
+    a wrong check digit, or a lot number that ran into an expiry date because
+    a separator was missing, is a mislabelled sample or a mis-administered
+    medication. The ENCODING is the safety-critical part; turning the encoded
+    symbol into ink is not.
+
+    Tier 1 + Tier 2 (ADR-002). Label printing itself is a Tier 3 concern
+    (Phase 24f) because that is where the hardware is.
+  -->
+  <PropertyGroup>
+    <TargetFrameworks>$(EdpfPlatformTargetFrameworks)</TargetFrameworks>
+    <IsPackable>true</IsPackable>
+    <Description>Enterprise Data Platform Framework — GS1 element string and Code 128 encoding with check digits, for medication and specimen traceability.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Edpf.Abstractions\Edpf.Abstractions.csproj" />
+    <ProjectReference Include="..\Edpf.Core\Edpf.Core.csproj" />
+  </ItemGroup>
+
+</Project>

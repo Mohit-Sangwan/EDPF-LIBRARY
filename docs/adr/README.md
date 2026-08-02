@@ -36,6 +36,7 @@ current answer is the current answer.
 | [ADR-024](ADR-024-vertical-package-boundary.md) | Vertical package boundary — domain content never enters the core | Accepted |
 | [ADR-025](ADR-025-metadata-resolved-fields.md) | Fields resolve through metadata, never reflection | Accepted |
 | [ADR-026](ADR-026-formula-sandbox.md) | Formulas are a closed grammar over decimal, never a scripting host | Accepted |
+| [ADR-027](ADR-027-decision-table-hit-policy.md) | Decision tables declare a hit policy; ambiguity is refused | Accepted |
 
 Template: [ADR-000-template.md](ADR-000-template.md).
 Smaller decisions go to the [technical decision log](../tdl/README.md).

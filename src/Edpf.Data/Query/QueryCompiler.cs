@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using Edpf.Abstractions.Data;
+using Edpf.Abstractions.Identity;
 using Edpf.Abstractions.Primitives;
 using Edpf.Abstractions.Query;
 using Edpf.Abstractions.Tenancy;
@@ -27,11 +28,30 @@ public sealed class QueryCompiler
     /// </summary>
     /// <param name="dialect">The target dialect.</param>
     /// <param name="metadata">The entity's metadata.</param>
-    public QueryCompiler(SqlDialectBase dialect, IEntityMetadata metadata)
+    /// <param name="permissions">
+    /// The caller's field permissions (Phase 08b). Omitted means
+    /// <see cref="FieldPermissionSet.None"/>: a caller who forgets to supply
+    /// them is denied every protected field rather than granted them, because
+    /// the forgotten argument must fail in the direction that does not
+    /// disclose.
+    /// </param>
+    public QueryCompiler(
+        SqlDialectBase dialect, IEntityMetadata metadata, IFieldPermissions? permissions = null)
     {
         _dialect = Guard.NotNull(dialect, nameof(dialect));
         _metadata = Guard.NotNull(metadata, nameof(metadata));
+        _permissions = permissions ?? FieldPermissionSet.None;
     }
+
+    private readonly IFieldPermissions _permissions;
+
+    /// <summary>
+    /// Whether the caller may read a field.
+    /// </summary>
+    /// <param name="field">The field.</param>
+    /// <returns>Whether it is readable by this caller.</returns>
+    private bool MayRead(IFieldMetadata field)
+        => string.IsNullOrEmpty(field.RequiredScope) || _permissions.Grants(field.RequiredScope!);
 
     /// <summary>The tenant discriminator column, first in every clustered index (Z.2).</summary>
     public const string TenantColumn = "TenantId";
@@ -68,7 +88,7 @@ public sealed class QueryCompiler
             return Result.Failure<CompiledQuery>(TenantScopeRequired());
         }
 
-        var compiler = new FilterCompiler(_dialect, _metadata);
+        var compiler = new FilterCompiler(_dialect, _metadata, _permissions);
         Result<string> where = BuildWhere(specification, tenant, compiler);
         if (where.IsFailure)
         {
@@ -139,7 +159,7 @@ public sealed class QueryCompiler
                 ErrorCategory.Validation));
         }
 
-        var compiler = new FilterCompiler(_dialect, _metadata);
+        var compiler = new FilterCompiler(_dialect, _metadata, _permissions);
         Result<string> where = BuildWhere(specification, tenant, compiler);
         if (where.IsFailure)
         {
@@ -250,10 +270,25 @@ public sealed class QueryCompiler
     {
         if (specification.Projection.Count == 0)
         {
+            // A default projection quietly omits fields the caller may not
+            // read, rather than failing the whole query. The caller asked for
+            // "the row", not for these fields specifically, and denying
+            // outright would make every protected column break every default
+            // read for everyone below it. Withheld columns are reported on the
+            // compiled query so a caller can surface the omission rather than
+            // silently present a partial row as a whole one.
             IEnumerable<string> all = _metadata.Fields.Values
-                .Where(f => f.IsProjectable)
+                .Where(f => f.IsProjectable && MayRead(f))
                 .Select(f => _dialect.QuoteIdentifier(f.ColumnName));
-            return Result.Success(string.Join(", ", all));
+
+            string projected = string.Join(", ", all);
+
+            return string.IsNullOrEmpty(projected)
+                ? Result.Failure<string>(new Error(
+                    ErrorCodes.FieldAccessDenied,
+                    "No field of this entity is readable by the caller.",
+                    ErrorCategory.Authorization))
+                : Result.Success(projected);
         }
 
         var columns = new List<string>(specification.Projection.Count);
@@ -263,6 +298,18 @@ public sealed class QueryCompiler
             if (resolved.IsFailure)
             {
                 return Result.Failure<string>(resolved.Error!);
+            }
+
+            // Named explicitly and not readable: refused with the same shape
+            // as a field that does not exist. Saying "you may not read this"
+            // would confirm the column is there, and on a tenant-overlaid
+            // entity the field list is itself tenant data (ADR-025).
+            if (!MayRead(resolved.Value))
+            {
+                return Result.Failure<string>(new Error(
+                    ErrorCodes.InvalidFilter,
+                    $"'{fieldName}' is not a queryable field of '{_metadata.EntityName}'.",
+                    ErrorCategory.Validation));
             }
 
             if (!resolved.Value.IsProjectable)
@@ -298,6 +345,18 @@ public sealed class QueryCompiler
             if (resolved.IsFailure)
             {
                 return Result.Failure<IReadOnlyList<SortColumn>>(resolved.Error!);
+            }
+
+            // Sorting on a field is reading it, by the same argument as
+            // filtering: ORDER BY on a protected column and a binary search
+            // over page boundaries reconstructs the ordering, and an ordering
+            // over salaries is most of the salaries.
+            if (!MayRead(resolved.Value))
+            {
+                return Result.Failure<IReadOnlyList<SortColumn>>(new Error(
+                    ErrorCodes.InvalidFilter,
+                    $"'{requested.ColumnName}' is not a queryable field of '{_metadata.EntityName}'.",
+                    ErrorCategory.Validation));
             }
 
             if (!resolved.Value.IsSortable)

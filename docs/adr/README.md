@@ -40,6 +40,7 @@ current answer is the current answer.
 | [ADR-028](ADR-028-profiling-discloses-nothing.md) | Quality profiles disclose shape, never content | Accepted |
 | [ADR-029](ADR-029-device-readings-are-claims.md) | A device reading is a claim; entitlement before content | Accepted |
 | [ADR-030](ADR-030-incremental-sync-completeness.md) | Incremental sync is gap-free by construction | Accepted |
+| [ADR-031](ADR-031-field-authorization.md) | Filtering and sorting are reading; a denied field looks absent | Accepted |
 
 Template: [ADR-000-template.md](ADR-000-template.md).
 Smaller decisions go to the [technical decision log](../tdl/README.md).

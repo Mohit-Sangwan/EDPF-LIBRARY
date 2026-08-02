@@ -358,6 +358,12 @@ Edpf.Abstractions.Identity.AuthorizationScope.Parent() -> Edpf.Abstractions.Iden
 Edpf.Abstractions.Identity.AuthorizationScope.Segments.get -> System.Collections.Generic.IReadOnlyList<string!>!
 Edpf.Abstractions.Identity.AuthorizationScope.TenantId.get -> System.Guid
 Edpf.Abstractions.Identity.AuthorizationScope.Value.get -> string!
+Edpf.Abstractions.Identity.FieldPermissionSet
+Edpf.Abstractions.Identity.FieldPermissionSet.FieldPermissionSet(System.Collections.Generic.IEnumerable<string!>! granted) -> void
+Edpf.Abstractions.Identity.FieldPermissionSet.Granted.get -> System.Collections.Generic.IReadOnlyCollection<string!>!
+Edpf.Abstractions.Identity.FieldPermissionSet.Grants(string! requiredPermission) -> bool
+Edpf.Abstractions.Identity.IFieldPermissions
+Edpf.Abstractions.Identity.IFieldPermissions.Grants(string! requiredPermission) -> bool
 Edpf.Abstractions.Identity.ScopeLevel
 Edpf.Abstractions.Identity.ScopeLevel.Department = 2 -> Edpf.Abstractions.Identity.ScopeLevel
 Edpf.Abstractions.Identity.ScopeLevel.Facility = 1 -> Edpf.Abstractions.Identity.ScopeLevel
@@ -730,6 +736,7 @@ static Edpf.Abstractions.Errors.EdpfException.TaxonomyTypes.get -> System.Collec
 static Edpf.Abstractions.Identity.AuthorizationDecision.Allow(string! permission, Edpf.Abstractions.Identity.AuthorizationScope? scope, string! reason) -> Edpf.Abstractions.Identity.AuthorizationDecision!
 static Edpf.Abstractions.Identity.AuthorizationDecision.Deny(string! permission, Edpf.Abstractions.Identity.AuthorizationScope? scope, string! reason) -> Edpf.Abstractions.Identity.AuthorizationDecision!
 static Edpf.Abstractions.Identity.AuthorizationScope.Create(System.Guid tenantId, params string![]! segments) -> Edpf.Abstractions.Identity.AuthorizationScope!
+static Edpf.Abstractions.Identity.FieldPermissionSet.None.get -> Edpf.Abstractions.Identity.FieldPermissionSet!
 static Edpf.Abstractions.Primitives.EntityId<TEntity>.Empty.get -> Edpf.Abstractions.Primitives.EntityId<TEntity>
 static Edpf.Abstractions.Primitives.EntityId<TEntity>.From(System.Guid value) -> Edpf.Abstractions.Primitives.EntityId<TEntity>
 static Edpf.Abstractions.Primitives.EntityId<TEntity>.New() -> Edpf.Abstractions.Primitives.EntityId<TEntity>

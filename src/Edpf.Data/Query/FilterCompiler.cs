@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 using Edpf.Abstractions.Data;
+using Edpf.Abstractions.Identity;
 using Edpf.Abstractions.Primitives;
 using Edpf.Abstractions.Query;
 using Edpf.Core.Guards;
@@ -43,10 +44,60 @@ public sealed class FilterCompiler : IFilterVisitor<Result<string>>
     /// </summary>
     /// <param name="dialect">The target dialect.</param>
     /// <param name="metadata">The entity's field metadata.</param>
-    public FilterCompiler(ISqlDialect dialect, IEntityMetadata metadata)
+    /// <param name="permissions">
+    /// The caller's field permissions. Omitted means
+    /// <see cref="FieldPermissionSet.None"/>, so a forgotten argument denies
+    /// rather than discloses (Phase 08b).
+    /// </param>
+    public FilterCompiler(
+        ISqlDialect dialect, IEntityMetadata metadata, IFieldPermissions? permissions = null)
     {
         _dialect = Guard.NotNull(dialect, nameof(dialect));
         _metadata = Guard.NotNull(metadata, nameof(metadata));
+        _permissions = permissions ?? FieldPermissionSet.None;
+    }
+
+    private readonly IFieldPermissions _permissions;
+
+    /// <summary>
+    /// Resolves a field the caller named, refusing one they may not read.
+    /// </summary>
+    /// <param name="fieldName">The caller-supplied name.</param>
+    /// <returns>The field, or a failure indistinguishable from "no such field".</returns>
+    /// <remarks>
+    /// <para>
+    /// **Filtering on a field is reading it.** <c>WHERE Salary &gt; 100000</c>
+    /// never projects the salary, and a caller who cannot see the column can
+    /// still binary-search every value in the table by watching which rows
+    /// come back. Denying projection while permitting filter is a disclosure
+    /// control that discloses.
+    /// </para>
+    /// <para>
+    /// The refusal is **identical to the one for a field that does not
+    /// exist**. Distinguishing them would turn the error into a schema oracle:
+    /// "you may not read this" confirms the field is there, which is often the
+    /// fact worth protecting — an entity carrying a
+    /// <c>ClinicalTrialArm</c> column says what the site is running.
+    /// </para>
+    /// </remarks>
+    internal Result<IFieldMetadata> ResolveReadable(string fieldName)
+    {
+        Result<IFieldMetadata> resolved = _metadata.ResolveField(fieldName);
+        if (resolved.IsFailure)
+        {
+            return resolved;
+        }
+
+        string? required = resolved.Value.RequiredScope;
+        if (!string.IsNullOrEmpty(required) && !_permissions.Grants(required!))
+        {
+            return Result.Failure<IFieldMetadata>(new Error(
+                ErrorCodes.InvalidFilter,
+                $"'{fieldName}' is not a queryable field of '{_metadata.EntityName}'.",
+                ErrorCategory.Validation));
+        }
+
+        return resolved;
     }
 
     /// <summary>Parameters accumulated while compiling.</summary>
@@ -85,7 +136,7 @@ public sealed class FilterCompiler : IFilterVisitor<Result<string>>
     {
         Guard.NotNull(node, nameof(node));
 
-        Result<IFieldMetadata> resolved = _metadata.ResolveField(node.FieldName);
+        Result<IFieldMetadata> resolved = ResolveReadable(node.FieldName);
         if (resolved.IsFailure)
         {
             return Result.Failure<string>(resolved.Error!);

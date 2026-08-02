@@ -2,7 +2,7 @@
 
 **Date:** 2026-08-02 · **Baseline:** Revision 12.0 (frozen)
 
-Phases 00–37, plus the Appendix H/I additions 05b, 08c, 17c, 23d, 24b, 24f
+Phases 00–37, plus the Appendix H/I additions 05b, 08b, 08c, 17c, 23d, 24b, 24f
 and 26f, have been worked through in order. This document is the single place
 a sponsor can see what exists, what does not, and why.
 
@@ -12,9 +12,9 @@ a sponsor can see what exists, what does not, and why.
 
 | | |
 |---|---|
-| Waves worked | 9 of 9 (Phases 00–37, plus 05b, 08c, 17c, 23d, 24b, 24f and 26f) |
-| ADRs accepted | 30 |
-| Automated tests | 1082, all passing |
+| Waves worked | 9 of 9 (Phases 00–37, plus 05b, 08b, 08c, 17c, 23d, 24b, 24f and 26f) |
+| ADRs accepted | 31 |
+| Automated tests | 1097, all passing |
 | Target frameworks | 5, building clean with warnings as errors |
 | Gates passed on engineering criteria | **G0, G1** |
 | Gates with outstanding criteria | G2–G9 |
@@ -85,6 +85,7 @@ made **structurally impossible** rather than merely discouraged:
 | An uncalibrated instrument's reading cannot be recorded | Entitlement checked before content, so a *normal-looking* value is rejected too; an unrecorded calibration is invalid, not valid-by-default | Device platform tests |
 | A true emergency cannot be discarded as an outlier | Separate plausible and expected bands, three dispositions — impossible is rejected, abnormal-but-real is flagged for a human | Artefact/emergency tests |
 | An incremental sync cannot silently skip records | Composite (timestamp, id) cursor; mandatory safety lag with no default; offset pagination refused unless the set is declared frozen | 1,000 records at one instant read exactly once |
+| A protected field cannot be read through a filter or a sort | Reading is reading in every clause; refusal is byte-identical to a field that does not exist; omitted permissions deny | Message-substitution equality test; isolation route 8 |
 
 ---
 
@@ -104,6 +105,7 @@ Worth recording, because they are the argument for the approach:
 | Two redaction policies disagreed on `Internal` — the new metadata-driven one redacted it, the shipped ADR-015 one did not | Phase 05b cross-check test | As a field's protection depending on which subsystem looked at it |
 | A GTIN-14 test vector I wrote had the wrong check digit | The Phase 17c implementation, on first run | Nowhere — but only because expectations came from GS1's published examples rather than from the encoder. Had they been derived from the code, a wrong encoder would have passed |
 | Six assemblies added after ADR-024 sat outside the core-neutrality test's scope — the rule was enforced against a stale list | Phase 24f, widening the list before adding a seventh | As clinical vocabulary re-entering the core through whichever package nobody had listed. All six turned out neutral, but they were neutral *unguarded* |
+| `IFieldMetadata.RequiredScope` was declared, stored, published on the API surface — and **read by nothing**. Any field marked as needing a permission was projected to everyone | Grepping its usages before starting Phase 08b; three hits, all declaration | As a field-level access control that a reviewer would reasonably believe was working. Worse than never adding the property, because its presence stops people looking |
 
 ---
 

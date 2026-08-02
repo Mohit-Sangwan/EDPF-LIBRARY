@@ -54,6 +54,29 @@ public sealed class ErrorEnumerationRouteTests
     private static QueryCompiler Compiler => new(new SqlServerDialect(), IsolationTestMetadata.Create());
 
     [Fact]
+    public void FieldTheCallerMayNotRead_IsIndistinguishableFromOneThatDoesNotExist()
+    {
+        // Phase 08b extends this route rather than adding a thirteenth: a
+        // field-authorization refusal is the same oracle risk in a new place.
+        // "You may not read this" confirms the column exists, and on a
+        // tenant-overlaid entity the field list is itself tenant data.
+        Result<CompiledQuery> denied = Compiler.CompilePaged(
+            Specification<object>.Create().Where("Restricted", FilterOperator.Equal, "x"),
+            Tenants.Context(Tenants.B),
+            new PageRequest(1, 10));
+
+        Result<CompiledQuery> missing = Compiler.CompilePaged(
+            Specification<object>.Create().Where("Nonexistent", FilterOperator.Equal, "x"),
+            Tenants.Context(Tenants.B),
+            new PageRequest(1, 10));
+
+        Assert.True(denied.IsFailure);
+        Assert.Equal(missing.Error!.Code, denied.Error!.Code);
+        Assert.Equal(missing.Error.Category, denied.Error.Category);
+        Assert.DoesNotContain("permission", denied.Error.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public void CrossTenantRefusal_UsesNotFoundSemantics_NotForbidden()
     {
         // 404, never 403: disclosing that a record exists but belongs to
@@ -210,5 +233,11 @@ internal static class IsolationTestMetadata
                 DataClassificationLevel.Phi),
             new FieldMetadata("IsDeleted", "IsDeleted", typeof(bool), DataClassificationLevel.Internal,
                 isFilterable: true, isSortable: true),
+
+            // Phase 08b: a field gated on a permission nobody in this suite
+            // holds, so the refusal path is exercised at every gate.
+            new FieldMetadata("Restricted", "Restricted", typeof(string),
+                DataClassificationLevel.Internal, isFilterable: true, isSortable: true,
+                requiredScope: "restricted.read"),
         ]);
 }

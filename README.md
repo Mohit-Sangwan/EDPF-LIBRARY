@@ -29,7 +29,7 @@ Gate G1 (Foundation) passed on engineering criteria.
 | Automated tests | 1212 green, Docker-gated provider parity included |
 | Injection corpus | 226 assertions, zero successful injections |
 | Adversarial isolation routes | 12/12 covered, coverage machine-checked, 48 tests |
-| Live gate demonstrations | 24/24, last re-verified 2026-08-02 against SQL Server LocalDB |
+| Live gate demonstrations | 24/24 against SQL Server LocalDB, plus 24/24 across both Tier A providers via Testcontainers — re-verified 2026-08-03 |
 | Public API surface | tracked, diffed in CI |
 
 | Wave | Phases | Gate |
@@ -78,9 +78,25 @@ dotnet build tools/Edpf.Cli -c Release
 dotnet build Edpf.slnx -c Release
 ```
 
+Run **everything**, including the Tier A provider-parity suite. Needs Docker:
+
+```bash
+dotnet test Edpf.slnx -c Release
+```
+
+Without Docker, the parity suite is skipped:
+
 ```bash
 dotnet test Edpf.slnx -c Release --filter "Category!=RequiresDocker"
 ```
+
+> **Know what that filter costs you.** It skips the identical gate
+> demonstrations against SQL Server *and* PostgreSQL — the only tests that
+> compare two providers. Running them for the first time found an audit chain
+> that could never verify on PostgreSQL, and an idempotent replay that returned
+> a different response shape from the original ([ADR-036](docs/adr/ADR-036-stored-form-must-equal-served-form.md)).
+> Both had sat in work reported complete since Wave 2. Use the filter when you
+> must, not by default.
 
 Run the walking skeleton and its gate demonstration —
 see [samples/walking-skeleton](docs/phases/p02-walking-skeleton/11-usage.md)

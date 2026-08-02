@@ -77,3 +77,26 @@ stale.
 not.** Of the twenty-seven architecture tests, exactly one enumerated a list of
 assemblies, and exactly one fell behind. That is a small sample, and it points
 the same way both times it has been tested.
+
+## Addendum — 2026-08-03: the audit missed something
+
+This audit checked which *rules* covered which assemblies. It did not ask
+**which tests were being run at all.**
+
+The Tier A provider-parity suite — the identical gate demonstrations against
+SQL Server and PostgreSQL — was excluded from every run in this programme by
+`Category!=RequiresDocker`, which is also the command the README recommended.
+Running it found two defects that had sat in work reported complete since
+Wave 2: an audit chain that could never verify on PostgreSQL, and an idempotent
+replay that returned a different response shape from the original
+([ADR-036](../adr/ADR-036-stored-form-must-equal-served-form.md)).
+
+So the audit's own coverage question was one level too shallow. "Is every
+assembly under every rule?" is worth asking. **"Is every rule actually being
+executed?"** is worth asking first, and it is the question a green build is
+least able to answer — a skipped suite and a passing suite look identical in
+the summary line.
+
+The README now leads with the unfiltered command and states what the filter
+costs. That is a documentation fix for a problem that was never a code
+problem.

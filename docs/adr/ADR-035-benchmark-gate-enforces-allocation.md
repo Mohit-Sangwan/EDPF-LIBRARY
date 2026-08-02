@@ -39,10 +39,28 @@ jobs on this machine, no code change between them:
 Every benchmark moved by more than 22% while every run called itself precise to
 under 2%. **The two statistics differ by roughly a factor of thirty.**
 
-*(An earlier draft of this ADR proposed calibrating enforcement per benchmark
-from the confidence margin. That was wrong: the margin would have marked all
-nine enforceable, and the gate would then have failed the build on the very
-next run with no code change. Running the comparison is what showed it.)*
+### The rejected design, run
+
+An earlier draft of this ADR proposed calibrating enforcement per benchmark
+from the confidence margin: enforce timing where the benchmark's own margin
+sits below the tolerance, advise where it does not.
+
+**That design was implemented and executed against the freshly captured
+baseline, with no code change between capture and comparison. It failed the
+build:**
+
+```
+REGRESSION  SerializeRoundTrip[PlaintextBytes=32]: mean 109.01 ns -> 116.13 ns (6.5%).
+EXIT=1
+```
+
+The baseline recorded that benchmark's margin as 0.9%, so the calibration
+judged it precise enough to enforce. It then drifted 6.5% on the next run of
+identical code. Every one of the nine allocation figures matched exactly in the
+same run.
+
+This is the whole argument in one output line: a gate built on within-run
+precision fails on drift, gets diagnosed as flaky, and is switched off.
 
 **Allocation is different in kind, not degree.** BenchmarkDotNet *counts*
 allocated bytes rather than sampling them. Across those same two runs every
@@ -91,6 +109,10 @@ when it is not.**
   slowdown prints as an advisory and can be scrolled past. That is a real gap,
   and it is preferable to a gate that fails on drift and gets switched off
   within a fortnight.
+- **Between-run drift is itself variable.** One pair of runs moved every
+  benchmark by 22%–49%; another moved eight of nine by under 5% and one by
+  6.5%. So a single quiet comparison proves nothing about the next one, and
+  "it passed yesterday" is not evidence the timing dimension is gateable here.
 - **The baseline is machine-specific and must be recaptured per runner.** A
   baseline from one machine gates nothing on another. The file records the
   machine and processor count so a mismatch is visible rather than silent.

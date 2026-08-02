@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Phase 23d — Data Quality Platform. Closes F22.
+
+    "NABH and NABL both assess data quality; without measurement there is no
+     way to demonstrate it."
+
+    And the constraint that shapes the cleansing half:
+
+    "rule-based cleansing with full before/after audit (cleansing clinical
+     data is a change to the medical record and must be traceable)"
+
+    Tier 1 + Tier 2 (ADR-002).
+  -->
+  <PropertyGroup>
+    <TargetFrameworks>$(EdpfPlatformTargetFrameworks)</TargetFrameworks>
+    <IsPackable>true</IsPackable>
+    <Description>Enterprise Data Platform Framework — column profiling, six-dimension quality scoring, audited cleansing and quarantine-on-import gates.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Edpf.Abstractions\Edpf.Abstractions.csproj" />
+    <ProjectReference Include="..\Edpf.Core\Edpf.Core.csproj" />
+    <ProjectReference Include="..\Edpf.Metadata\Edpf.Metadata.csproj" />
+  </ItemGroup>
+
+</Project>

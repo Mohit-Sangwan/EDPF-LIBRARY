@@ -1,5 +1,21 @@
 # EDPF commit gate (Appendix Z.13; Phase 01 CI skeleton — Phase 34 completes it).
 # Budget: 15 minutes. A red main branch is a stop-the-line event.
+#
+# ─────────────────────────────────────────────────────────────────────────────
+# 2026-08-03: this file referenced `Edpf.sln` in four places across two
+# workflows. The solution is `Edpf.slnx` (SDK 10 format) and has been since
+# Phase 01, so every `build-and-test` job would have died at `dotnet restore`.
+# The repository has no git remote, so the pipeline had never executed and
+# nothing reported the breakage.
+#
+# The commit gate was itself an unverified control — the fifth found in one
+# session, after a field-level permission that was never read, a benchmark
+# gate with no baseline, a provider-parity suite excluded by a filter, and a
+# Tier 3 surface that only ever compiled.
+#
+# It is fixed here but STILL UNPROVEN: verifying a GitHub Actions workflow
+# requires GitHub Actions. Treat the first push as the real test.
+# ─────────────────────────────────────────────────────────────────────────────
 name: ci
 
 on:
@@ -31,10 +47,10 @@ jobs:
           global-json-file: global.json
 
       - name: Restore
-        run: dotnet restore Edpf.sln
+        run: dotnet restore Edpf.slnx
 
       - name: Build (warnings as errors, all TFMs)
-        run: dotnet build Edpf.sln --no-restore --configuration Release
+        run: dotnet build Edpf.slnx --no-restore --configuration Release
 
       - name: Unit tests + coverage
         run: >
@@ -62,10 +78,30 @@ jobs:
           --no-build --configuration Release
           --filter "Category!=RequiresDocker"
 
+      - name: Conformance tests
+        run: >
+          dotnet test tests/Edpf.ConformanceTests/Edpf.ConformanceTests.csproj
+          --no-build --configuration Release
+
+      # ★ Tier 3 must be asked for BY FRAMEWORK. A solution-level or
+      # project-level `dotnet test` on a multi-targeted project runs one TFM,
+      # so net48 needs naming — otherwise the eleven assemblies that declare
+      # net472/net48 support (ADR-002) are compile-verified and never executed,
+      # which is exactly the state this repository was in until 2026-08-03.
+      - name: Tier 3 runtime suite (net48)
+        run: >
+          dotnet test tests/Edpf.Tier3Tests/Edpf.Tier3Tests.csproj
+          --no-build --configuration Release --framework net48
+
+      - name: Tier 3 runtime suite (net10.0, for comparison)
+        run: >
+          dotnet test tests/Edpf.Tier3Tests/Edpf.Tier3Tests.csproj
+          --no-build --configuration Release --framework net10.0
+
       - name: SBOM (CycloneDX)
         run: |
           dotnet tool install --global CycloneDX
-          dotnet CycloneDX Edpf.sln -o artifacts/sbom --disable-github-licenses
+          dotnet CycloneDX Edpf.slnx -o artifacts/sbom --disable-github-licenses
         shell: bash
 
       - name: Upload SBOM

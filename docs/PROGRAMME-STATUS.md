@@ -119,6 +119,7 @@ Worth recording, because they are the argument for the approach:
 | Two packages declared a project reference they never used, widening their published dependency graph | Consolidation audit — reference-usage scan | As consumers of two packages pulling in a dependency for nothing |
 | The documented LocalDB path for the live demonstration works once and then fails opaquely: the database persists across runs while the development master key does not, so tenant DEKs will not unwrap and the first create returns a generic 500 | Re-running the gate demonstration and hitting it | As a new adopter following the written instructions, getting an uninformative error on their second attempt, and having no way to diagnose it — the exact shape of failure the G8 usability criterion exists to find |
 | **The audit chain could never verify on PostgreSQL.** The hash covers `OccurredUtc.UtcTicks` (100 ns); PostgreSQL stores microseconds and *rounds*, so the value hashed before the write differs from the value read back. SQL Server round-trips exactly, so it passed there | Running the Tier A provider-parity suite for the **first time** — it had been excluded by `Category!=RequiresDocker` on every previous run | **As a tamper-evidence mechanism that did not work on half the supported providers**, failing in a way indistinguishable from actual tampering. The entire compliance story rests on this chain |
+| **The CI pipeline could never have run.** It referenced `Edpf.sln` in four places across two workflows; the solution is `Edpf.slnx` and has been since Phase 01, so every `build-and-test` job would have died at `dotnet restore`. The repository has no git remote, so the pipeline had never executed and nothing reported it | Checking whether CI actually ran the suites just found to be skipped — the README claims the public API is "diffed in CI" | **As every commit gate in Appendix Z.13 being decorative.** Warnings-as-errors, the architecture tests, the isolation suite, the API baseline diff, the secret scan — all configured, none enforced. Fixed, but still unproven: verifying a GitHub Actions workflow requires GitHub Actions |
 | **Tier 3 had never been executed.** Eleven assemblies declare net472/net48 support and every test project targeted net10.0 only, so ADR-002's justification — paid for seven times, spent by Phase 24f on laboratory device hosts — rested on "it compiles" | Checking which frameworks the *test* projects target, having just learned that an unrun suite and a passing suite look identical | Nowhere, as it happens: **11/11 pass on net48, identical to net10.0.** Worth recording precisely because it passed — not every unrun control is broken, and the point of running it is that you stop guessing |
 | **An idempotent replay returned a different response shape from the original** — `{"Id":…}` where the first call returned `{"id":…}` — because the filter stored the body with `JsonSerializer`'s PascalCase defaults while minimal APIs serve camelCase | The same parity run. **Provider-independent**: it failed identically on both, and the PowerShell demonstration had been passing it for months because `Invoke-RestMethod` property access is case-insensitive | As a client that parsed the original response breaking on the retry — precisely the case idempotency exists to make safe. A lenient test hid it; a strict one found it |
 | The Z.9 benchmark regression gate had **never been run**: no baseline was ever captured and no tooling existed to capture one, so the gate had nothing to compare against and could not fire | Running the benchmarks for the first time | As a performance gate everyone believed was watching. Same shape as the `RequiredScope` defect — a control that cannot fire is indistinguishable from an absent one |
@@ -175,6 +176,34 @@ Nothing on this list is engineering:
 The engineering that could be done without infrastructure, external parties
 or elapsed time has been done. What remains is a different kind of work, and
 it belongs to the programme rather than to the codebase.
+
+---
+
+## The pattern that emerged on 2026-08-02/03
+
+Five controls were found that had **never executed**. Each looked complete in
+review, and each was found only by asking the same question at a different
+level:
+
+| Control | State | Verdict when finally run |
+| --- | --- | --- |
+| `IFieldMetadata.RequiredScope` | Declared, stored, published — read by nothing | **Broken.** Every protected field was projected to everyone |
+| Z.9 benchmark regression gate | Comparison logic built; no baseline ever captured | **Broken.** Could not fire; and the tolerance turned out to rest on the wrong statistic |
+| Tier A provider-parity suite | Written, excluded by `Category!=RequiresDocker` on every run | **Broken.** Audit chain could never verify on PostgreSQL; idempotent replay returned a different shape |
+| Tier 3 (net472/net48) surface | Eleven assemblies compile there; no test ever executed there | **Fine.** 11/11, identical to net10.0 |
+| The CI pipeline itself | Referenced a solution file that does not exist; no git remote | **Broken.** Every commit gate was decorative |
+
+Four of five were broken. The one that was fine is the reason to run them all
+rather than reason about which are worth checking.
+
+The question that found each was the same, applied one level further out:
+*is the thing that claims to check something actually executing?* A green
+build cannot answer it — **a skipped suite and a passing suite are the same
+line of output.**
+
+That is also the sharpest argument available for the four criteria below that
+cannot be self-satisfied. Every one of these was found by me, late, by
+accident, in work I had already reported complete.
 
 ---
 

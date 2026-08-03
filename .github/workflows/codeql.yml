@@ -31,6 +31,6 @@ jobs:
           queries: security-extended
 
       - name: Build
-        run: dotnet build Edpf.sln --configuration Release
+        run: dotnet build Edpf.slnx --configuration Release
 
       - uses: github/codeql-action/analyze@v3

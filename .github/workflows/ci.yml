@@ -98,10 +98,17 @@ jobs:
           dotnet test tests/Edpf.Tier3Tests/Edpf.Tier3Tests.csproj
           --no-build --configuration Release --framework net10.0
 
+      # `--disable-github-licenses` was removed in CycloneDX 6.x: GitHub
+      # licence resolution is now OFF by default and opted INTO with
+      # `--enable-github-licenses`. The stale flag aborted the step with
+      # "Unrecognized command or argument" before it read a single project.
+      #
+      # Verified locally against CycloneDX 6.2.0: `.slnx` is accepted, and the
+      # run produced a 243-package BOM with exit 0.
       - name: SBOM (CycloneDX)
         run: |
           dotnet tool install --global CycloneDX
-          dotnet CycloneDX Edpf.slnx -o artifacts/sbom --disable-github-licenses
+          dotnet CycloneDX Edpf.slnx -o artifacts/sbom
         shell: bash
 
       - name: Upload SBOM

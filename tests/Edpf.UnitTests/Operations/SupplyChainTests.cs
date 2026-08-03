@@ -30,6 +30,39 @@ public sealed class LicensePolicyTests
         Assert.Single(new LicensePolicy().Evaluate([Dep(licence)], isCorePackage: false));
     }
 
+    [Theory]
+    // SPDX deprecated the bare forms, but NuGet packages declare them
+    // constantly. Without these the gate still failed closed — safe — while
+    // reporting "unclassified: nobody has read this licence" for a licence
+    // that is in fact known-forbidden. A wrong diagnosis on a correct verdict
+    // still costs someone an afternoon.
+    [InlineData("GPL-2.0")]
+    [InlineData("GPL-3.0")]
+    [InlineData("AGPL-3.0")]
+    [InlineData("GPL-3.0-or-later")]
+    [InlineData("AGPL-3.0-or-later")]
+    public void Evaluate_DeprecatedStrongCopyleftIdentifiers_AreForbiddenNotMerelyUnclassified(
+        string licence)
+    {
+        LicenseViolation finding = Assert.Single(
+            new LicensePolicy().Evaluate([Dep(licence)], isCorePackage: false));
+
+        Assert.Contains("forbidden", finding.Reason, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("unclassified", finding.Reason, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Theory]
+    [InlineData("LGPL-2.1")]
+    [InlineData("LGPL-3.0")]
+    [InlineData("LGPL-3.0-or-later")]
+    public void Evaluate_DeprecatedWeakCopyleftIdentifiers_TrackTheirCurrentForm(string licence)
+    {
+        var policy = new LicensePolicy();
+
+        Assert.Single(policy.Evaluate([Dep(licence)], isCorePackage: true));
+        Assert.Empty(policy.Evaluate([Dep(licence)], isCorePackage: false));
+    }
+
     [Fact]
     public void Evaluate_WeakCopyleft_FailsInCoreButPassesInAnOptionalPackage()
     {

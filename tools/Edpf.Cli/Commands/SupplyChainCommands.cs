@@ -66,6 +66,7 @@ public static class CheckLicensesCommand
     private static List<DependencyLicense> ReadDependencies(string path)
     {
         var dependencies = new List<DependencyLicense>();
+        bool headerConsidered = false;
 
         foreach (string line in File.ReadAllLines(path))
         {
@@ -80,6 +81,24 @@ public static class CheckLicensesCommand
                 continue;
             }
 
+            // A header row is the natural first line of a CSV, and every tool
+            // that exports one writes it. Without this, the header was
+            // evaluated as a dependency named "Package" whose licence was
+            // "License" — unclassified, therefore a violation, therefore a
+            // failed build on every run of the gate. The check is exact
+            // rather than heuristic: only a row that IS the header is
+            // skipped, so a package genuinely named "Package" still gets
+            // evaluated.
+            if (!headerConsidered)
+            {
+                headerConsidered = true;
+
+                if (IsHeaderRow(cells))
+                {
+                    continue;
+                }
+            }
+
             bool transitive = cells.Length > 3
                 && bool.TryParse(cells[3], out bool parsed) && parsed;
 
@@ -92,6 +111,23 @@ public static class CheckLicensesCommand
 
         return dependencies;
     }
+
+    /// <summary>
+    /// Whether a row is the CSV header rather than a dependency.
+    /// </summary>
+    /// <param name="cells">The row's cells, trimmed.</param>
+    /// <returns>Whether every one of the first three cells is a column name.</returns>
+    /// <remarks>
+    /// Requires ALL THREE to match. A single-column heuristic would skip a
+    /// real dependency that happened to be called "Package"; requiring the
+    /// whole row makes a false skip effectively impossible while still
+    /// accepting the header every exporter emits.
+    /// </remarks>
+    private static bool IsHeaderRow(string[] cells)
+        => string.Equals(cells[0], "Package", StringComparison.OrdinalIgnoreCase)
+            && string.Equals(cells[1], "Version", StringComparison.OrdinalIgnoreCase)
+            && (string.Equals(cells[2], "License", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(cells[2], "Licence", StringComparison.OrdinalIgnoreCase));
 }
 
 /// <summary>

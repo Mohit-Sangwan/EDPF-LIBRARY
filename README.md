@@ -26,7 +26,7 @@ Gate G1 (Foundation) passed on engineering criteria.
 |---|---|
 | ADRs accepted | 36 (ADR-001 … ADR-036) |
 | Target frameworks | 5 building green; Tier 3 (net48) now also **executes** tests, not just compiles |
-| Automated tests | 1223 green (incl. Docker parity), plus 11 more executing on net48 |
+| Automated tests | 1231 green (incl. Docker parity), plus 11 more executing on net48 |
 | Injection corpus | 226 assertions, zero successful injections |
 | Adversarial isolation routes | 12/12 covered, coverage machine-checked, 48 tests |
 | Live gate demonstrations | 24/24 against SQL Server LocalDB, plus 24/24 across both Tier A providers via Testcontainers — re-verified 2026-08-03 |

@@ -105,6 +105,27 @@ public sealed class LicensePolicy
             ["AGPL-3.0-only"] = LicenseDisposition.Forbidden,
             ["SSPL-1.0"] = LicenseDisposition.Forbidden,
 
+            // ── deprecated SPDX identifiers ──────────────────────────────
+            // SPDX deprecated the bare forms in favour of -only/-or-later,
+            // but NuGet packages in the wild still declare them constantly.
+            // Without these entries a known-forbidden licence reports as
+            // "unclassified", which fails closed — safe, but it tells a
+            // reader "nobody has read this licence" when the truth is
+            // "remove this package". A wrong diagnosis on a correct verdict
+            // still costs someone an afternoon.
+            ["GPL-2.0"] = LicenseDisposition.Forbidden,
+            ["GPL-3.0"] = LicenseDisposition.Forbidden,
+            ["AGPL-3.0"] = LicenseDisposition.Forbidden,
+            ["GPL-2.0-or-later"] = LicenseDisposition.Forbidden,
+            ["GPL-3.0-or-later"] = LicenseDisposition.Forbidden,
+            ["AGPL-3.0-or-later"] = LicenseDisposition.Forbidden,
+            ["LGPL-2.1"] = LicenseDisposition.OptionalPackageOnly,
+            ["LGPL-3.0"] = LicenseDisposition.OptionalPackageOnly,
+            ["LGPL-2.1-or-later"] = LicenseDisposition.OptionalPackageOnly,
+            ["LGPL-3.0-or-later"] = LicenseDisposition.OptionalPackageOnly,
+            ["BSD-2"] = LicenseDisposition.Allowed,
+            ["BSD-3"] = LicenseDisposition.Allowed,
+
             // Source-available but commercially restrictive.
             ["BUSL-1.1"] = LicenseDisposition.Forbidden,
             ["Elastic-2.0"] = LicenseDisposition.Forbidden,

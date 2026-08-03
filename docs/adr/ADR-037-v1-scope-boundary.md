@@ -19,7 +19,7 @@ rather than the specification:
 
 | | Named | Built |
 | --- | ---: | ---: |
-| Database providers | 13 | **2** (SQL Server, PostgreSQL) |
+| Database providers | 13 | **3** (SQL Server, PostgreSQL, SQLite) |
 | Host types | 13 | **1** (ASP.NET Core Web API) |
 | Platform pillars | ~24 | **~9** |
 | AI vendors | 11 | **0** |
@@ -27,7 +27,7 @@ rather than the specification:
 | Communication channels | 9 | **0** |
 
 That is not a criticism of what was built. The nine pillars that exist are
-finished to a standard the other fifteen are nowhere near: 1,231 tests, five
+finished to a standard the other fifteen are nowhere near: 1,248 tests, five
 target frameworks, provider parity verified on both Tier A engines, and a set
 of safety properties that are structural rather than disciplinary.
 
@@ -77,6 +77,11 @@ procurement lead time and no research risk:
 1. **MySQL and SQLite providers.** Not for coverage — to prove the provider
    model generalises beyond the pair that already produced a cross-provider
    defect. Two engines is a coincidence; four is evidence.
+   **SQLite has landed** (17 tests, `SqliteDialect`) and the abstraction held:
+   a third dialect required no change to `SqlDialectBase` or `QueryCompiler`,
+   and it declares four capabilities *false* — including row-level security,
+   which is the case that proves EDPF never leaned on the database to enforce
+   tenancy. MySQL remains.
 2. **Storage platform** — local, SFTP, S3-compatible, Azure Blob. Every buyer
    needs files.
 3. **Communication platform** — email and SMS, provider-abstracted. Every buyer

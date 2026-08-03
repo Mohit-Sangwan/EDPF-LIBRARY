@@ -25,8 +25,8 @@ Gate G1 (Foundation) passed on engineering criteria.
 | | |
 |---|---|
 | ADRs accepted | 36 (ADR-001 … ADR-036) |
-| Target frameworks building green | 5 (net472, net48, net6.0, net8.0, net10.0) |
-| Automated tests | 1212 green, Docker-gated provider parity included |
+| Target frameworks | 5 building green; Tier 3 (net48) now also **executes** tests, not just compiles |
+| Automated tests | 1223 green (incl. Docker parity), plus 11 more executing on net48 |
 | Injection corpus | 226 assertions, zero successful injections |
 | Adversarial isolation routes | 12/12 covered, coverage machine-checked, 48 tests |
 | Live gate demonstrations | 24/24 against SQL Server LocalDB, plus 24/24 across both Tier A providers via Testcontainers — re-verified 2026-08-03 |
@@ -97,6 +97,20 @@ dotnet test Edpf.slnx -c Release --filter "Category!=RequiresDocker"
 > a different response shape from the original ([ADR-036](docs/adr/ADR-036-stored-form-must-equal-served-form.md)).
 > Both had sat in work reported complete since Wave 2. Use the filter when you
 > must, not by default.
+
+Neither command above runs **Tier 3**. A solution-level `dotnet test` executes
+only one target framework per project, so the net48 half of the Tier 3 suite
+needs asking for by name:
+
+```bash
+dotnet test tests/Edpf.Tier3Tests -c Release --framework net48
+```
+
+> Eleven assemblies declare net472/net48 support (ADR-002) and, until this
+> suite existed, not one line of them had ever *executed* there — every test
+> project targeted net10.0 only, so Tier 3 was compile-verified and nothing
+> more. It passes, on both tiers, identically. But "it compiles" and "it works"
+> are different claims, and only one of them was being made.
 
 Run the walking skeleton and its gate demonstration —
 see [samples/walking-skeleton](docs/phases/p02-walking-skeleton/11-usage.md)

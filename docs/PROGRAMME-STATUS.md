@@ -13,7 +13,7 @@ a sponsor can see what exists, what does not, and why.
 | | |
 |---|---|
 | Waves worked | 9 of 9 (Phases 00–37, plus 05b, 08b, 08c, 17c, 23d, 24b, 24f, 26f, 33b, 34b and 35b) |
-| ADRs accepted | 36 |
+| ADRs accepted | 36, plus ADR-037 (v1.0 scope) **proposed and awaiting a sponsor decision** |
 | Automated tests | 1231, all passing (Docker parity included), plus 11 executing on net48 |
 | Target frameworks | 5, building clean with warnings as errors; Tier 3 runtime-verified 2026-08-03 |
 | Gates passed on engineering criteria | **G0, G1** |

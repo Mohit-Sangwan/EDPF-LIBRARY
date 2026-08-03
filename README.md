@@ -24,7 +24,7 @@ Gate G1 (Foundation) passed on engineering criteria.
 
 | | |
 |---|---|
-| ADRs accepted | 36 (ADR-001 … ADR-036) |
+| ADRs accepted | 36 accepted, 1 proposed ([ADR-037](docs/adr/ADR-037-v1-scope-boundary.md) — v1.0 scope, awaiting sponsor) |
 | Target frameworks | 5 building green; Tier 3 (net48) now also **executes** tests, not just compiles |
 | Automated tests | 1231 green (incl. Docker parity), plus 11 more executing on net48 |
 | Injection corpus | 226 assertions, zero successful injections |

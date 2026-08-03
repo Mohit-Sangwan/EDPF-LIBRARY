@@ -46,6 +46,7 @@ current answer is the current answer.
 | [ADR-034](ADR-034-entitlement-never-gates-safety.md) | Entitlement gates features, never care | Accepted |
 | [ADR-035](ADR-035-benchmark-gate-enforces-allocation.md) | The benchmark gate enforces allocation and advises on time | Accepted |
 | [ADR-036](ADR-036-stored-form-must-equal-served-form.md) | Stored form must equal hashed form; replayed must equal served | Accepted |
+| [ADR-037](ADR-037-v1-scope-boundary.md) | The v1.0 scope boundary — ships, waits, never | **Proposed** |
 
 Template: [ADR-000-template.md](ADR-000-template.md).
 Smaller decisions go to the [technical decision log](../tdl/README.md).

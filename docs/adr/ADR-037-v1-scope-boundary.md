@@ -19,7 +19,7 @@ rather than the specification:
 
 | | Named | Built |
 | --- | ---: | ---: |
-| Database providers | 13 | **3** (SQL Server, PostgreSQL, SQLite) |
+| Database providers | 13 | **4** (SQL Server, PostgreSQL, SQLite, MySQL) |
 | Host types | 13 | **1** (ASP.NET Core Web API) |
 | Platform pillars | ~24 | **~9** |
 | AI vendors | 11 | **0** |
@@ -77,11 +77,17 @@ procurement lead time and no research risk:
 1. **MySQL and SQLite providers.** Not for coverage — to prove the provider
    model generalises beyond the pair that already produced a cross-provider
    defect. Two engines is a coincidence; four is evidence.
-   **SQLite has landed** (17 tests, `SqliteDialect`) and the abstraction held:
-   a third dialect required no change to `SqlDialectBase` or `QueryCompiler`,
-   and it declares four capabilities *false* — including row-level security,
-   which is the case that proves EDPF never leaned on the database to enforce
-   tenancy. MySQL remains.
+   **Both have landed**, and they failed differently, which is the point.
+   SQLite tested whether the abstraction survives an engine that *lacks*
+   features; MySQL tested whether it survives an engine whose features *mean
+   something else* — `||` is logical OR there, so the shared `Concat` would
+   have written `0` and `1` into string columns without erroring. Neither
+   required a change to `SqlDialectBase` or `QueryCompiler`.
+
+   The four together also settle a recurring argument: **two of the four
+   cannot enforce tenancy in the database at all.** Had the tenant predicate
+   been delegated to row-level security, half the supported estate would
+   silently enforce nothing. There is a test asserting the count.
 2. **Storage platform** — local, SFTP, S3-compatible, Azure Blob. Every buyer
    needs files.
 3. **Communication platform** — email and SMS, provider-abstracted. Every buyer

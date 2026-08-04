@@ -67,10 +67,14 @@ written once:
 | **MySQL provider** | The fourth dialect, and the one that disagrees silently — `\|\|` is logical OR there | — |
 | **Worker Service host** | Tenancy re-established from the message, since there is no request to carry it | — |
 
-Adopting EDPF? Read the
-[shared-responsibility model](docs/compliance/shared-responsibility-model.md)
-first. Three of the four responsibility layers are yours, and that is what
-compliance consists of.
+Adopting EDPF? Two documents before any code:
+
+- [**Brownfield adoption strategy**](docs/adoption/brownfield-strategy.md) — how
+  an existing HIS moves onto EDPF one bounded context at a time, which cutover
+  stages are reversible, and [when not to adopt](docs/adoption/brownfield-strategy.md#when-not-to-adopt).
+- [**Shared-responsibility model**](docs/compliance/shared-responsibility-model.md) —
+  three of the four responsibility layers are yours, and that is what compliance
+  consists of.
 
 ## The `edpf` CLI
 

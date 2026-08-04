@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Document platform: generation, e-signature workflow, and printing.
+
+    The three ship together because they share one artefact. A signature is
+    over exact bytes, and a print is of exact bytes; splitting them into three
+    assemblies would mean three definitions of "the document" and an
+    opportunity for two of them to disagree.
+
+    No PDF library. The renderer writes a minimal PDF 1.4 directly, which is
+    the only way to guarantee what it does NOT contain: no JavaScript, no
+    launch actions, no embedded files. A general-purpose library gives you no
+    such assurance, and the storage layer already treats inbound PDFs as
+    programs for exactly that reason.
+
+    Tier 1, consistent with the other platform assemblies (ADR-002/ADR-038).
+  -->
+  <PropertyGroup>
+    <TargetFrameworks>$(EdpfPlatformTargetFrameworks)</TargetFrameworks>
+    <IsPackable>true</IsPackable>
+    <Description>Enterprise Data Platform Framework — deterministic inert-PDF document generation, what-you-see-is-what-you-sign e-signature, and classification-gated printing.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Edpf.Abstractions\Edpf.Abstractions.csproj" />
+    <ProjectReference Include="..\Edpf.Core\Edpf.Core.csproj" />
+  </ItemGroup>
+
+</Project>

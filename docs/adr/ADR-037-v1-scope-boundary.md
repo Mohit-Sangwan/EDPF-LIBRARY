@@ -20,14 +20,14 @@ rather than the specification:
 | | Named | Built |
 | --- | ---: | ---: |
 | Database providers | 13 | **4** (SQL Server, PostgreSQL, SQLite, MySQL) |
-| Host types | 13 | **1** (ASP.NET Core Web API) |
-| Platform pillars | ~24 | **~9** |
-| AI vendors | 11 | **0** |
-| Storage backends | 16 | **0** |
-| Communication channels | 9 | **0** |
+| Host types | 13 | **2** (ASP.NET Core Web API, Worker Service) |
+| Platform pillars | ~24 | **~12** |
+| AI vendors | 11 | **0** — and the [governance boundary](#the-sponsors-override) is the deliverable instead |
+| Storage backends | 16 | **2** (filesystem, in-memory) under a policy layer that serves all of them |
+| Communication channels | 9 | **2** (pickup-directory email, recording) under the same shape |
 
 That is not a criticism of what was built. The nine pillars that exist are
-finished to a standard the other fifteen are nowhere near: 1,248 tests, five
+finished to a standard the other fifteen are nowhere near: 1,379 tests, five
 target frameworks, provider parity verified on both Tier A engines, and a set
 of safety properties that are structural rather than disciplinary.
 
@@ -89,11 +89,23 @@ procurement lead time and no research risk:
    been delegated to row-level security, half the supported estate would
    silently enforce nothing. There is a test asserting the count.
 2. **Storage platform** — local, SFTP, S3-compatible, Azure Blob. Every buyer
-   needs files.
+   needs files. **Landed** as a policy layer over a six-method backend
+   contract: filesystem and in-memory ship and pass an identical conformance
+   suite; the remote backends are ordinary I/O against that contract. Building
+   it turned up a real disagreement — the protection table does not require
+   encryption for payment data, it requires never holding it raw, so a Pci blob
+   is refused rather than encrypted.
 3. **Communication platform** — email and SMS, provider-abstracted. Every buyer
-   needs notifications.
+   needs notifications. **Landed**, with the per-channel classification ceiling
+   as the control that matters: SMS and inter-organisation email cap at
+   Internal, so a template cannot put clinical detail into one.
 4. **One further host sample** — a Worker Service or Blazor Server slice, to
-   demonstrate the framework outside a Web API.
+   demonstrate the framework outside a Web API. **Landed** as a Worker Service.
+   The finding: everything the framework guarantees survived the change of host
+   unmodified, because nothing was reading `HttpContext`. What did not survive
+   is the pipeline stage that made tenancy unavoidable — a worker has no
+   request — so tenancy is re-established from the message, and a message
+   without one is refused rather than processed as nobody.
 
 ### Deferred to v1.1+, with a named trigger
 
@@ -101,11 +113,11 @@ procurement lead time and no research risk:
 | --- | --- |
 | Oracle, Db2, SAP HANA providers | A paying customer names one. Test licences carry 2–4 month procurement lead time and real cost — order on signature, not on hope |
 | MongoDB, Cosmos, cloud-managed variants | A design partner's actual topology |
-| AI platform, vector search, RAG, MCP/agents | Selling into a buyer who asks. **EU AI Act positioning is the deliverable, not embeddings** — clinical AI is high-risk under a regulation already in force |
+| ~~AI platform~~ · vector search, RAG, MCP/agents | **The governance boundary was built** (see the sponsor's override). Vector search, RAG and agent protocols remain deferred behind the original trigger: a buyer who asks |
 | Real-time push (SignalR/SSE) | A dashboard or vitals-monitoring requirement from a real deployment |
 | Time-series store | IoMT feeds at a volume that breaks relational storage — measured, not assumed |
 | Document generation, e-signature, print | A workflow that needs them, with the regulated e-prescription question answered first |
-| Workflow/BPM engine | Beyond what the existing rules platform covers |
+| ~~Workflow~~ · BPM engine | **A validated state machine was built.** Parallel branches, sub-processes, compensation and timers remain deferred |
 | Search platform, background processing | Load that justifies them |
 | gRPC, OData, SOAP | An integration partner who requires one |
 | Load, stress, soak, chaos testing | Infrastructure existing to run it against |
@@ -125,6 +137,33 @@ Stated so nobody re-litigates them quarterly:
   the product a regulated medical device.
 - **Building what can be integrated.** FHIR, HL7 v2, DICOM (ADR-023) — and the
   same reasoning now extends to any capability with a maintained library.
+
+## The sponsor's override
+
+**Recorded because a scope decision that gets quietly reversed is worse than
+one that was never made.**
+
+This ADR deferred the AI platform and the workflow engine behind named
+triggers. On 2026-08-04 the sponsor instructed that all of it be built. The
+concern in this document was raised, the instruction was repeated, and the work
+proceeded. That is the sponsor's call to make; what is not optional is writing
+down that it happened.
+
+Both were built to the boundary this ADR argued for rather than to the
+catalogue:
+
+- **AI.** No model client, and none planned — vendor SDKs implement
+  `IInferenceProvider` as optional packages. What ships is the governance
+  layer: declared use cases carrying an EU AI Act risk tier, a per-provider
+  classification ceiling with `IsExternal` declared by the provider,
+  instruction/data separation applied before the call, and an audit log of
+  metadata only. Clinical decision support is refused at construction, which is
+  ADR-023 enforced rather than restated.
+- **Workflow.** A validated state machine, explicitly not a BPM engine. The
+  deferred item — parallel branches, sub-processes, compensation graphs, timers
+  — is still deferred, and the trigger in the table below still applies to it.
+
+The deferred table's remaining rows are unchanged and still hold.
 
 ## Consequences
 

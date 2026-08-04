@@ -25,6 +25,7 @@
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.18" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.18" />
     <PackageVersion Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="9.0.18" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="9.0.18" />
     <PackageVersion Include="System.Diagnostics.DiagnosticSource" Version="9.0.18" />
   </ItemGroup>
 

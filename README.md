@@ -26,7 +26,9 @@ Gate G1 (Foundation) passed on engineering criteria.
 |---|---|
 | ADRs accepted | 36 accepted, 1 proposed ([ADR-037](docs/adr/ADR-037-v1-scope-boundary.md) — v1.0 scope, awaiting sponsor) |
 | Target frameworks | 5 building green; Tier 3 (net48) now also **executes** tests, not just compiles |
-| Automated tests | 1248 green (incl. Docker parity), plus 11 more executing on net48 |
+| Automated tests | 1379 green without Docker, plus 24 Tier A parity tests that need a daemon, plus 11 executing on net48 |
+| SQL providers | 4 dialects (SQL Server, PostgreSQL, SQLite, MySQL); 2 verified against live engines |
+| Host types | 2 (ASP.NET Core Web API, Worker Service) |
 | Injection corpus | 226 assertions, zero successful injections |
 | Adversarial isolation routes | 12/12 covered, coverage machine-checked, 48 tests |
 | Live gate demonstrations | 24/24 against SQL Server LocalDB, plus 24/24 across both Tier A providers via Testcontainers — re-verified 2026-08-03 |
@@ -48,6 +50,22 @@ Gate G1 (Foundation) passed on engineering criteria.
 **All nine waves worked.** See [PROGRAMME-STATUS.md](docs/PROGRAMME-STATUS.md)
 for what exists, what does not, and the six things a sponsor must do next —
 none of which are engineering.
+
+### Six platforms added after the waves
+
+Built on the sponsor's instruction, against [ADR-037](docs/adr/ADR-037-v1-scope-boundary.md)'s
+v1.0 list and past two of its deferrals. Each follows the same shape the rest
+of the framework uses — a thin technology adapter under a policy layer that is
+written once:
+
+| Platform | What it contributes | What it deliberately is not |
+|---|---|---|
+| **Storage** | Tenant enforcement, encryption at rest, content-type coercion, bounded reads, platform-computed hashing — applied to every backend | Not a cloud SDK. Filesystem and in-memory ship; S3/Azure/SFTP are optional packages |
+| **Communication** | Consent before send, a per-channel classification ceiling, closed-grammar templates, addresses that reject rather than repair | Not a mail server. A pickup-directory channel ships; vendor APIs are optional packages |
+| **Workflow** | A state machine validated before it runs — determinism, reachability, no dead ends, terminal means terminal | Not a BPM engine. No parallel branches, sub-processes, compensation or timers |
+| **AI** | Declared use cases with EU AI Act risk tiers, a provider classification ceiling, instruction/data separation, an audit log of metadata | Not a model client, and never will be. Clinical decision support is refused outright ([ADR-023](docs/adr/ADR-023-integrate-do-not-build.md)) |
+| **MySQL provider** | The fourth dialect, and the one that disagrees silently — `\|\|` is logical OR there | — |
+| **Worker Service host** | Tenancy re-established from the message, since there is no request to carry it | — |
 
 Adopting EDPF? Read the
 [shared-responsibility model](docs/compliance/shared-responsibility-model.md)

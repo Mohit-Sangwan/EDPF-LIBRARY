@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    The second host's tests. Small on purpose: the framework is already tested
+    elsewhere, and what this project verifies is the one thing that genuinely
+    differs outside a Web API — tenancy without a request to carry it.
+  -->
+  <ItemGroup>
+    <ProjectReference Include="..\..\samples\worker-service\Edpf.WorkerHost\Edpf.WorkerHost.csproj" />
+  </ItemGroup>
+
+</Project>

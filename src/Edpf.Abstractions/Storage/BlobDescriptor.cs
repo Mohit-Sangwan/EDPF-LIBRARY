@@ -33,6 +33,16 @@ public sealed class BlobDescriptor
     /// </param>
     /// <param name="isEncryptedAtRest">Whether the stored bytes are ciphertext.</param>
     /// <param name="createdUtc">When the blob was first written.</param>
+    /// <param name="scanState">What is known about malware scanning.</param>
+    /// <param name="isCompressed">Whether the stored bytes are compressed.</param>
+    /// <param name="version">
+    /// Which version this descriptor describes. 1 is the first write; a new
+    /// write to the same path increments it.
+    /// </param>
+    /// <param name="retainUntilUtc">
+    /// The earliest instant a lifecycle sweep may delete this blob. Null means
+    /// no retention was declared and lifecycle will not touch it.
+    /// </param>
     /// <exception cref="ArgumentNullException">Any reference argument is null.</exception>
     public BlobDescriptor(
         BlobPath path,
@@ -43,7 +53,11 @@ public sealed class BlobDescriptor
         string servedContentType,
         bool requiresAttachmentDisposition,
         bool isEncryptedAtRest,
-        DateTimeOffset createdUtc)
+        DateTimeOffset createdUtc,
+        ScanState scanState = ScanState.NotScanned,
+        bool isCompressed = false,
+        int version = 1,
+        DateTimeOffset? retainUntilUtc = null)
     {
         Path = path ?? throw new ArgumentNullException(nameof(path));
         ContentHash = contentHash ?? throw new ArgumentNullException(nameof(contentHash));
@@ -54,7 +68,34 @@ public sealed class BlobDescriptor
         RequiresAttachmentDisposition = requiresAttachmentDisposition;
         IsEncryptedAtRest = isEncryptedAtRest;
         CreatedUtc = createdUtc;
+        ScanState = scanState;
+        IsCompressed = isCompressed;
+        Version = version;
+        RetainUntilUtc = retainUntilUtc;
     }
+
+    /// <summary>What is known about malware scanning of this blob.</summary>
+    public ScanState ScanState { get; }
+
+    /// <summary>Whether the stored bytes are compressed.</summary>
+    /// <remarks>
+    /// Compression happens **before** encryption. The reverse order compresses
+    /// ciphertext, which is incompressible by construction and therefore pure
+    /// cost. The known trade is that compressed-then-encrypted length leaks
+    /// something about the plaintext (the CRIME/BREACH family); at rest, with
+    /// no attacker-chosen plaintext being injected per request, that is an
+    /// accepted and stated risk rather than an overlooked one.
+    /// </remarks>
+    public bool IsCompressed { get; }
+
+    /// <summary>Which version this descriptor describes. The first write is 1.</summary>
+    public int Version { get; }
+
+    /// <summary>
+    /// The earliest instant a lifecycle sweep may delete this blob, or null when
+    /// no retention was declared.
+    /// </summary>
+    public DateTimeOffset? RetainUntilUtc { get; }
 
     /// <summary>The tenant-scoped path.</summary>
     public BlobPath Path { get; }

@@ -67,11 +67,23 @@ public sealed class BlobWriteOptions
     /// <exception cref="ArgumentException">
     /// The content type is blank, or the maximum length is out of range.
     /// </exception>
+    /// <param name="compress">
+    /// Whether to compress before encrypting. Off by default: compression is a
+    /// decision about a specific payload, and applying it to already-compressed
+    /// formats (JPEG, PDF, DICOM) costs CPU to make the file marginally larger.
+    /// </param>
+    /// <param name="retainUntilUtc">
+    /// The earliest instant a lifecycle sweep may delete this blob. Null means
+    /// lifecycle will never delete it, which is the safe default — a retention
+    /// period nobody chose should not start a clock.
+    /// </param>
     public BlobWriteOptions(
         DataClassificationLevel classification,
         string declaredContentType,
         long maxLength,
-        Guid? subjectId = null)
+        Guid? subjectId = null,
+        bool compress = false,
+        DateTimeOffset? retainUntilUtc = null)
     {
         if (string.IsNullOrWhiteSpace(declaredContentType))
         {
@@ -97,7 +109,15 @@ public sealed class BlobWriteOptions
         DeclaredContentType = declaredContentType;
         MaxLength = maxLength;
         SubjectId = subjectId;
+        Compress = compress;
+        RetainUntilUtc = retainUntilUtc;
     }
+
+    /// <summary>Whether to compress before encrypting.</summary>
+    public bool Compress { get; }
+
+    /// <summary>The earliest instant a lifecycle sweep may delete this blob.</summary>
+    public DateTimeOffset? RetainUntilUtc { get; }
 
     /// <summary>The classification of the content being written.</summary>
     public DataClassificationLevel Classification { get; }

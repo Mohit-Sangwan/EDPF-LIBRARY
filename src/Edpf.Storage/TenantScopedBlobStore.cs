@@ -44,6 +44,15 @@ public sealed class TenantScopedBlobStore : IBlobStore
     internal const string MetadataLength = "edpf.length";
     internal const string MetadataEncrypted = "edpf.encrypted";
     internal const string MetadataCreatedUtc = "edpf.created-utc";
+    internal const string MetadataScanState = "edpf.scan-state";
+    internal const string MetadataScanner = "edpf.scanner";
+    internal const string MetadataCompressed = "edpf.compressed";
+    internal const string MetadataVersion = "edpf.version";
+    internal const string MetadataRetainUntil = "edpf.retain-until";
+    internal const string MetadataSubject = "edpf.subject";
+
+    /// <summary>The suffix that marks a superseded version. Reserved.</summary>
+    internal const string VersionSuffix = "__v";
 
     private const int CopyBufferSize = 81920;
 
@@ -53,6 +62,7 @@ public sealed class TenantScopedBlobStore : IBlobStore
     private readonly IHashingService _hashing;
     private readonly IClock _clock;
     private readonly ICryptoProvider? _crypto;
+    private readonly IContentScanner? _scanner;
 
     /// <summary>
     /// Composes the policy over a backend.
@@ -71,6 +81,11 @@ public sealed class TenantScopedBlobStore : IBlobStore
     /// nothing the policy marks <c>EncryptAtRest</c> does not need one; omitting
     /// it makes every such write fail.
     /// </param>
+    /// <param name="scanner">
+    /// Malware scanning seam. When absent, blobs record
+    /// <see cref="ScanState.NotScanned"/> — honestly, rather than being marked
+    /// clean by a scanner that never ran.
+    /// </param>
     /// <exception cref="ArgumentNullException">Any required dependency is null.</exception>
     public TenantScopedBlobStore(
         IBlobBackend backend,
@@ -78,7 +93,8 @@ public sealed class TenantScopedBlobStore : IBlobStore
         IDataProtectionPolicy protection,
         IHashingService hashing,
         IClock clock,
-        ICryptoProvider? crypto = null)
+        ICryptoProvider? crypto = null,
+        IContentScanner? scanner = null)
     {
         _backend = Guard.NotNull(backend, nameof(backend));
         _tenantAccessor = Guard.NotNull(tenantAccessor, nameof(tenantAccessor));
@@ -86,6 +102,7 @@ public sealed class TenantScopedBlobStore : IBlobStore
         _hashing = Guard.NotNull(hashing, nameof(hashing));
         _clock = Guard.NotNull(clock, nameof(clock));
         _crypto = crypto;
+        _scanner = scanner;
     }
 
     /// <inheritdoc />
@@ -103,6 +120,17 @@ public sealed class TenantScopedBlobStore : IBlobStore
         if (tenant.IsFailure)
         {
             return Result.Failure<BlobDescriptor>(tenant.Error!);
+        }
+
+        if (IsVersionPath(path))
+        {
+            // The suffix is reserved so that a caller-chosen name can never
+            // collide with an archived version and overwrite the history of a
+            // different blob. Refused, not silently renamed.
+            return Result.Failure<BlobDescriptor>(new Error(
+                ErrorCodes.ValidationFailed,
+                "That name ends in the reserved version suffix and cannot be written directly.",
+                ErrorCategory.Validation));
         }
 
         DataProtectionRequirements required = _protection.For(options.Classification);
@@ -145,7 +173,43 @@ public sealed class TenantScopedBlobStore : IBlobStore
         byte[] bytes = plaintext.Value;
         string contentHash = ToHex(_hashing.Sha256(bytes));
 
+        // ── Scan before anything else touches the payload ────────────────
+        //
+        // On the plaintext, and on the whole payload. Scanning ciphertext
+        // finds nothing, and scanning a chunk misses a signature that
+        // straddles the boundary.
+        ScanState scanState = ScanState.NotScanned;
+        if (_scanner is not null)
+        {
+            Result<ScanVerdict> verdict =
+                await _scanner.ScanAsync(bytes, cancellationToken).ConfigureAwait(false);
+
+            // A scanner failure and an Indeterminate verdict are the same
+            // thing: the content was not cleared. Treating either as clean is
+            // how a password-protected archive walks past a scanner.
+            if (verdict.IsFailure || verdict.Value != ScanVerdict.Clean)
+            {
+                return Result.Failure<BlobDescriptor>(new Error(
+                    ErrorCodes.ValidationFailed,
+                    "The content did not pass scanning and was not stored.",
+                    ErrorCategory.Validation));
+            }
+
+            scanState = ScanState.Clean;
+        }
+
         byte[] stored = bytes;
+
+        // ── Compress, then encrypt ───────────────────────────────────────
+        //
+        // This order and not the reverse. Ciphertext is incompressible by
+        // construction, so compressing after encrypting costs CPU and saves
+        // nothing.
+        if (options.Compress)
+        {
+            stored = BlobCompression.Compress(stored);
+        }
+
         if (mustEncrypt)
         {
             KeyScope scope = options.SubjectId.HasValue
@@ -153,13 +217,32 @@ public sealed class TenantScopedBlobStore : IBlobStore
                 : KeyScope.ForTenant(tenant.Value);
 
             Result<EncryptionEnvelope> envelope =
-                await _crypto!.EncryptAsync(bytes, scope, cancellationToken).ConfigureAwait(false);
+                await _crypto!.EncryptAsync(stored, scope, cancellationToken).ConfigureAwait(false);
             if (envelope.IsFailure)
             {
                 return Result.Failure<BlobDescriptor>(envelope.Error!);
             }
 
             stored = envelope.Value.Serialize();
+        }
+
+        // ── Preserve what is already there ───────────────────────────────
+        //
+        // A write over an existing blob moves the current content aside first.
+        // Overwriting a clinical document in place destroys the version a
+        // clinician signed, and "we have a backup" is not the same as being
+        // able to produce the exact bytes that were signed.
+        int version = 1;
+        Result<BlobDescriptor> existing = await StatAsync(path, cancellationToken).ConfigureAwait(false);
+        if (existing.IsSuccess)
+        {
+            version = existing.Value.Version + 1;
+
+            Result archived = await ArchiveAsync(path, existing.Value, cancellationToken).ConfigureAwait(false);
+            if (archived.IsFailure)
+            {
+                return Result.Failure<BlobDescriptor>(archived.Error!);
+            }
         }
 
         ContentTypeDecision served = ServedContentType.Resolve(options.DeclaredContentType);
@@ -178,7 +261,11 @@ public sealed class TenantScopedBlobStore : IBlobStore
             served.ServedContentType,
             served.RequiresAttachment,
             mustEncrypt,
-            createdUtc);
+            createdUtc,
+            scanState,
+            options.Compress,
+            version,
+            options.RetainUntilUtc);
 
         Result put = await _backend.PutAsync(path, stored, cancellationToken).ConfigureAwait(false);
         if (put.IsFailure)
@@ -187,7 +274,7 @@ public sealed class TenantScopedBlobStore : IBlobStore
         }
 
         Result metadata = await _backend
-            .PutMetadataAsync(path, ToMetadata(descriptor), cancellationToken)
+            .PutMetadataAsync(path, ToMetadata(descriptor, options.SubjectId), cancellationToken)
             .ConfigureAwait(false);
         if (metadata.IsFailure)
         {
@@ -254,6 +341,21 @@ public sealed class TenantScopedBlobStore : IBlobStore
             }
 
             bytes = plaintext.Value;
+        }
+
+        if (descriptor.Value.IsCompressed)
+        {
+            // Bounded by the recorded length, so a tampered or crafted archive
+            // cannot expand into an unbounded buffer.
+            Result<byte[]> expanded = BlobCompression.Decompress(
+                bytes, Math.Max(descriptor.Value.Length, 1));
+
+            if (expanded.IsFailure)
+            {
+                return Result.Failure<BlobContent>(expanded.Error!);
+            }
+
+            bytes = expanded.Value;
         }
 
         return new BlobContent(descriptor.Value, new MemoryStream(bytes, writable: false));
@@ -351,6 +453,15 @@ public sealed class TenantScopedBlobStore : IBlobStore
                 continue;
             }
 
+            // Archived versions are reachable through ListVersionsAsync, not
+            // through a directory listing. A listing that returned every
+            // superseded copy would make "the documents in this folder" a
+            // number that grows every time one is edited.
+            if (IsVersionPath(parsed.Value))
+            {
+                continue;
+            }
+
             Result<BlobDescriptor> descriptor = await StatAsync(parsed.Value, cancellationToken).ConfigureAwait(false);
             if (descriptor.IsSuccess)
             {
@@ -432,7 +543,7 @@ public sealed class TenantScopedBlobStore : IBlobStore
         return buffer.ToArray();
     }
 
-    private static Dictionary<string, string> ToMetadata(BlobDescriptor descriptor)
+    private static Dictionary<string, string> ToMetadata(BlobDescriptor descriptor, Guid? subjectId)
         => new(StringComparer.Ordinal)
         {
             [MetadataClassification] = descriptor.Classification.ToString(),
@@ -443,6 +554,13 @@ public sealed class TenantScopedBlobStore : IBlobStore
             [MetadataLength] = descriptor.Length.ToString(CultureInfo.InvariantCulture),
             [MetadataEncrypted] = descriptor.IsEncryptedAtRest ? "1" : "0",
             [MetadataCreatedUtc] = descriptor.CreatedUtc.ToString("O", CultureInfo.InvariantCulture),
+            [MetadataScanState] = descriptor.ScanState.ToString(),
+            [MetadataCompressed] = descriptor.IsCompressed ? "1" : "0",
+            [MetadataVersion] = descriptor.Version.ToString(CultureInfo.InvariantCulture),
+            [MetadataRetainUntil] = descriptor.RetainUntilUtc is null
+                ? string.Empty
+                : MetadataFormat.Instant(descriptor.RetainUntilUtc.Value),
+            [MetadataSubject] = subjectId is null ? string.Empty : subjectId.Value.ToString("D"),
         };
 
     private static Result<BlobDescriptor> FromMetadata(
@@ -472,6 +590,27 @@ public sealed class TenantScopedBlobStore : IBlobStore
 
         metadata.TryGetValue(MetadataAttachment, out string? attachment);
         metadata.TryGetValue(MetadataEncrypted, out string? encrypted);
+        metadata.TryGetValue(MetadataCompressed, out string? compressed);
+
+        // Absent or unparseable scan state reads as NotScanned, never as Clean.
+        // The safe direction here is "we do not know", because a blob claiming
+        // to be scanned by metadata nobody can parse has not been scanned.
+        metadata.TryGetValue(MetadataScanState, out string? scanText);
+        if (!Enum.TryParse(scanText, out ScanState scanState))
+        {
+            scanState = ScanState.NotScanned;
+        }
+
+        metadata.TryGetValue(MetadataVersion, out string? versionText);
+        if (!int.TryParse(versionText, NumberStyles.None, CultureInfo.InvariantCulture, out int version))
+        {
+            version = 1;
+        }
+
+        metadata.TryGetValue(MetadataRetainUntil, out string? retainText);
+        DateTimeOffset? retainUntil = MetadataFormat.TryInstant(retainText, out DateTimeOffset parsedRetain)
+            ? parsedRetain
+            : null;
 
         return new BlobDescriptor(
             path,
@@ -482,7 +621,225 @@ public sealed class TenantScopedBlobStore : IBlobStore
             served!,
             string.Equals(attachment, "1", StringComparison.Ordinal),
             string.Equals(encrypted, "1", StringComparison.Ordinal),
-            created);
+            created,
+            scanState,
+            string.Equals(compressed, "1", StringComparison.Ordinal),
+            version,
+            retainUntil);
+    }
+
+    /// <summary>
+    /// Starts a resumable chunked upload.
+    /// </summary>
+    /// <param name="path">The destination.</param>
+    /// <param name="options">The caller's declarations, applied at completion.</param>
+    /// <returns>The session, or a tenant refusal.</returns>
+    /// <exception cref="ArgumentNullException">An argument is null.</exception>
+    public Result<IBlobUploadSession> BeginUpload(BlobPath path, BlobWriteOptions options)
+    {
+        Guard.NotNull(path, nameof(path));
+        Guard.NotNull(options, nameof(options));
+
+        Result<Guid> tenant = RequireOwningTenant(path);
+        if (tenant.IsFailure)
+        {
+            return Result.Failure<IBlobUploadSession>(tenant.Error!);
+        }
+
+        // CA2000 cannot see through Result<T> that the session escapes to the
+        // caller, who owns it — that is what a factory does, and it is why
+        // IBlobUploadSession derives from IDisposable.
+#pragma warning disable CA2000
+        return Result<IBlobUploadSession>.FromValue(
+            new BufferedUploadSession(this, path, options, Guid.NewGuid().ToString("N")));
+#pragma warning restore CA2000
+    }
+
+    /// <summary>
+    /// Opens a stream over a blob's content without buffering it whole.
+    /// </summary>
+    /// <param name="path">The tenant-scoped path.</param>
+    /// <param name="cancellationToken">Cancels the open.</param>
+    /// <returns>The content, or a failure.</returns>
+    /// <remarks>
+    /// **Refused for an encrypted blob, deliberately.** AES-GCM's
+    /// authentication tag covers the whole ciphertext and is verified at the
+    /// end, so streaming would mean handing the caller plaintext that has not
+    /// yet been shown to be authentic. Everything after that point is acting on
+    /// data an attacker may have altered, and the fact that the tag check fails
+    /// a moment later does not un-act it.
+    /// </remarks>
+    public async Task<Result<BlobContent>> OpenReadAsync(BlobPath path, CancellationToken cancellationToken)
+    {
+        Guard.NotNull(path, nameof(path));
+
+        Result<BlobDescriptor> descriptor = await StatAsync(path, cancellationToken).ConfigureAwait(false);
+        if (descriptor.IsFailure)
+        {
+            return Result.Failure<BlobContent>(descriptor.Error!);
+        }
+
+        if (descriptor.Value.IsEncryptedAtRest)
+        {
+            return Result.Failure<BlobContent>(new Error(
+                ErrorCodes.CapabilityNotSupported,
+                "An encrypted blob cannot be streamed: its authenticity is established only once the whole "
+                + "ciphertext has been read. Use ReadAsync.",
+                ErrorCategory.Validation));
+        }
+
+        return await ReadAsync(path, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Lists the archived versions of a blob, newest first.
+    /// </summary>
+    /// <param name="path">The live path.</param>
+    /// <param name="cancellationToken">Cancels the enumeration.</param>
+    /// <returns>Descriptors of superseded versions.</returns>
+    public async Task<Result<IReadOnlyList<BlobDescriptor>>> ListVersionsAsync(
+        BlobPath path,
+        CancellationToken cancellationToken)
+    {
+        Guard.NotNull(path, nameof(path));
+
+        Result<Guid> tenant = RequireOwningTenant(path);
+        if (tenant.IsFailure)
+        {
+            return Result.Failure<IReadOnlyList<BlobDescriptor>>(tenant.Error!);
+        }
+
+        var versions = new List<BlobDescriptor>();
+
+        for (int version = 1; ; version++)
+        {
+            Result<BlobPath> archived = VersionPathFor(path, version);
+            if (archived.IsFailure)
+            {
+                break;
+            }
+
+            Result<BlobDescriptor> descriptor =
+                await StatAsync(archived.Value, cancellationToken).ConfigureAwait(false);
+
+            if (descriptor.IsFailure)
+            {
+                break;
+            }
+
+            versions.Insert(0, descriptor.Value);
+        }
+
+        return versions;
+    }
+
+    /// <summary>
+    /// Reads the subject a blob was written for, when it declared one.
+    /// </summary>
+    /// <param name="path">The tenant-scoped path.</param>
+    /// <param name="cancellationToken">Cancels the lookup.</param>
+    /// <returns>The subject, null when none was declared, or a failure.</returns>
+    /// <remarks>
+    /// Used by the lifecycle sweep to ask the legal-hold store whether this
+    /// blob's subject is under hold.
+    /// </remarks>
+    public async Task<Result<Guid?>> SubjectOfAsync(BlobPath path, CancellationToken cancellationToken)
+    {
+        Guard.NotNull(path, nameof(path));
+
+        Result<Guid> tenant = RequireOwningTenant(path);
+        if (tenant.IsFailure)
+        {
+            return Result.Failure<Guid?>(tenant.Error!);
+        }
+
+        Result<IReadOnlyDictionary<string, string>> metadata =
+            await _backend.GetMetadataAsync(path, cancellationToken).ConfigureAwait(false);
+
+        if (metadata.IsFailure)
+        {
+            return Result.Failure<Guid?>(metadata.Error!);
+        }
+
+        return metadata.Value.TryGetValue(MetadataSubject, out string? subject)
+            && Guid.TryParse(subject, out Guid parsed)
+                ? parsed
+                : (Guid?)null;
+    }
+
+    private async Task<Result> ArchiveAsync(
+        BlobPath path,
+        BlobDescriptor current,
+        CancellationToken cancellationToken)
+    {
+        Result<BlobPath> archivePath = VersionPathFor(path, current.Version);
+        if (archivePath.IsFailure)
+        {
+            return Result.Failure(archivePath.Error!);
+        }
+
+        Result<byte[]> bytes = await _backend.GetAsync(path, cancellationToken).ConfigureAwait(false);
+        if (bytes.IsFailure)
+        {
+            return Result.Failure(bytes.Error!);
+        }
+
+        Result<IReadOnlyDictionary<string, string>> metadata =
+            await _backend.GetMetadataAsync(path, cancellationToken).ConfigureAwait(false);
+        if (metadata.IsFailure)
+        {
+            return Result.Failure(metadata.Error!);
+        }
+
+        Result put = await _backend.PutAsync(archivePath.Value, bytes.Value, cancellationToken).ConfigureAwait(false);
+        return put.IsFailure
+            ? put
+            : await _backend
+                .PutMetadataAsync(archivePath.Value, metadata.Value, cancellationToken)
+                .ConfigureAwait(false);
+    }
+
+    private static Result<BlobPath> VersionPathFor(BlobPath path, int version)
+    {
+        string[] segments = path.RelativePath.Split('/');
+        segments[segments.Length - 1] += VersionSuffix + version.ToString(CultureInfo.InvariantCulture);
+
+        try
+        {
+            return BlobPath.Create(path.TenantId, segments);
+        }
+        catch (ArgumentException)
+        {
+            return Result.Failure<BlobPath>(NotFound());
+        }
+    }
+
+    private static bool IsVersionPath(BlobPath path)
+    {
+        string[] segments = path.RelativePath.Split('/');
+        string last = segments[segments.Length - 1];
+
+        int marker = last.LastIndexOf(VersionSuffix, StringComparison.Ordinal);
+        if (marker < 0)
+        {
+            return false;
+        }
+
+        string tail = last.Substring(marker + VersionSuffix.Length);
+        if (tail.Length == 0)
+        {
+            return false;
+        }
+
+        foreach (char c in tail)
+        {
+            if (c is < '0' or > '9')
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private static bool Requires(DataProtectionRequirements set, DataProtectionRequirements flag)

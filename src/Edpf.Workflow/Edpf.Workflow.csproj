@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Workflow platform. ADR-037 defers a BPM engine; this is not one, and the
+    distinction is load-bearing: no parallel branches, no sub-processes, no
+    compensation graph, no timers. A validated state machine covers the
+    regulated workflows this framework's consumers actually run, and stops
+    short of the product ADR-037 declined to build.
+
+    Tier 1 + Tier 2, consistent with the other platform assemblies (ADR-002).
+  -->
+  <PropertyGroup>
+    <TargetFrameworks>$(EdpfPlatformTargetFrameworks)</TargetFrameworks>
+    <IsPackable>true</IsPackable>
+    <Description>Enterprise Data Platform Framework — a state machine whose shape is validated before anything runs.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Edpf.Abstractions\Edpf.Abstractions.csproj" />
+    <ProjectReference Include="..\Edpf.Core\Edpf.Core.csproj" />
+  </ItemGroup>
+
+</Project>

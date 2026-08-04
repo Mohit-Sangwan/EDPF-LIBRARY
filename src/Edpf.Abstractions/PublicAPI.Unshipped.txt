@@ -38,6 +38,7 @@ const Edpf.Abstractions.Security.EncryptionEnvelope.NonceSize = 12 -> int
 const Edpf.Abstractions.Security.EncryptionEnvelope.TagSize = 16 -> int
 const Edpf.Abstractions.Storage.BlobPath.MaxPathLength = 1024 -> int
 const Edpf.Abstractions.Storage.BlobPath.MaxSegmentLength = 255 -> int
+const Edpf.Abstractions.Storage.BlobWriteOptions.AbsoluteMaxLength = 2147483648 -> long
 const Edpf.Abstractions.Validation.ValidationFailure.MaxMessageLength = 200 -> int
 Edpf.Abstractions.Audit.AuditChainVerification
 Edpf.Abstractions.Audit.AuditChainVerification.AuditChainVerification(bool isValid, long recordCount, long? firstBrokenSequence) -> void
@@ -622,11 +623,47 @@ Edpf.Abstractions.Security.SafeHarborPolicy.FieldIdentifiers.get -> System.Colle
 Edpf.Abstractions.Security.SafeHarborPolicy.RejectUnmappedFields.get -> bool
 Edpf.Abstractions.Security.SafeHarborPolicy.SafeHarborPolicy(System.Collections.Generic.IReadOnlyDictionary<string!, Edpf.Abstractions.Security.SafeHarborIdentifier>! fieldIdentifiers, string? subjectTokenField = null, bool rejectUnmappedFields = true) -> void
 Edpf.Abstractions.Security.SafeHarborPolicy.SubjectTokenField.get -> string?
+Edpf.Abstractions.Storage.BlobContent
+Edpf.Abstractions.Storage.BlobContent.BlobContent(Edpf.Abstractions.Storage.BlobDescriptor! descriptor, System.IO.Stream! content) -> void
+Edpf.Abstractions.Storage.BlobContent.Content.get -> System.IO.Stream!
+Edpf.Abstractions.Storage.BlobContent.Descriptor.get -> Edpf.Abstractions.Storage.BlobDescriptor!
+Edpf.Abstractions.Storage.BlobContent.Dispose() -> void
+Edpf.Abstractions.Storage.BlobDescriptor
+Edpf.Abstractions.Storage.BlobDescriptor.BlobDescriptor(Edpf.Abstractions.Storage.BlobPath! path, long length, string! contentHash, Edpf.Abstractions.Primitives.DataClassificationLevel classification, string! declaredContentType, string! servedContentType, bool requiresAttachmentDisposition, bool isEncryptedAtRest, System.DateTimeOffset createdUtc) -> void
+Edpf.Abstractions.Storage.BlobDescriptor.Classification.get -> Edpf.Abstractions.Primitives.DataClassificationLevel
+Edpf.Abstractions.Storage.BlobDescriptor.ContentHash.get -> string!
+Edpf.Abstractions.Storage.BlobDescriptor.CreatedUtc.get -> System.DateTimeOffset
+Edpf.Abstractions.Storage.BlobDescriptor.DeclaredContentType.get -> string!
+Edpf.Abstractions.Storage.BlobDescriptor.IsEncryptedAtRest.get -> bool
+Edpf.Abstractions.Storage.BlobDescriptor.Length.get -> long
+Edpf.Abstractions.Storage.BlobDescriptor.Path.get -> Edpf.Abstractions.Storage.BlobPath!
+Edpf.Abstractions.Storage.BlobDescriptor.RequiresAttachmentDisposition.get -> bool
+Edpf.Abstractions.Storage.BlobDescriptor.ServedContentType.get -> string!
 Edpf.Abstractions.Storage.BlobPath
 Edpf.Abstractions.Storage.BlobPath.Equals(Edpf.Abstractions.Storage.BlobPath? other) -> bool
 Edpf.Abstractions.Storage.BlobPath.RelativePath.get -> string!
 Edpf.Abstractions.Storage.BlobPath.TenantId.get -> System.Guid
 Edpf.Abstractions.Storage.BlobPath.Value.get -> string!
+Edpf.Abstractions.Storage.BlobWriteOptions
+Edpf.Abstractions.Storage.BlobWriteOptions.BlobWriteOptions(Edpf.Abstractions.Primitives.DataClassificationLevel classification, string! declaredContentType, long maxLength, System.Guid? subjectId = null) -> void
+Edpf.Abstractions.Storage.BlobWriteOptions.Classification.get -> Edpf.Abstractions.Primitives.DataClassificationLevel
+Edpf.Abstractions.Storage.BlobWriteOptions.DeclaredContentType.get -> string!
+Edpf.Abstractions.Storage.BlobWriteOptions.MaxLength.get -> long
+Edpf.Abstractions.Storage.BlobWriteOptions.SubjectId.get -> System.Guid?
+Edpf.Abstractions.Storage.IBlobBackend
+Edpf.Abstractions.Storage.IBlobBackend.BackendName.get -> string!
+Edpf.Abstractions.Storage.IBlobBackend.GetAsync(Edpf.Abstractions.Storage.BlobPath! path, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result<byte[]!>!>!
+Edpf.Abstractions.Storage.IBlobBackend.GetMetadataAsync(Edpf.Abstractions.Storage.BlobPath! path, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result<System.Collections.Generic.IReadOnlyDictionary<string!, string!>!>!>!
+Edpf.Abstractions.Storage.IBlobBackend.ListAsync(string! renderedPrefix, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result<System.Collections.Generic.IReadOnlyList<string!>!>!>!
+Edpf.Abstractions.Storage.IBlobBackend.PutAsync(Edpf.Abstractions.Storage.BlobPath! path, byte[]! bytes, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result!>!
+Edpf.Abstractions.Storage.IBlobBackend.PutMetadataAsync(Edpf.Abstractions.Storage.BlobPath! path, System.Collections.Generic.IReadOnlyDictionary<string!, string!>! metadata, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result!>!
+Edpf.Abstractions.Storage.IBlobBackend.RemoveAsync(Edpf.Abstractions.Storage.BlobPath! path, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result!>!
+Edpf.Abstractions.Storage.IBlobStore
+Edpf.Abstractions.Storage.IBlobStore.DeleteAsync(Edpf.Abstractions.Storage.BlobPath! path, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result!>!
+Edpf.Abstractions.Storage.IBlobStore.ListAsync(System.Collections.Generic.IReadOnlyList<string!>! prefixSegments, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result<System.Collections.Generic.IReadOnlyList<Edpf.Abstractions.Storage.BlobDescriptor!>!>!>!
+Edpf.Abstractions.Storage.IBlobStore.ReadAsync(Edpf.Abstractions.Storage.BlobPath! path, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result<Edpf.Abstractions.Storage.BlobContent!>!>!
+Edpf.Abstractions.Storage.IBlobStore.StatAsync(Edpf.Abstractions.Storage.BlobPath! path, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result<Edpf.Abstractions.Storage.BlobDescriptor!>!>!
+Edpf.Abstractions.Storage.IBlobStore.WriteAsync(Edpf.Abstractions.Storage.BlobPath! path, System.IO.Stream! content, Edpf.Abstractions.Storage.BlobWriteOptions! options, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result<Edpf.Abstractions.Storage.BlobDescriptor!>!>!
 Edpf.Abstractions.Tenancy.BreakGlassGrant
 Edpf.Abstractions.Tenancy.BreakGlassGrant.BreakGlassGrant(System.Guid grantId, string! operatorId, System.Guid targetTenantId, string! justification, System.DateTimeOffset expiresUtc) -> void
 Edpf.Abstractions.Tenancy.BreakGlassGrant.ExpiresUtc.get -> System.DateTimeOffset

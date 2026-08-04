@@ -9,6 +9,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Edpf.Abstractions\Edpf.Abstractions.csproj" />
     <ProjectReference Include="..\..\src\Edpf.Data\Edpf.Data.csproj" />
+    <ProjectReference Include="..\..\src\Edpf.Storage\Edpf.Storage.csproj" />
   </ItemGroup>
 
 </Project>

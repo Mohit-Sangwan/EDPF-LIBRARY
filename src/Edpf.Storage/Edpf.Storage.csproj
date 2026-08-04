@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Phase 14 — Storage platform (ADR-037 v1.0 addition 2).
+
+    Tier 1 + Tier 2 only. ADR-002 scopes the net472/net48 surface to "data
+    access, config, logging, security primitives"; a blob platform is none of
+    those, so the exclusion is a stated decision rather than an accident of
+    whichever API happened to be missing.
+
+    No backend SDK is referenced here. Filesystem and in-memory need none, and
+    S3, Azure Blob and SFTP arrive as separate optional packages so the core
+    graph carries no cloud client (ADR-009).
+  -->
+  <PropertyGroup>
+    <TargetFrameworks>$(EdpfPlatformTargetFrameworks)</TargetFrameworks>
+    <IsPackable>true</IsPackable>
+    <Description>Enterprise Data Platform Framework — tenant-safe blob storage with encryption at rest and content-type coercion.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Edpf.Abstractions\Edpf.Abstractions.csproj" />
+    <ProjectReference Include="..\Edpf.Core\Edpf.Core.csproj" />
+  </ItemGroup>
+
+</Project>

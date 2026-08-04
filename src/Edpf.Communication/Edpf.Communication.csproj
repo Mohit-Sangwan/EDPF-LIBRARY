@@ -3,7 +3,7 @@
   <!--
     Communication platform (ADR-037 v1.0 addition 3).
 
-    Tier 1 + Tier 2 only, for the same reason as Edpf.Storage: ADR-002 scopes
+    Tier 1 only, for the same reason as Edpf.Storage: ADR-002 scopes
     the net472/net48 surface to data access, config, logging and security
     primitives, and outbound messaging is none of those.
 

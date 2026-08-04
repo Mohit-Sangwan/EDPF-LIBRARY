@@ -1,0 +1,80 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    ★ THE TIERED RUNTIME SUITE ★
+
+    This project exists because a declared target framework and an executed one
+    are different things, and nothing in a green build distinguishes them.
+
+    It began as a Tier 3 suite: eleven assemblies declared net472/net48 support
+    (ADR-002) and not one line had ever EXECUTED there, because every test
+    project targeted net10.0 only. That mattered because ADR-002's cost had been
+    paid seven times — portable equivalents for IsExternalInit, DateOnly,
+    Index/Range, static HashData, [GeneratedRegex], ReadOnlySpan in a
+    zero-dependency assembly, and RSASSA-PSS — and Phase 24f spent the benefit
+    on the claim that laboratory device hosts still run .NET Framework. A claim
+    nobody had run.
+
+    Then it was pointed one level further out, at the question it had answered
+    for Tier 3 but not for the matrix as a whole: WHICH of the declared
+    frameworks has actually executed anything? The answer was two of five.
+    net472 and net8.0 had never run a test either — the suite had been fixed for
+    exactly the tier that prompted it and stopped there.
+
+    net6.0 could not be added: xunit.runner.visualstudio 3.1.5 resolves .NET
+    Framework assets for it (NU1701). Tier 2 was not merely untested, it was
+    untestable with the pinned toolchain — one of the four findings that
+    retired it in ADR-038.
+
+    So this runs on EVERY framework the libraries declare, and that is the
+    invariant to preserve: $(EdpfLibraryTargetFrameworks), never a hand-written
+    list. A hand-written list is what let three frameworks go unexecuted, and
+    the consolidation audit's lesson applies here — a rule that names its
+    subjects goes stale, a rule that discovers them does not.
+
+    "It compiles" and "it works" differ most on exactly the constructs a
+    portable equivalent replaces: culture-sensitive formatting, Substring vs
+    Range, instance vs static hash APIs.
+
+    Deliberately NARROW in what it references — only assemblies that reach
+    Tier 3 — so a divergence appears as a difference between runs of identical
+    assertions rather than as an absence.
+  -->
+  <PropertyGroup>
+    <!--
+      ★ Clearing the inherited SINGULAR property is load-bearing. ★
+
+      tests/Directory.Build.props sets <TargetFramework>net10.0</TargetFramework>
+      for every test project. When a csproj then sets the PLURAL
+      <TargetFrameworks>, both are defined — and MSBuild resolves that in favour
+      of the singular, disabling cross-targeting entirely. The project builds
+      net10.0 and nothing else, silently, with no warning.
+
+      That is not hypothetical. This project shipped on 2026-08-03 declaring
+      net48;net10.0, and `dotnet build` produced only net10.0. The CI step added
+      the same day to prove Tier 3 executes asked for the net48 framework with
+      the no-build flag, against an assembly the build had never produced:
+      "The test source file ... was not found", exit code 1.
+
+      So the suite created to prove a framework runs, and the CI step created to
+      run it, were BOTH broken by the same inherited property — and neither
+      failure was visible, because `dotnet test -f net48` WITHOUT the no-build
+      flag builds the missing target on demand and passes. That is how it was
+      verified, and that is why it looked fine.
+
+      (The flag names are spelled out rather than quoted because a literal
+      double hyphen is illegal inside an XML comment — this file did not load
+      at all until that was fixed.)
+    -->
+    <TargetFramework />
+    <TargetFrameworks>$(EdpfLibraryTargetFrameworks)</TargetFrameworks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Edpf.Abstractions\Edpf.Abstractions.csproj" />
+    <ProjectReference Include="..\..\src\Edpf.Core\Edpf.Core.csproj" />
+    <ProjectReference Include="..\..\src\Edpf.Compatibility\Edpf.Compatibility.csproj" />
+    <ProjectReference Include="..\..\src\Edpf.Devices\Edpf.Devices.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,8 +1,21 @@
 # ADR-002: Multi-target strategy — tiered TFM surface
 
-**Status:** Accepted
+**Status:** Accepted — **amended 2026-08-04 by
+[ADR-038](ADR-038-retire-tier-2.md), which retired Tier 2 (net6.0)**
 **Date:** 2026-08-01
 **Deciders:** Chief Architect, squad leads
+
+> **The Phase 32 review promised below was never performed.** This ADR deferred
+> net6.0's end-of-support status to Phase 32; Phase 32 shipped in Wave 7 and its
+> completion report does not mention target frameworks. The review finally ran
+> on 2026-08-04 and net6.0 failed it four ways — unsupported for twenty-one
+> months, disclaimed by all twenty of its Microsoft dependencies, never
+> executed, and *untestable* with the pinned test runner. Tier 2 is retired.
+>
+> The deferral is left in place below rather than edited out. A deferral that
+> was never honoured is evidence about how this programme fails, and rewriting
+> it would remove the evidence: **two documents asserted a review existed, and
+> its existence was never checked because both of them said so.**
 
 ## Context
 
@@ -39,14 +52,27 @@ Option 3. The tier definitions live in `Directory.Build.props`
 tiered surface is proven by per-TFM builds in CI — all five TFMs compile with
 warnings as errors today.
 
+> **"Proven by per-TFM builds" was the mistake, in one phrase.** A build proves
+> compilation and nothing else, and the sentence above treats the two as the
+> same claim. It stood for eight waves. Since ADR-038 the tiered surface is
+> proven by per-TFM *test runs* — `tests/Edpf.RuntimeTests`, executing on every
+> framework `EdpfLibraryTargetFrameworks` declares, in the project file and in
+> CI, derived rather than listed.
+
 ## Consequences
 
 - Positive: modern targets are never dragged down; legacy targets get an
   honest, supportable contract instead of a false promise.
 - Negative: Tier 3 consumers see a smaller API; documented per capability.
-- Accepted risk: net6.0 is out of Microsoft support; retained deliberately as
+- ~~Accepted risk: net6.0 is out of Microsoft support; retained deliberately as
   the Tier 2 bridge and reviewed at Phase 32 (`CheckEolTargetFramework`
-  disabled with this justification).
+  disabled with this justification).~~
+  **Withdrawn 2026-08-04 ([ADR-038](ADR-038-retire-tier-2.md)).** The review
+  named here never happened, and the risk was not accepted so much as
+  suppressed: `CheckEolTargetFramework=false` was the only thing keeping this
+  ADR's "warnings as errors" claim compatible with shipping an EOL runtime.
+  The check is now armed, so the next framework to reach end of support fails
+  the build rather than waiting on a review nobody scheduled.
 
 ## Revisit trigger
 

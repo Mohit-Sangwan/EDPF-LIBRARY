@@ -20,7 +20,7 @@
     Rendering — PDF/A, Word, real Excel — is a different problem with a
     different dependency footprint and is not here. See the phase report.
 
-    Tier 1 + Tier 2 (ADR-002).
+    Tier 1 (ADR-002).
   -->
   <PropertyGroup>
     <TargetFrameworks>$(EdpfPlatformTargetFrameworks)</TargetFrameworks>

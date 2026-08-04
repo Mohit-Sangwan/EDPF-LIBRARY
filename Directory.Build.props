@@ -12,28 +12,49 @@
 
   <PropertyGroup Label="TargetFrameworkTiers">
     <!--
-      ADR-002 tiered surface:
+      ADR-002 tiered surface, as amended by ADR-038:
         Tier 1 (net8.0, net10.0)  — full surface.
-        Tier 2 (net6.0)           — full minus newest APIs.
         Tier 3 (net472, net48)    — reduced surface: data access, config,
                                     logging, security primitives only.
       Divergence is isolated in Edpf.Compatibility; `#if` is forbidden
       everywhere else (Z.3 rule 12, enforced by architecture test EDPF0002).
+
+      Tier 2 (net6.0) was RETIRED by ADR-038. It was out of Microsoft support
+      for twenty-one months, every Microsoft.Extensions package it referenced
+      declared it unsupported and untested, no test had ever executed on it,
+      and the pinned test runner could not target it at all. A support claim
+      the repository could not back.
     -->
-    <EdpfLibraryTargetFrameworks>net472;net48;net6.0;net8.0;net10.0</EdpfLibraryTargetFrameworks>
+    <EdpfLibraryTargetFrameworks>net472;net48;net8.0;net10.0</EdpfLibraryTargetFrameworks>
     <EdpfModernTargetFrameworks>net8.0;net10.0</EdpfModernTargetFrameworks>
     <!--
-      Tier 1 + Tier 2 only. Used by assemblies outside the Tier 3 surface that
-      ADR-002 defines — data-platform services (classification, lineage, MDM,
-      CDC) are not part of the "data access, config, logging, security
+      Tier 1 only, since ADR-038. Used by assemblies outside the Tier 3 surface
+      that ADR-002 defines — data-platform services (classification, lineage,
+      MDM, CDC) are not part of the "data access, config, logging, security
       primitives" that net472/net48 receive. Declaring that here keeps the
       exclusion a stated architectural decision rather than an accident of
       whichever API happened to be unavailable.
+
+      This currently holds the same value as EdpfModernTargetFrameworks and is
+      deliberately kept separate: the two encode different decisions that merely
+      coincide today. "Deliberately outside Tier 3" and "a modern-only tool" are
+      not the same statement, and they will diverge again the next time a tier
+      moves.
     -->
-    <EdpfPlatformTargetFrameworks>net6.0;net8.0;net10.0</EdpfPlatformTargetFrameworks>
-    <!-- net6.0 is retained deliberately as the Tier 2 surface per ADR-002;
-         its EOL status is acknowledged and tracked as a Phase 32 review item. -->
-    <CheckEolTargetFramework>false</CheckEolTargetFramework>
+    <EdpfPlatformTargetFrameworks>net8.0;net10.0</EdpfPlatformTargetFrameworks>
+    <!--
+      ARMED, per ADR-038. This was previously false, which is how net6.0 stayed
+      in the matrix for twenty-one months after going out of support: NETSDK1138
+      carries a warning code, so with TreatWarningsAsErrors it FAILS the build —
+      and suppressing it was the only thing keeping "warnings as errors" and "we
+      ship an EOL runtime" true at the same time.
+
+      Leaving it armed means the next framework to reach end of support cannot be
+      absorbed silently. It will stop the build, and that is the intended
+      behaviour: a deliberate decision to drop or knowingly retain a tier, made
+      on the day it goes EOL rather than discovered nearly two years later.
+    -->
+    <CheckEolTargetFramework>true</CheckEolTargetFramework>
   </PropertyGroup>
 
   <PropertyGroup Label="Compiler">

@@ -7,7 +7,7 @@
   -->
   <PropertyGroup>
     <!--
-      Tier 1 + Tier 2 (ADR-002). Data-platform services are deliberately
+      Tier 1 (ADR-002). Data-platform services are deliberately
       outside the Tier 3 reduced surface, which covers data access, config,
       logging and security primitives only. A net48 host consumes the platform
       through its API rather than in-process.

@@ -13,7 +13,7 @@
     equivalence without disclosing values, dual-write divergence detection,
     and a cutover with an explicit point of no return.
 
-    Tier 1 + Tier 2 (ADR-002). The migration runner is a modern tool even when
+    Tier 1 (ADR-002). The migration runner is a modern tool even when
     the system it is migrating from is not.
   -->
   <PropertyGroup>

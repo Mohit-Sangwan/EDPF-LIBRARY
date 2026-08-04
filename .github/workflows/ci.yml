@@ -83,20 +83,45 @@ jobs:
           dotnet test tests/Edpf.ConformanceTests/Edpf.ConformanceTests.csproj
           --no-build --configuration Release
 
-      # ★ Tier 3 must be asked for BY FRAMEWORK. A solution-level or
-      # project-level `dotnet test` on a multi-targeted project runs one TFM,
-      # so net48 needs naming — otherwise the eleven assemblies that declare
-      # net472/net48 support (ADR-002) are compile-verified and never executed,
-      # which is exactly the state this repository was in until 2026-08-03.
-      - name: Tier 3 runtime suite (net48)
-        run: >
-          dotnet test tests/Edpf.Tier3Tests/Edpf.Tier3Tests.csproj
-          --no-build --configuration Release --framework net48
-
-      - name: Tier 3 runtime suite (net10.0, for comparison)
-        run: >
-          dotnet test tests/Edpf.Tier3Tests/Edpf.Tier3Tests.csproj
-          --no-build --configuration Release --framework net10.0
+      # ★ Each framework is asked for BY NAME, and the reason is not the one
+      # this comment used to give.
+      #
+      # It claimed `dotnet test` runs only one TFM of a multi-targeted project.
+      # It does not — it cross-targets, and running the project plainly
+      # produces a result line per framework. What actually happened is in
+      # tests/Edpf.RuntimeTests: the singular <TargetFramework> inherited from
+      # tests/Directory.Build.props silently defeated the plural
+      # <TargetFrameworks>, so only ONE framework was ever BUILT. A missing
+      # build output was misread as a limitation of the runner.
+      #
+      # Naming them is still worth doing, for a different reason: a framework
+      # that cannot execute fails this step loudly, instead of quietly
+      # producing one fewer result line among ten. That is the failure mode
+      # this repository keeps rediscovering.
+      #
+      # The list is DERIVED, not written. Adding a framework to
+      # EdpfLibraryTargetFrameworks enrolls it here automatically; a hand-kept
+      # list is what went stale, and the consolidation audit's lesson is that a
+      # rule which names its subjects goes stale while one that discovers them
+      # does not.
+      #
+      # windows-latest is required: net472/net48 cannot execute elsewhere.
+      - name: Tiered runtime suite (every declared framework)
+        shell: bash
+        run: |
+          set -euo pipefail
+          tfms=$(sed -n 's/.*<EdpfLibraryTargetFrameworks>\(.*\)<\/EdpfLibraryTargetFrameworks>.*/\1/p' Directory.Build.props)
+          if [ -z "$tfms" ]; then
+            echo "::error::Could not read EdpfLibraryTargetFrameworks from Directory.Build.props"
+            exit 1
+          fi
+          echo "Declared library frameworks: $tfms"
+          for tfm in ${tfms//;/ }; do
+            echo "::group::Tiered runtime suite — $tfm"
+            dotnet test tests/Edpf.RuntimeTests/Edpf.RuntimeTests.csproj \
+              --no-build --configuration Release --framework "$tfm"
+            echo "::endgroup::"
+          done
 
       # `--disable-github-licenses` was removed in CycloneDX 6.x: GitHub
       # licence resolution is now OFF by default and opted INTO with

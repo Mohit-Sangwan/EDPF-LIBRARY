@@ -16,7 +16,7 @@
     as a revisit trigger; the reference below is how that trigger stays
     unpulled.
 
-    Tier 1 + Tier 2 (ADR-002).
+    Tier 1 (ADR-002).
   -->
   <PropertyGroup>
     <TargetFrameworks>$(EdpfPlatformTargetFrameworks)</TargetFrameworks>

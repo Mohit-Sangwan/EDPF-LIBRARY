@@ -12,7 +12,7 @@
     medication. The ENCODING is the safety-critical part; turning the encoded
     symbol into ink is not.
 
-    Tier 1 + Tier 2 (ADR-002). Label printing itself is a Tier 3 concern
+    Tier 1 (ADR-002). Label printing itself is a Tier 3 concern
     (Phase 24f) because that is where the hardware is.
   -->
   <PropertyGroup>

@@ -7,7 +7,7 @@
     regulated workflows this framework's consumers actually run, and stops
     short of the product ADR-037 declined to build.
 
-    Tier 1 + Tier 2, consistent with the other platform assemblies (ADR-002).
+    Tier 1, consistent with the other platform assemblies (ADR-002).
   -->
   <PropertyGroup>
     <TargetFrameworks>$(EdpfPlatformTargetFrameworks)</TargetFrameworks>

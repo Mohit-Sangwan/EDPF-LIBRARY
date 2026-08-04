@@ -13,7 +13,7 @@
     offset pagination over a set that is still changing. Those are pure logic
     and they are what this package makes hard to get wrong.
 
-    Tier 1 + Tier 2 (ADR-002).
+    Tier 1 (ADR-002).
   -->
   <PropertyGroup>
     <TargetFrameworks>$(EdpfPlatformTargetFrameworks)</TargetFrameworks>

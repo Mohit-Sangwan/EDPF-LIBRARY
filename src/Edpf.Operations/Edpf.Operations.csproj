@@ -3,7 +3,7 @@
   <!--
     Wave 7 — Operate (Phases 29-32).
     SLOs and error budgets, burn-rate alerting, cost attribution, and the
-    benchmark regression gate. Tier 1 + Tier 2 (ADR-002): operations tooling
+    benchmark regression gate. Tier 1 (ADR-002): operations tooling
     is not part of the Tier 3 reduced surface.
   -->
   <PropertyGroup>

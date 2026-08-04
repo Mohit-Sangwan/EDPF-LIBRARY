@@ -11,7 +11,7 @@
     "rule-based cleansing with full before/after audit (cleansing clinical
      data is a change to the medical record and must be traceable)"
 
-    Tier 1 + Tier 2 (ADR-002).
+    Tier 1 (ADR-002).
   -->
   <PropertyGroup>
     <TargetFrameworks>$(EdpfPlatformTargetFrameworks)</TargetFrameworks>

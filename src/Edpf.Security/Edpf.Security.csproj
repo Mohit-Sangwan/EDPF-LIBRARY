@@ -30,7 +30,7 @@
     is no legacy verifier to accommodate. An #if would put conditional
     compilation outside Edpf.Compatibility, which EDPF0002 forbids.
 
-    So entitlement verification is Tier 1 + Tier 2. That is the right answer on
+    So entitlement verification is Tier 1. That is the right answer on
     its merits anyway: entitlements are checked by on-premises servers and
     installers, not by the WinForms device hosts that justify Tier 3
     (Phase 24f). A Tier 3 consumer needing this must reach it through a

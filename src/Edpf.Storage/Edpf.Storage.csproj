@@ -3,7 +3,7 @@
   <!--
     Phase 14 — Storage platform (ADR-037 v1.0 addition 2).
 
-    Tier 1 + Tier 2 only. ADR-002 scopes the net472/net48 surface to "data
+    Tier 1 only. ADR-002 scopes the net472/net48 surface to "data
     access, config, logging, security primitives"; a blob platform is none of
     those, so the exclusion is a stated decision rather than an accident of
     whichever API happened to be missing.

@@ -10,7 +10,7 @@
     implicitly assuming reflection over compile-time types, which cannot
     describe a field a customer adds at runtime.
 
-    Tier 1 + Tier 2 (ADR-002). Metadata resolution is a platform service, not
+    Tier 1 (ADR-002). Metadata resolution is a platform service, not
     part of the "data access, config, logging, security primitives" surface
     that net472/net48 receive.
   -->

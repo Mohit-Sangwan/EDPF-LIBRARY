@@ -6,17 +6,25 @@ using Edpf.Core.Guards;
 using Edpf.Core.Time;
 using Edpf.Devices;
 
-namespace Edpf.Tier3Tests;
+namespace Edpf.RuntimeTests;
 
 /// <summary>
-/// The Tier 3 surface, executed rather than merely compiled.
+/// Every declared target framework, executed rather than merely compiled.
 /// </summary>
 /// <remarks>
 /// <para>
-/// Runs on net48 and net10.0. Every assertion here is framework-independent by
-/// intent, so a failure on one target and not the other is exactly the
-/// divergence ADR-002's portable equivalents exist to prevent — and the only
-/// way to see it is to run both.
+/// Runs on all of <c>$(EdpfLibraryTargetFrameworks)</c> — net472, net48, net8.0
+/// and net10.0. Every assertion here is framework-independent by intent, so a
+/// failure on one target and not another is exactly the divergence ADR-002's
+/// portable equivalents exist to prevent — and the only way to see it is to run
+/// them all.
+/// </para>
+/// <para>
+/// The method names say <c>OnEveryTier</c>. They were aspirational when written:
+/// the suite ran on two of the five frameworks the libraries declared, and
+/// net472, net8.0 and net6.0 had never executed a line. ADR-038 retired net6.0
+/// and this project now derives its targets from the same property the libraries
+/// use, so the names are true and stay true as the matrix changes.
 /// </para>
 /// <para>
 /// The cases are chosen where "it compiles" and "it works" most often part
@@ -24,7 +32,7 @@ namespace Edpf.Tier3Tests;
 /// range expression, and instance hash APIs standing in for static ones.
 /// </para>
 /// </remarks>
-public sealed class Tier3SurfaceTests
+public sealed class TieredRuntimeTests
 {
     // ── the framework this is actually running on ─────────────────────────
 

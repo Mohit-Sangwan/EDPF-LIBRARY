@@ -16,7 +16,7 @@
       "A user-authored formula is untrusted input regardless of who authored
        it."
 
-    Tier 1 + Tier 2 (ADR-002).
+    Tier 1 (ADR-002).
   -->
   <PropertyGroup>
     <TargetFrameworks>$(EdpfPlatformTargetFrameworks)</TargetFrameworks>

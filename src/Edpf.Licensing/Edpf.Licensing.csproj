@@ -21,7 +21,7 @@
     verification arrives through IDetachedSignatureVerifier, whose only
     implementation lives in Edpf.Security (Z.10).
 
-    Tier 1 + Tier 2 (ADR-002).
+    Tier 1 (ADR-002).
   -->
   <PropertyGroup>
     <TargetFrameworks>$(EdpfPlatformTargetFrameworks)</TargetFrameworks>

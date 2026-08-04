@@ -14,9 +14,9 @@ a sponsor can see what exists, what does not, and why.
 |---|---|
 | Waves worked | 9 of 9 (Phases 00–37, plus 05b, 08b, 08c, 17c, 23d, 24b, 24f, 26f, 33b, 34b and 35b) |
 | ADRs accepted | 36, plus ADR-037 (v1.0 scope) **proposed and awaiting a sponsor decision** |
-| Automated tests | 1379 passing without Docker, plus 24 Tier A parity tests requiring a daemon, plus 11 on net48 |
+| Automated tests | 1412 executions passing without Docker (1368 tests, plus the 11-test runtime suite on each of 4 frameworks); 24 Tier A parity tests require a daemon |
 | Platforms added post-wave | 6 — storage, communication, workflow, AI, MySQL provider, Worker Service host |
-| Target frameworks | 5, building clean with warnings as errors; Tier 3 runtime-verified 2026-08-03 |
+| Target frameworks | 4, all four **executing** tests (11/11 identical on each), zero build warnings. net6.0 retired 2026-08-04 ([ADR-038](adr/ADR-038-retire-tier-2.md)) |
 | Gates passed on engineering criteria | **G0, G1** |
 | Gates with outstanding criteria | G2–G9 |
 

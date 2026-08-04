@@ -24,9 +24,9 @@ Gate G1 (Foundation) passed on engineering criteria.
 
 | | |
 |---|---|
-| ADRs accepted | 36 accepted, 1 proposed ([ADR-037](docs/adr/ADR-037-v1-scope-boundary.md) — v1.0 scope, awaiting sponsor) |
-| Target frameworks | 5 building green; Tier 3 (net48) now also **executes** tests, not just compiles |
-| Automated tests | 1379 green without Docker, plus 24 Tier A parity tests that need a daemon, plus 11 executing on net48 |
+| ADRs accepted | 37 accepted, 1 proposed ([ADR-037](docs/adr/ADR-037-v1-scope-boundary.md) — v1.0 scope, awaiting sponsor) |
+| Target frameworks | 4, and **all four execute tests** — net6.0 was retired ([ADR-038](docs/adr/ADR-038-retire-tier-2.md)): unsupported since Nov 2024, and untestable with the pinned runner |
+| Automated tests | 1412 executions green without Docker (1368 tests, plus the 11-test runtime suite on each of 4 frameworks); 24 Tier A parity tests need a Docker daemon |
 | SQL providers | 4 dialects (SQL Server, PostgreSQL, SQLite, MySQL); 2 verified against live engines |
 | Host types | 2 (ASP.NET Core Web API, Worker Service) |
 | Injection corpus | 226 assertions, zero successful injections |
@@ -116,19 +116,40 @@ dotnet test Edpf.slnx -c Release --filter "Category!=RequiresDocker"
 > Both had sat in work reported complete since Wave 2. Use the filter when you
 > must, not by default.
 
-Neither command above runs **Tier 3**. A solution-level `dotnet test` executes
-only one target framework per project, so the net48 half of the Tier 3 suite
-needs asking for by name:
+Both commands above **do** run the tiered runtime suite on every framework —
+`dotnet test` cross-targets, so all four appear as separate result lines. To
+run just that suite:
 
 ```bash
-dotnet test tests/Edpf.Tier3Tests -c Release --framework net48
+dotnet test tests/Edpf.RuntimeTests -c Release
 ```
 
+> **A correction, because the earlier claim here was wrong.** This section used
+> to say a solution-level `dotnet test` executes only one framework per project
+> and each had to be named. It does not. What was actually happening is in the
+> [suite's project file](tests/Edpf.RuntimeTests/Edpf.RuntimeTests.csproj):
+> `tests/Directory.Build.props` sets the *singular* `<TargetFramework>`, which
+> silently wins over a project's *plural* `<TargetFrameworks>` and disables
+> cross-targeting altogether. Only one framework was being **built**, so only
+> one could run — and the missing framework was misread as a limitation of the
+> test runner. CI still enumerates them one at a time, which is worth doing for
+> a different reason: it fails loudly if a declared framework cannot execute,
+> rather than quietly producing one fewer result line.
+>
 > Eleven assemblies declare net472/net48 support (ADR-002) and, until this
 > suite existed, not one line of them had ever *executed* there — every test
-> project targeted net10.0 only, so Tier 3 was compile-verified and nothing
-> more. It passes, on both tiers, identically. But "it compiles" and "it works"
-> are different claims, and only one of them was being made.
+> project targeted net10.0 only. Fixing that named net48, and stopped: on
+> 2026-08-04, asking the same question of the whole matrix found that **two of
+> five declared frameworks had ever run a test.** net472 and net8.0 had not.
+> All four now pass 11/11, identically.
+>
+> The fifth, net6.0, could not be made to run at all — `xunit.runner.visualstudio`
+> 3.1.5 resolves .NET Framework assets for it. It was retired
+> ([ADR-038](docs/adr/ADR-038-retire-tier-2.md)) rather than tested, having also
+> been out of Microsoft support since November 2024.
+>
+> CI derives this list from `EdpfLibraryTargetFrameworks` rather than repeating
+> it, because a hand-kept list is exactly what went stale.
 
 Run the walking skeleton and its gate demonstration —
 see [samples/walking-skeleton](docs/phases/p02-walking-skeleton/11-usage.md)

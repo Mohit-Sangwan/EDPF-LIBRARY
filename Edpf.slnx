@@ -35,7 +35,7 @@
     <Project Path="tests/Edpf.Benchmarks/Edpf.Benchmarks.csproj" />
     <Project Path="tests/Edpf.ConformanceTests/Edpf.ConformanceTests.csproj" />
     <Project Path="tests/Edpf.IsolationTests/Edpf.IsolationTests.csproj" />
-    <Project Path="tests/Edpf.Tier3Tests/Edpf.Tier3Tests.csproj" />
+    <Project Path="tests/Edpf.RuntimeTests/Edpf.RuntimeTests.csproj" />
     <Project Path="tests/Edpf.UnitTests/Edpf.UnitTests.csproj" />
     <Project Path="tests/Edpf.WalkingSkeleton.Tests/Edpf.WalkingSkeleton.Tests.csproj" />
     <Project Path="tests/Edpf.WorkerHost.Tests/Edpf.WorkerHost.Tests.csproj" />

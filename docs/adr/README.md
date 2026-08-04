@@ -11,7 +11,7 @@ current answer is the current answer.
 | ADR | Title | Status |
 |---|---|---|
 | [ADR-001](ADR-001-data-core-strategy.md) | Data core strategy — wrap, don't build | Accepted |
-| [ADR-002](ADR-002-multi-target-strategy.md) | Multi-target strategy — tiered TFM surface | Accepted |
+| [ADR-002](ADR-002-multi-target-strategy.md) | Multi-target strategy — tiered TFM surface | Accepted — amended by [ADR-038](ADR-038-retire-tier-2.md) |
 | [ADR-003](ADR-003-consistency-model.md) | Consistency — outbox + saga + idempotency, no 2PC | Accepted |
 | [ADR-004](ADR-004-multi-tenancy-model.md) | Multi-tenancy — pluggable isolation, per-tenant keys | Accepted |
 | [ADR-005](ADR-005-schema-migration.md) | Schema migration & evolution | Accepted |
@@ -47,6 +47,7 @@ current answer is the current answer.
 | [ADR-035](ADR-035-benchmark-gate-enforces-allocation.md) | The benchmark gate enforces allocation and advises on time | Accepted |
 | [ADR-036](ADR-036-stored-form-must-equal-served-form.md) | Stored form must equal hashed form; replayed must equal served | Accepted |
 | [ADR-037](ADR-037-v1-scope-boundary.md) | The v1.0 scope boundary — ships, waits, never | **Proposed** |
+| [ADR-038](ADR-038-retire-tier-2.md) | Retire Tier 2 (net6.0) — a support claim the repository could not back | Accepted |
 
 Template: [ADR-000-template.md](ADR-000-template.md).
 Smaller decisions go to the [technical decision log](../tdl/README.md).

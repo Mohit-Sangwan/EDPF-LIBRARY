@@ -9,7 +9,7 @@
     as optional packages implementing IInferenceProvider (ADR-001, ADR-009);
     what the framework contributes is the boundary around them.
 
-    Tier 1 + Tier 2, consistent with the other platform assemblies (ADR-002).
+    Tier 1, consistent with the other platform assemblies (ADR-002).
   -->
   <PropertyGroup>
     <TargetFrameworks>$(EdpfPlatformTargetFrameworks)</TargetFrameworks>

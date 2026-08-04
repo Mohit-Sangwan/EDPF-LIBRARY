@@ -10,6 +10,7 @@
     <ProjectReference Include="..\..\src\Edpf.Abstractions\Edpf.Abstractions.csproj" />
     <ProjectReference Include="..\..\src\Edpf.Data\Edpf.Data.csproj" />
     <ProjectReference Include="..\..\src\Edpf.Storage\Edpf.Storage.csproj" />
+    <ProjectReference Include="..\..\src\Edpf.Communication\Edpf.Communication.csproj" />
   </ItemGroup>
 
 </Project>

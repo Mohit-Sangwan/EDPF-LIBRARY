@@ -77,6 +77,17 @@ public static class ErrorCodes
     /// <summary>Operation blocked by legal hold. Detail: hold reference.</summary>
     public const string LegalHold = "EDPF-CMP-6003";
 
+    /// <summary>
+    /// The message's effective classification exceeds what the delivery channel
+    /// may carry. Detail: channel name and the ceiling — never the content.
+    /// </summary>
+    /// <remarks>
+    /// Unencrypted email and SMS traverse infrastructure the platform does not
+    /// control, so they carry a ceiling below PHI. This is the code that fires
+    /// when a template would have put clinical detail into one.
+    /// </remarks>
+    public const string ChannelClassificationExceeded = "EDPF-CMP-6004";
+
     /// <summary>Retryable dependency failure. Detail: Retry-After.</summary>
     public const string TransientFailure = "EDPF-INT-7001";
 

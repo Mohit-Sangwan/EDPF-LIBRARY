@@ -7,6 +7,7 @@
     <Project Path="src/Edpf.Abstractions/Edpf.Abstractions.csproj" />
     <Project Path="src/Edpf.Barcode/Edpf.Barcode.csproj" />
     <Project Path="src/Edpf.Caching/Edpf.Caching.csproj" />
+    <Project Path="src/Edpf.Communication/Edpf.Communication.csproj" />
     <Project Path="src/Edpf.Compatibility/Edpf.Compatibility.csproj" />
     <Project Path="src/Edpf.Configuration/Edpf.Configuration.csproj" />
     <Project Path="src/Edpf.Connectors/Edpf.Connectors.csproj" />

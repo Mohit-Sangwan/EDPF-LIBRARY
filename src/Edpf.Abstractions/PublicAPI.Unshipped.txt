@@ -2,11 +2,14 @@
 const Edpf.Abstractions.Caching.CacheKey.GlobalPrefix = 'g' -> char
 const Edpf.Abstractions.Caching.CacheKey.Separator = ':' -> char
 const Edpf.Abstractions.Caching.CacheKey.TenantPrefix = 't' -> char
+const Edpf.Abstractions.Communication.MessageAddress.MaxLength = 254 -> int
+const Edpf.Abstractions.Communication.OutboundMessage.MaxSubjectLength = 250 -> int
 const Edpf.Abstractions.Configuration.SecretValue.Redacted = "***" -> string!
 const Edpf.Abstractions.Primitives.ErrorCodes.AuditUnavailable = "EDPF-AUDIT-9001" -> string!
 const Edpf.Abstractions.Primitives.ErrorCodes.AuthenticationFailed = "EDPF-AUTH-2001" -> string!
 const Edpf.Abstractions.Primitives.ErrorCodes.AuthorizationFailed = "EDPF-AUTHZ-2101" -> string!
 const Edpf.Abstractions.Primitives.ErrorCodes.CapabilityNotSupported = "EDPF-DATA-3005" -> string!
+const Edpf.Abstractions.Primitives.ErrorCodes.ChannelClassificationExceeded = "EDPF-CMP-6004" -> string!
 const Edpf.Abstractions.Primitives.ErrorCodes.CircuitOpen = "EDPF-INT-7002" -> string!
 const Edpf.Abstractions.Primitives.ErrorCodes.ConcurrencyConflict = "EDPF-DATA-3001" -> string!
 const Edpf.Abstractions.Primitives.ErrorCodes.ConfigurationInvalid = "EDPF-CFG-8001" -> string!
@@ -71,6 +74,37 @@ Edpf.Abstractions.Caching.ICacheProvider.GetOrCreateAsync<T>(Edpf.Abstractions.C
 Edpf.Abstractions.Caching.ICacheProvider.IsAvailable.get -> bool
 Edpf.Abstractions.Caching.ICacheProvider.RemoveAsync(Edpf.Abstractions.Caching.CacheKey! key, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result!>!
 Edpf.Abstractions.Caching.ICacheProvider.SetAsync<T>(Edpf.Abstractions.Caching.CacheKey! key, T! value, System.TimeSpan expiry, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result!>!
+Edpf.Abstractions.Communication.AddressKind
+Edpf.Abstractions.Communication.AddressKind.Email = 0 -> Edpf.Abstractions.Communication.AddressKind
+Edpf.Abstractions.Communication.AddressKind.Phone = 1 -> Edpf.Abstractions.Communication.AddressKind
+Edpf.Abstractions.Communication.ICommunicationChannel
+Edpf.Abstractions.Communication.ICommunicationChannel.AddressKind.get -> Edpf.Abstractions.Communication.AddressKind
+Edpf.Abstractions.Communication.ICommunicationChannel.ChannelName.get -> string!
+Edpf.Abstractions.Communication.ICommunicationChannel.MaximumClassification.get -> Edpf.Abstractions.Primitives.DataClassificationLevel
+Edpf.Abstractions.Communication.ICommunicationChannel.SendAsync(Edpf.Abstractions.Communication.OutboundMessage! message, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result!>!
+Edpf.Abstractions.Communication.ICommunicationDispatcher
+Edpf.Abstractions.Communication.ICommunicationDispatcher.SendAsync(Edpf.Abstractions.Communication.SendRequest! request, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result<Edpf.Abstractions.Communication.OutboundMessage!>!>!
+Edpf.Abstractions.Communication.MessageAddress
+Edpf.Abstractions.Communication.MessageAddress.Equals(Edpf.Abstractions.Communication.MessageAddress? other) -> bool
+Edpf.Abstractions.Communication.MessageAddress.Kind.get -> Edpf.Abstractions.Communication.AddressKind
+Edpf.Abstractions.Communication.MessageAddress.Value.get -> string!
+Edpf.Abstractions.Communication.OutboundMessage
+Edpf.Abstractions.Communication.OutboundMessage.Body.get -> string!
+Edpf.Abstractions.Communication.OutboundMessage.Classification.get -> Edpf.Abstractions.Primitives.DataClassificationLevel
+Edpf.Abstractions.Communication.OutboundMessage.OutboundMessage(Edpf.Abstractions.Communication.MessageAddress! recipient, string! subject, string! body, Edpf.Abstractions.Primitives.DataClassificationLevel classification) -> void
+Edpf.Abstractions.Communication.OutboundMessage.Recipient.get -> Edpf.Abstractions.Communication.MessageAddress!
+Edpf.Abstractions.Communication.OutboundMessage.Subject.get -> string!
+Edpf.Abstractions.Communication.SendRequest
+Edpf.Abstractions.Communication.SendRequest.Purpose.get -> string!
+Edpf.Abstractions.Communication.SendRequest.Recipient.get -> Edpf.Abstractions.Communication.MessageAddress!
+Edpf.Abstractions.Communication.SendRequest.SendRequest(string! templateId, Edpf.Abstractions.Communication.MessageAddress! recipient, System.Collections.Generic.IReadOnlyDictionary<string!, Edpf.Abstractions.Communication.TemplateValue!>! values, string! purpose, string! subjectToken) -> void
+Edpf.Abstractions.Communication.SendRequest.SubjectToken.get -> string!
+Edpf.Abstractions.Communication.SendRequest.TemplateId.get -> string!
+Edpf.Abstractions.Communication.SendRequest.Values.get -> System.Collections.Generic.IReadOnlyDictionary<string!, Edpf.Abstractions.Communication.TemplateValue!>!
+Edpf.Abstractions.Communication.TemplateValue
+Edpf.Abstractions.Communication.TemplateValue.Classification.get -> Edpf.Abstractions.Primitives.DataClassificationLevel
+Edpf.Abstractions.Communication.TemplateValue.TemplateValue(string! value, Edpf.Abstractions.Primitives.DataClassificationLevel classification) -> void
+Edpf.Abstractions.Communication.TemplateValue.Value.get -> string!
 Edpf.Abstractions.Compliance.ConsentDecision
 Edpf.Abstractions.Compliance.ConsentDecision.Basis.get -> Edpf.Abstractions.Compliance.LawfulBasis
 Edpf.Abstractions.Compliance.ConsentDecision.ConsentVersion.get -> string?
@@ -731,6 +765,9 @@ Edpf.Abstractions.Validation.ValidationSeverity.Warning = 1 -> Edpf.Abstractions
 override Edpf.Abstractions.Caching.CacheKey.Equals(object? obj) -> bool
 override Edpf.Abstractions.Caching.CacheKey.GetHashCode() -> int
 override Edpf.Abstractions.Caching.CacheKey.ToString() -> string!
+override Edpf.Abstractions.Communication.MessageAddress.Equals(object? obj) -> bool
+override Edpf.Abstractions.Communication.MessageAddress.GetHashCode() -> int
+override Edpf.Abstractions.Communication.MessageAddress.ToString() -> string!
 override Edpf.Abstractions.Configuration.SecretValue.Equals(object? obj) -> bool
 override Edpf.Abstractions.Configuration.SecretValue.GetHashCode() -> int
 override Edpf.Abstractions.Configuration.SecretValue.ToString() -> string!
@@ -762,6 +799,9 @@ override Edpf.Abstractions.Storage.BlobPath.ToString() -> string!
 override Edpf.Abstractions.Validation.ValidationFailure.ToString() -> string!
 static Edpf.Abstractions.Caching.CacheKey.ForTenant(System.Guid tenantId, string! entityName, params string![]! parts) -> Edpf.Abstractions.Caching.CacheKey!
 static Edpf.Abstractions.Caching.CacheKey.Global(string! justification, string! entityName, params string![]! parts) -> Edpf.Abstractions.Caching.CacheKey!
+static Edpf.Abstractions.Communication.MessageAddress.ForEmail(string! address) -> Edpf.Abstractions.Communication.MessageAddress!
+static Edpf.Abstractions.Communication.MessageAddress.ForPhone(string! number) -> Edpf.Abstractions.Communication.MessageAddress!
+static Edpf.Abstractions.Communication.TemplateValue.Public(string! value) -> Edpf.Abstractions.Communication.TemplateValue!
 static Edpf.Abstractions.Compliance.ConsentDecision.Permit(Edpf.Abstractions.Compliance.LawfulBasis basis, string! reason, string? consentVersion = null) -> Edpf.Abstractions.Compliance.ConsentDecision!
 static Edpf.Abstractions.Compliance.ConsentDecision.Refuse(string! reason) -> Edpf.Abstractions.Compliance.ConsentDecision!
 static Edpf.Abstractions.Configuration.SecretValue.Empty.get -> Edpf.Abstractions.Configuration.SecretValue!

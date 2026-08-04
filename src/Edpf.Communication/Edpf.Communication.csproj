@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Communication platform (ADR-037 v1.0 addition 3).
+
+    Tier 1 + Tier 2 only, for the same reason as Edpf.Storage: ADR-002 scopes
+    the net472/net48 surface to data access, config, logging and security
+    primitives, and outbound messaging is none of those.
+
+    No vendor client is referenced. The pickup-directory email channel needs
+    none; SendGrid, SES and Twilio arrive as optional packages (ADR-009).
+  -->
+  <PropertyGroup>
+    <TargetFrameworks>$(EdpfPlatformTargetFrameworks)</TargetFrameworks>
+    <IsPackable>true</IsPackable>
+    <Description>Enterprise Data Platform Framework — consent-gated outbound email and SMS with a per-channel classification ceiling.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Edpf.Abstractions\Edpf.Abstractions.csproj" />
+    <ProjectReference Include="..\Edpf.Core\Edpf.Core.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Real-time platform. Deferred in ADR-037 behind "a dashboard or
+    vitals-monitoring requirement from a real deployment"; built on the
+    sponsor's instruction.
+
+    No SignalR reference. SignalR, raw WebSocket and server-sent events are
+    transports implementing ISubscriberTransport, and they ship as optional
+    packages (ADR-001, ADR-009). What lives here is the part a transport does
+    not do: tenancy, scope, the classification ceiling, and the
+    acknowledgement rule.
+
+    Tier 1, consistent with the other platform assemblies (ADR-002/ADR-038).
+  -->
+  <PropertyGroup>
+    <TargetFrameworks>$(EdpfPlatformTargetFrameworks)</TargetFrameworks>
+    <IsPackable>true</IsPackable>
+    <Description>Enterprise Data Platform Framework — tenant-scoped real-time delivery where a critical alert nobody acknowledged is escalated, not reported as sent.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Edpf.Abstractions\Edpf.Abstractions.csproj" />
+    <ProjectReference Include="..\Edpf.Core\Edpf.Core.csproj" />
+  </ItemGroup>
+
+</Project>

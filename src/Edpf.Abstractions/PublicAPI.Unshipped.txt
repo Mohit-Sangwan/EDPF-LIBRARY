@@ -589,6 +589,30 @@ Edpf.Abstractions.Query.ISpecification<TEntity>.IncludeDeleted.get -> bool
 Edpf.Abstractions.Query.ISpecification<TEntity>.NoTracking.get -> bool
 Edpf.Abstractions.Query.ISpecification<TEntity>.Projection.get -> System.Collections.Generic.IReadOnlyList<string!>!
 Edpf.Abstractions.Query.ISpecification<TEntity>.Sort.get -> System.Collections.Generic.IReadOnlyList<Edpf.Abstractions.Data.SortColumn>!
+Edpf.Abstractions.RealTime.DeliveryGuarantee
+Edpf.Abstractions.RealTime.DeliveryGuarantee.BestEffort = 0 -> Edpf.Abstractions.RealTime.DeliveryGuarantee
+Edpf.Abstractions.RealTime.DeliveryGuarantee.RequiresAcknowledgement = 1 -> Edpf.Abstractions.RealTime.DeliveryGuarantee
+Edpf.Abstractions.RealTime.IAlertEscalator
+Edpf.Abstractions.RealTime.IAlertEscalator.EscalateAsync(Edpf.Abstractions.RealTime.RealTimeMessage! message, System.Guid tenantId, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result!>!
+Edpf.Abstractions.RealTime.IRealTimeHub
+Edpf.Abstractions.RealTime.IRealTimeHub.PublishAsync(string! channelName, string! payload, Edpf.Abstractions.Primitives.DataClassificationLevel classification, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result<int>!>!
+Edpf.Abstractions.RealTime.IRealTimeHub.Subscribe(string! channelName, string! connectionId, System.Collections.Generic.IReadOnlyList<string!>! heldScopes) -> Edpf.Abstractions.Primitives.Result!
+Edpf.Abstractions.RealTime.ISubscriberTransport
+Edpf.Abstractions.RealTime.ISubscriberTransport.PushAsync(string! connectionId, Edpf.Abstractions.RealTime.RealTimeMessage! message, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result!>!
+Edpf.Abstractions.RealTime.ISubscriberTransport.TransportName.get -> string!
+Edpf.Abstractions.RealTime.RealTimeChannel
+Edpf.Abstractions.RealTime.RealTimeChannel.Delivery.get -> Edpf.Abstractions.RealTime.DeliveryGuarantee
+Edpf.Abstractions.RealTime.RealTimeChannel.MaximumClassification.get -> Edpf.Abstractions.Primitives.DataClassificationLevel
+Edpf.Abstractions.RealTime.RealTimeChannel.Name.get -> string!
+Edpf.Abstractions.RealTime.RealTimeChannel.RealTimeChannel(string! name, Edpf.Abstractions.Primitives.DataClassificationLevel maximumClassification, Edpf.Abstractions.RealTime.DeliveryGuarantee delivery, string! requiredScope) -> void
+Edpf.Abstractions.RealTime.RealTimeChannel.RequiredScope.get -> string!
+Edpf.Abstractions.RealTime.RealTimeMessage
+Edpf.Abstractions.RealTime.RealTimeMessage.ChannelName.get -> string!
+Edpf.Abstractions.RealTime.RealTimeMessage.Classification.get -> Edpf.Abstractions.Primitives.DataClassificationLevel
+Edpf.Abstractions.RealTime.RealTimeMessage.MessageId.get -> string!
+Edpf.Abstractions.RealTime.RealTimeMessage.Payload.get -> string!
+Edpf.Abstractions.RealTime.RealTimeMessage.PublishedUtc.get -> System.DateTimeOffset
+Edpf.Abstractions.RealTime.RealTimeMessage.RealTimeMessage(string! messageId, string! channelName, string! payload, Edpf.Abstractions.Primitives.DataClassificationLevel classification, System.DateTimeOffset publishedUtc) -> void
 Edpf.Abstractions.Search.ISearchIndex<TDocument>
 Edpf.Abstractions.Search.ISearchIndex<TDocument>.IndexAsync(System.Guid tenantId, string! documentId, TDocument! document, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result!>!
 Edpf.Abstractions.Search.ISearchIndex<TDocument>.IndexName.get -> string!

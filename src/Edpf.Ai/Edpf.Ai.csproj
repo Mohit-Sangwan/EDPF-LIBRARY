@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    AI platform. ADR-037 deferred this and said what the deliverable would be
+    when it arrived: "EU AI Act positioning is the deliverable, not
+    embeddings". That is what this assembly is.
+
+    There is no model client here and there will not be one. Vendor SDKs ship
+    as optional packages implementing IInferenceProvider (ADR-001, ADR-009);
+    what the framework contributes is the boundary around them.
+
+    Tier 1 + Tier 2, consistent with the other platform assemblies (ADR-002).
+  -->
+  <PropertyGroup>
+    <TargetFrameworks>$(EdpfPlatformTargetFrameworks)</TargetFrameworks>
+    <IsPackable>true</IsPackable>
+    <Description>Enterprise Data Platform Framework — a governed inference boundary: declared use cases, risk tiers, classification ceilings and an audit log.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Edpf.Abstractions\Edpf.Abstractions.csproj" />
+    <ProjectReference Include="..\Edpf.Core\Edpf.Core.csproj" />
+  </ItemGroup>
+
+</Project>

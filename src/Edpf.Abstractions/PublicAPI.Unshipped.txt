@@ -43,6 +43,35 @@ const Edpf.Abstractions.Storage.BlobPath.MaxPathLength = 1024 -> int
 const Edpf.Abstractions.Storage.BlobPath.MaxSegmentLength = 255 -> int
 const Edpf.Abstractions.Storage.BlobWriteOptions.AbsoluteMaxLength = 2147483648 -> long
 const Edpf.Abstractions.Validation.ValidationFailure.MaxMessageLength = 200 -> int
+Edpf.Abstractions.Ai.AiRiskTier
+Edpf.Abstractions.Ai.AiRiskTier.High = 2 -> Edpf.Abstractions.Ai.AiRiskTier
+Edpf.Abstractions.Ai.AiRiskTier.Limited = 1 -> Edpf.Abstractions.Ai.AiRiskTier
+Edpf.Abstractions.Ai.AiRiskTier.Minimal = 0 -> Edpf.Abstractions.Ai.AiRiskTier
+Edpf.Abstractions.Ai.AiRiskTier.Unacceptable = 3 -> Edpf.Abstractions.Ai.AiRiskTier
+Edpf.Abstractions.Ai.IInferenceProvider
+Edpf.Abstractions.Ai.IInferenceProvider.InferAsync(Edpf.Abstractions.Ai.InferenceRequest! request, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result<Edpf.Abstractions.Ai.InferenceResult!>!>!
+Edpf.Abstractions.Ai.IInferenceProvider.IsExternal.get -> bool
+Edpf.Abstractions.Ai.IInferenceProvider.MaximumClassification.get -> Edpf.Abstractions.Primitives.DataClassificationLevel
+Edpf.Abstractions.Ai.IInferenceProvider.ModelIdentifier.get -> string!
+Edpf.Abstractions.Ai.IInferenceProvider.ProviderName.get -> string!
+Edpf.Abstractions.Ai.InferenceRequest
+Edpf.Abstractions.Ai.InferenceRequest.EffectiveClassification.get -> Edpf.Abstractions.Primitives.DataClassificationLevel
+Edpf.Abstractions.Ai.InferenceRequest.InferenceRequest(string! useCaseId, System.Collections.Generic.IReadOnlyList<Edpf.Abstractions.Ai.PromptSegment!>! segments, Edpf.Abstractions.Primitives.DataClassificationLevel effectiveClassification) -> void
+Edpf.Abstractions.Ai.InferenceRequest.Segments.get -> System.Collections.Generic.IReadOnlyList<Edpf.Abstractions.Ai.PromptSegment!>!
+Edpf.Abstractions.Ai.InferenceRequest.UseCaseId.get -> string!
+Edpf.Abstractions.Ai.InferenceResult
+Edpf.Abstractions.Ai.InferenceResult.InferenceResult(string! text, string! providerName, string! modelIdentifier) -> void
+Edpf.Abstractions.Ai.InferenceResult.ModelIdentifier.get -> string!
+Edpf.Abstractions.Ai.InferenceResult.ProviderName.get -> string!
+Edpf.Abstractions.Ai.InferenceResult.Text.get -> string!
+Edpf.Abstractions.Ai.PromptSegment
+Edpf.Abstractions.Ai.PromptSegment.Classification.get -> Edpf.Abstractions.Primitives.DataClassificationLevel
+Edpf.Abstractions.Ai.PromptSegment.Kind.get -> Edpf.Abstractions.Ai.PromptSegmentKind
+Edpf.Abstractions.Ai.PromptSegment.PromptSegment(Edpf.Abstractions.Ai.PromptSegmentKind kind, string! text, Edpf.Abstractions.Primitives.DataClassificationLevel classification) -> void
+Edpf.Abstractions.Ai.PromptSegment.Text.get -> string!
+Edpf.Abstractions.Ai.PromptSegmentKind
+Edpf.Abstractions.Ai.PromptSegmentKind.Content = 1 -> Edpf.Abstractions.Ai.PromptSegmentKind
+Edpf.Abstractions.Ai.PromptSegmentKind.Instruction = 0 -> Edpf.Abstractions.Ai.PromptSegmentKind
 Edpf.Abstractions.Audit.AuditChainVerification
 Edpf.Abstractions.Audit.AuditChainVerification.AuditChainVerification(bool isValid, long recordCount, long? firstBrokenSequence) -> void
 Edpf.Abstractions.Audit.AuditChainVerification.FirstBrokenSequence.get -> long?

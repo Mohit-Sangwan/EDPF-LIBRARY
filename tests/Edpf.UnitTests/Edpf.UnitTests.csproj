@@ -26,6 +26,7 @@
     <ProjectReference Include="..\..\src\Edpf.Storage\Edpf.Storage.csproj" />
     <ProjectReference Include="..\..\src\Edpf.Communication\Edpf.Communication.csproj" />
     <ProjectReference Include="..\..\src\Edpf.Workflow\Edpf.Workflow.csproj" />
+    <ProjectReference Include="..\..\src\Edpf.Ai\Edpf.Ai.csproj" />
     <ProjectReference Include="..\..\src\Edpf.DataPlatform\Edpf.DataPlatform.csproj" />
     <ProjectReference Include="..\..\src\Edpf.Globalization\Edpf.Globalization.csproj" />
     <ProjectReference Include="..\..\src\Edpf.Operations\Edpf.Operations.csproj" />

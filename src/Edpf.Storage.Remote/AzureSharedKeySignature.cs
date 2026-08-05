@@ -60,13 +60,19 @@ public sealed class AzureSharedKeySignature
     /// <param name="contentLength">The body length. Signed as empty when zero.</param>
     /// <param name="msHeaders">The <c>x-ms-*</c> headers, keyed by lowercase name.</param>
     /// <param name="canonicalResource">The canonicalised resource, from <see cref="CanonicalResource"/>.</param>
+    /// <param name="range">
+    /// The <c>Range</c> header, when one is sent. Empty otherwise. The Files
+    /// service writes with ranged PUTs, so this slot is not decorative there
+    /// even though the Blob service never fills it.
+    /// </param>
     /// <returns>The string to sign.</returns>
     /// <exception cref="ArgumentNullException">Any reference argument is null.</exception>
     public static string StringToSign(
         string method,
         long contentLength,
         SortedDictionary<string, string> msHeaders,
-        string canonicalResource)
+        string canonicalResource,
+        string range = "")
     {
         Guard.NotNull(method, nameof(method));
         Guard.NotNull(msHeaders, nameof(msHeaders));
@@ -94,7 +100,7 @@ public sealed class AzureSharedKeySignature
             + "\n"                                   // If-Match
             + "\n"                                   // If-None-Match
             + "\n"                                   // If-Unmodified-Since
-            + "\n"                                   // Range
+            + range + "\n"                           // Range
             + canonicalHeaders
             + canonicalResource;
     }

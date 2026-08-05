@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Remote storage backends, over HttpClient only.
+
+    NO VENDOR SDK, and that is the design rather than a shortcut. An SDK
+    wrapper can only be exercised against the live service, which is how cloud
+    adapters get shipped and never run; a signer built on HttpClient can be
+    verified against the provider's own published test vectors with no
+    credentials, in CI, on every commit.
+
+    It also keeps the supply chain flat. AWSSDK, Azure.Storage and
+    Google.Cloud between them pull in dozens of transitive packages, each with
+    its own CVE cadence, into every deployment that wanted to store a file
+    (ADR-001, ADR-009).
+
+    Tier 1, consistent with the other platform assemblies (ADR-002/ADR-038).
+  -->
+  <PropertyGroup>
+    <TargetFrameworks>$(EdpfPlatformTargetFrameworks)</TargetFrameworks>
+    <IsPackable>true</IsPackable>
+    <Description>Enterprise Data Platform Framework — S3-compatible and Azure Blob storage backends over HttpClient, with request signing implemented in-framework so it is testable without credentials.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Edpf.Abstractions\Edpf.Abstractions.csproj" />
+    <ProjectReference Include="..\Edpf.Core\Edpf.Core.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -31,6 +31,7 @@
     <Project Path="src/Edpf.Rules/Edpf.Rules.csproj" />
     <Project Path="src/Edpf.Security/Edpf.Security.csproj" />
     <Project Path="src/Edpf.Storage/Edpf.Storage.csproj" />
+    <Project Path="src/Edpf.Storage.Remote/Edpf.Storage.Remote.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Edpf.ArchitectureTests/Edpf.ArchitectureTests.csproj" />

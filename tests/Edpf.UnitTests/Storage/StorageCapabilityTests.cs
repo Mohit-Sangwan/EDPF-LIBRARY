@@ -25,8 +25,10 @@ public sealed class StorageCapabilityTests
     private readonly ReversibleTestCryptoProvider _crypto = new();
     private readonly FakeClock _clock = new();
 
-    private TenantScopedBlobStore CreateStore(IContentScanner? scanner = null)
-        => new(_backend, _tenants, ProtectionPolicy.Default, new TestHashingService(), _clock, _crypto, scanner);
+    private TenantScopedBlobStore CreateStore(
+        IContentScanner? scanner = null, IContentExtractor? extractor = null)
+        => new(_backend, _tenants, ProtectionPolicy.Default, new TestHashingService(),
+            _clock, _crypto, scanner, extractor);
 
     private IDisposable ActAs(Guid tenantId)
         => _tenants.Push(new TenantDescriptor(
@@ -496,6 +498,222 @@ public sealed class StorageCapabilityTests
             Invocations++;
             LastScanned = content;
             return Task.FromResult(Result<ScanVerdict>.FromValue(verdict));
+        }
+    }
+
+    // ── OCR / text extraction ─────────────────────────────────────────────
+
+    [Fact]
+    public async Task ExtractText_WithNoExtractor_ReportsUnsupportedNotEmpty()
+    {
+        // "Nobody looked" and "this document contains no text" are different
+        // facts, and only one of them is safe to act on.
+        TenantScopedBlobStore store = CreateStore();
+        BlobPath path = BlobPath.Create(TenantA, "scan.txt");
+
+        using (ActAs(TenantA))
+        {
+            await store.WriteAsync(path, Payload("content"), Options(), default);
+
+            Result<ExtractedContent> extracted = await store.ExtractTextAsync(path, default);
+
+            Assert.True(extracted.IsFailure);
+            Assert.Equal(ErrorCodes.CapabilityNotSupported, extracted.Error!.Code);
+        }
+    }
+
+    [Fact]
+    public async Task ExtractText_InheritsTheBlobsClassification()
+    {
+        // The seam where OCR pipelines leak: text goes to a search index that
+        // was never told what it was handling.
+        TenantScopedBlobStore store = CreateStore(extractor: new StubExtractor());
+        BlobPath path = BlobPath.Create(TenantA, "chart.txt");
+
+        using (ActAs(TenantA))
+        {
+            await store.WriteAsync(
+                path, Payload("MRN-000123"),
+                Options(classification: DataClassificationLevel.Phi), default);
+
+            ExtractedContent extracted = (await store.ExtractTextAsync(path, default)).Value;
+
+            Assert.Equal(DataClassificationLevel.Phi, extracted.Classification);
+        }
+    }
+
+    [Fact]
+    public async Task ExtractText_OverridesAnExtractorThatUnderDeclares()
+    {
+        // An extractor is third-party code. If it claimed Public, the text and
+        // the tables would enter a search index labelled Public.
+        TenantScopedBlobStore store = CreateStore(
+            extractor: new StubExtractor { DeclaredClassification = DataClassificationLevel.Public });
+
+        BlobPath path = BlobPath.Create(TenantA, "chart.txt");
+
+        using (ActAs(TenantA))
+        {
+            await store.WriteAsync(
+                path, Payload("MRN-000123"),
+                Options(classification: DataClassificationLevel.Phi), default);
+
+            ExtractedContent extracted = (await store.ExtractTextAsync(path, default)).Value;
+
+            Assert.Equal(DataClassificationLevel.Phi, extracted.Classification);
+        }
+    }
+
+    [Fact]
+    public async Task ExtractText_SeesDecryptedDecompressedPlaintext()
+    {
+        var extractor = new StubExtractor();
+        TenantScopedBlobStore store = CreateStore(extractor: extractor);
+        BlobPath path = BlobPath.Create(TenantA, "chart.txt");
+
+        using (ActAs(TenantA))
+        {
+            await store.WriteAsync(
+                path, Payload("readable text"),
+                Options(compress: true, classification: DataClassificationLevel.Phi), default);
+
+            await store.ExtractTextAsync(path, default);
+        }
+
+        Assert.Equal("readable text", Encoding.UTF8.GetString(extractor.LastSeen!));
+    }
+
+    [Fact]
+    public async Task ExtractText_ReturnsTablesFieldsLanguageAndConfidence()
+    {
+        var extractor = new StubExtractor
+        {
+            Language = "bn",
+            Fields = [new ExtractedField("NHS number", "943 476 5919", 0.97)],
+            Tables = [new ExtractedTable([["Test", "Value"], ["Potassium", "6.9"]], 0.95)],
+        };
+
+        TenantScopedBlobStore store = CreateStore(extractor: extractor);
+        BlobPath path = BlobPath.Create(TenantA, "lab.txt");
+
+        using (ActAs(TenantA))
+        {
+            await store.WriteAsync(path, Payload("report"), Options(), default);
+
+            ExtractedContent extracted = (await store.ExtractTextAsync(path, default)).Value;
+
+            Assert.Equal("bn", extracted.Language);
+            Assert.Equal("943 476 5919", Assert.Single(extracted.Fields).Value);
+            Assert.Equal("6.9", Assert.Single(extracted.Tables).Rows[1][1]);
+            Assert.False(extracted.RequiresHumanReview);
+        }
+    }
+
+    [Fact]
+    public async Task ExtractText_FlagsALowConfidenceFieldEvenWhenTheDocumentScoredWell()
+    {
+        // The case that matters. A discharge summary read at 0.98 overall can
+        // carry one field at 0.41, and that field is the one holding the dose.
+        var extractor = new StubExtractor
+        {
+            Confidence = 0.98,
+            Fields = [new ExtractedField("Dose", "50mg", 0.41)],
+        };
+
+        TenantScopedBlobStore store = CreateStore(extractor: extractor);
+        BlobPath path = BlobPath.Create(TenantA, "summary.txt");
+
+        using (ActAs(TenantA))
+        {
+            await store.WriteAsync(path, Payload("summary"), Options(), default);
+
+            ExtractedContent extracted = (await store.ExtractTextAsync(path, default)).Value;
+
+            Assert.True(extracted.RequiresHumanReview);
+
+            // Flagged, not discarded. Dropping it would lose the fact that the
+            // document had a dose written on it at all.
+            Assert.Equal("50mg", Assert.Single(extracted.Fields).Value);
+        }
+    }
+
+    [Fact]
+    public async Task ExtractText_FlagsALowConfidenceTable()
+    {
+        var extractor = new StubExtractor
+        {
+            Tables = [new ExtractedTable([["Potassium", "6.9"]], 0.5)],
+        };
+
+        TenantScopedBlobStore store = CreateStore(extractor: extractor);
+        BlobPath path = BlobPath.Create(TenantA, "lab.txt");
+
+        using (ActAs(TenantA))
+        {
+            await store.WriteAsync(path, Payload("report"), Options(), default);
+
+            Assert.True((await store.ExtractTextAsync(path, default)).Value.RequiresHumanReview);
+        }
+    }
+
+    [Fact]
+    public async Task ExtractText_OfAnUnsupportedMediaType_IsRefused()
+    {
+        TenantScopedBlobStore store = CreateStore(
+            extractor: new StubExtractor { Supported = ["application/pdf"] });
+
+        BlobPath path = BlobPath.Create(TenantA, "note.txt");
+
+        using (ActAs(TenantA))
+        {
+            await store.WriteAsync(path, Payload("text"), Options(), default);
+
+            Result<ExtractedContent> extracted = await store.ExtractTextAsync(path, default);
+
+            Assert.Equal(ErrorCodes.CapabilityNotSupported, extracted.Error!.Code);
+        }
+    }
+
+    [Fact]
+    public void ExtractedField_RefusesAConfidenceOutsideZeroToOne()
+    {
+        Assert.Throws<ArgumentOutOfRangeException>(() => new ExtractedField("k", "v", 1.5));
+        Assert.Throws<ArgumentOutOfRangeException>(() => new ExtractedField("k", "v", -0.1));
+    }
+
+    private sealed class StubExtractor : IContentExtractor
+    {
+        public string ExtractorName => "Stub";
+
+        public IReadOnlyList<string> Supported { get; set; } = ["text/plain"];
+
+        public IReadOnlyList<string> SupportedContentTypes => Supported;
+
+        public DataClassificationLevel DeclaredClassification { get; set; } = DataClassificationLevel.Phi;
+
+        public double Confidence { get; set; } = 0.99;
+
+        public string? Language { get; set; }
+
+        public IReadOnlyList<ExtractedField> Fields { get; set; } = [];
+
+        public IReadOnlyList<ExtractedTable> Tables { get; set; } = [];
+
+        public byte[]? LastSeen { get; private set; }
+
+        public Task<Result<ExtractedContent>> ExtractAsync(
+            byte[] content, string contentType, CancellationToken cancellationToken)
+        {
+            LastSeen = content;
+
+            return Task.FromResult(Result<ExtractedContent>.FromValue(new ExtractedContent(
+                Encoding.UTF8.GetString(content),
+                DeclaredClassification,
+                ExtractorName,
+                Confidence,
+                Language,
+                Fields,
+                Tables)));
         }
     }
 

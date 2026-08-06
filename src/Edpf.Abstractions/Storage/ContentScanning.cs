@@ -96,27 +96,138 @@ public interface IContentExtractor
         byte[] content, string contentType, CancellationToken cancellationToken);
 }
 
-/// <summary>Text extracted from a blob, carrying the blob's classification.</summary>
+/// <summary>One key-value pair an extractor recognised on a form.</summary>
+public sealed class ExtractedField
+{
+    /// <summary>
+    /// Records a field.
+    /// </summary>
+    /// <param name="key">The label, as read.</param>
+    /// <param name="value">The value, as read.</param>
+    /// <param name="confidence">How sure the extractor is, from 0 to 1.</param>
+    /// <exception cref="ArgumentNullException">The key or value is null.</exception>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="confidence"/> is outside 0 to 1.</exception>
+    public ExtractedField(string key, string value, double confidence)
+    {
+        Key = key ?? throw new ArgumentNullException(nameof(key));
+        Value = value ?? throw new ArgumentNullException(nameof(value));
+
+        if (confidence is < 0 or > 1)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(confidence), "Confidence is a probability from 0 to 1.");
+        }
+
+        Confidence = confidence;
+    }
+
+    /// <summary>The label, as read.</summary>
+    public string Key { get; }
+
+    /// <summary>The value, as read.</summary>
+    public string Value { get; }
+
+    /// <summary>
+    /// How sure the extractor is, from 0 to 1.
+    /// </summary>
+    /// <remarks>
+    /// Per field rather than per document, because that is where it matters: a
+    /// discharge summary can be read at 0.98 overall while the one field
+    /// carrying a medication dose was read at 0.41.
+    /// </remarks>
+    public double Confidence { get; }
+}
+
+/// <summary>A table an extractor recognised.</summary>
+public sealed class ExtractedTable
+{
+    /// <summary>
+    /// Records a table.
+    /// </summary>
+    /// <param name="rows">The cells, row by row.</param>
+    /// <param name="confidence">How sure the extractor is, from 0 to 1.</param>
+    /// <exception cref="ArgumentNullException"><paramref name="rows"/> is null.</exception>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="confidence"/> is outside 0 to 1.</exception>
+    public ExtractedTable(IReadOnlyList<IReadOnlyList<string>> rows, double confidence)
+    {
+        Rows = rows ?? throw new ArgumentNullException(nameof(rows));
+
+        if (confidence is < 0 or > 1)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(confidence), "Confidence is a probability from 0 to 1.");
+        }
+
+        Confidence = confidence;
+    }
+
+    /// <summary>The cells, row by row.</summary>
+    public IReadOnlyList<IReadOnlyList<string>> Rows { get; }
+
+    /// <summary>How sure the extractor is, from 0 to 1.</summary>
+    public double Confidence { get; }
+}
+
+/// <summary>
+/// Everything an extractor read from a blob, carrying the blob's
+/// classification.
+/// </summary>
+/// <remarks>
+/// <para>
+/// **Every part inherits the classification, not just the text.** A table of
+/// laboratory values is as much PHI as the prose around it, and a key-value
+/// pair reading "NHS number: …" more so. A result type that classified only
+/// its text would leak through the structured half.
+/// </para>
+/// <para>
+/// **Confidence is mandatory.** An OCR engine that cannot say how sure it is
+/// has not given a usable answer for clinical use, and the alternative —
+/// defaulting to 1.0 — asserts certainty on the engine's behalf.
+/// </para>
+/// </remarks>
 public sealed class ExtractedContent
 {
     /// <summary>
-    /// Records extracted text.
+    /// Records an extraction.
     /// </summary>
-    /// <param name="text">The text.</param>
+    /// <param name="text">The full text.</param>
     /// <param name="classification">
     /// The source blob's classification. There is no parameter to lower it,
     /// because extraction does not de-identify anything.
     /// </param>
     /// <param name="extractorName">Which extractor produced it.</param>
-    /// <exception cref="ArgumentNullException">Any argument is null.</exception>
-    public ExtractedContent(string text, DataClassificationLevel classification, string extractorName)
+    /// <param name="confidence">Overall confidence, from 0 to 1.</param>
+    /// <param name="language">The detected language tag, or null when unknown.</param>
+    /// <param name="fields">Recognised key-value pairs.</param>
+    /// <param name="tables">Recognised tables.</param>
+    /// <exception cref="ArgumentNullException">A required argument is null.</exception>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="confidence"/> is outside 0 to 1.</exception>
+    public ExtractedContent(
+        string text,
+        DataClassificationLevel classification,
+        string extractorName,
+        double confidence = 1.0,
+        string? language = null,
+        IReadOnlyList<ExtractedField>? fields = null,
+        IReadOnlyList<ExtractedTable>? tables = null)
     {
         Text = text ?? throw new ArgumentNullException(nameof(text));
         ExtractorName = extractorName ?? throw new ArgumentNullException(nameof(extractorName));
+
+        if (confidence is < 0 or > 1)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(confidence), "Confidence is a probability from 0 to 1.");
+        }
+
         Classification = classification;
+        Confidence = confidence;
+        Language = language;
+        Fields = fields ?? [];
+        Tables = tables ?? [];
     }
 
-    /// <summary>The extracted text.</summary>
+    /// <summary>The full text.</summary>
     public string Text { get; }
 
     /// <summary>The source blob's classification, inherited.</summary>
@@ -124,6 +235,42 @@ public sealed class ExtractedContent
 
     /// <summary>Which extractor produced it.</summary>
     public string ExtractorName { get; }
+
+    /// <summary>Overall confidence, from 0 to 1.</summary>
+    public double Confidence { get; }
+
+    /// <summary>
+    /// The detected language tag, or null when the extractor could not say.
+    /// </summary>
+    /// <remarks>
+    /// Null rather than a default of <c>en</c>. Assuming English is how a
+    /// Bengali discharge note gets indexed with an English stemmer and then
+    /// cannot be found by the people who need it.
+    /// </remarks>
+    public string? Language { get; }
+
+    /// <summary>Recognised key-value pairs.</summary>
+    public IReadOnlyList<ExtractedField> Fields { get; }
+
+    /// <summary>Recognised tables.</summary>
+    public IReadOnlyList<ExtractedTable> Tables { get; }
+
+    /// <summary>
+    /// True when any part of the extraction fell below the required confidence
+    /// and a person must check it before it is relied on.
+    /// </summary>
+    /// <remarks>
+    /// Set by the storage layer rather than by the extractor. The three
+    /// dispositions match ADR-029's: a usable reading passes, a doubtful one is
+    /// flagged for a human, and nothing is silently discarded. Dropping a
+    /// low-confidence field would lose the fact that the document contained
+    /// something there at all.
+    /// </remarks>
+    public bool RequiresHumanReview { get; private set; }
+
+    /// <summary>Marks this extraction as needing human review.</summary>
+    /// <remarks>Called by the storage layer after applying the confidence floor.</remarks>
+    public void FlagForHumanReview() => RequiresHumanReview = true;
 }
 
 /// <summary>

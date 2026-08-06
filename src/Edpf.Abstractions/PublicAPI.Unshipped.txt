@@ -745,9 +745,24 @@ Edpf.Abstractions.Storage.BlobWriteOptions.RetainUntilUtc.get -> System.DateTime
 Edpf.Abstractions.Storage.BlobWriteOptions.SubjectId.get -> System.Guid?
 Edpf.Abstractions.Storage.ExtractedContent
 Edpf.Abstractions.Storage.ExtractedContent.Classification.get -> Edpf.Abstractions.Primitives.DataClassificationLevel
-Edpf.Abstractions.Storage.ExtractedContent.ExtractedContent(string! text, Edpf.Abstractions.Primitives.DataClassificationLevel classification, string! extractorName) -> void
+Edpf.Abstractions.Storage.ExtractedContent.Confidence.get -> double
+Edpf.Abstractions.Storage.ExtractedContent.ExtractedContent(string! text, Edpf.Abstractions.Primitives.DataClassificationLevel classification, string! extractorName, double confidence = 1, string? language = null, System.Collections.Generic.IReadOnlyList<Edpf.Abstractions.Storage.ExtractedField!>? fields = null, System.Collections.Generic.IReadOnlyList<Edpf.Abstractions.Storage.ExtractedTable!>? tables = null) -> void
 Edpf.Abstractions.Storage.ExtractedContent.ExtractorName.get -> string!
+Edpf.Abstractions.Storage.ExtractedContent.Fields.get -> System.Collections.Generic.IReadOnlyList<Edpf.Abstractions.Storage.ExtractedField!>!
+Edpf.Abstractions.Storage.ExtractedContent.FlagForHumanReview() -> void
+Edpf.Abstractions.Storage.ExtractedContent.Language.get -> string?
+Edpf.Abstractions.Storage.ExtractedContent.RequiresHumanReview.get -> bool
+Edpf.Abstractions.Storage.ExtractedContent.Tables.get -> System.Collections.Generic.IReadOnlyList<Edpf.Abstractions.Storage.ExtractedTable!>!
 Edpf.Abstractions.Storage.ExtractedContent.Text.get -> string!
+Edpf.Abstractions.Storage.ExtractedField
+Edpf.Abstractions.Storage.ExtractedField.Confidence.get -> double
+Edpf.Abstractions.Storage.ExtractedField.ExtractedField(string! key, string! value, double confidence) -> void
+Edpf.Abstractions.Storage.ExtractedField.Key.get -> string!
+Edpf.Abstractions.Storage.ExtractedField.Value.get -> string!
+Edpf.Abstractions.Storage.ExtractedTable
+Edpf.Abstractions.Storage.ExtractedTable.Confidence.get -> double
+Edpf.Abstractions.Storage.ExtractedTable.ExtractedTable(System.Collections.Generic.IReadOnlyList<System.Collections.Generic.IReadOnlyList<string!>!>! rows, double confidence) -> void
+Edpf.Abstractions.Storage.ExtractedTable.Rows.get -> System.Collections.Generic.IReadOnlyList<System.Collections.Generic.IReadOnlyList<string!>!>!
 Edpf.Abstractions.Storage.IBlobBackend
 Edpf.Abstractions.Storage.IBlobBackend.BackendName.get -> string!
 Edpf.Abstractions.Storage.IBlobBackend.GetAsync(Edpf.Abstractions.Storage.BlobPath! path, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result<byte[]!>!>!

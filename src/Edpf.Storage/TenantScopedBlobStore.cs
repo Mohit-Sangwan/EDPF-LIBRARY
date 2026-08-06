@@ -63,6 +63,7 @@ public sealed class TenantScopedBlobStore : IBlobStore
     private readonly IClock _clock;
     private readonly ICryptoProvider? _crypto;
     private readonly IContentScanner? _scanner;
+    private readonly IContentExtractor? _extractor;
 
     /// <summary>
     /// Composes the policy over a backend.
@@ -86,6 +87,12 @@ public sealed class TenantScopedBlobStore : IBlobStore
     /// <see cref="ScanState.NotScanned"/> — honestly, rather than being marked
     /// clean by a scanner that never ran.
     /// </param>
+    /// <param name="extractor">
+    /// Text-extraction seam — OCR, a PDF text layer, a document parser. When
+    /// absent, <see cref="ExtractTextAsync"/> reports the capability as
+    /// unsupported rather than returning nothing, so a caller cannot mistake
+    /// "no extractor configured" for "this document contains no text".
+    /// </param>
     /// <exception cref="ArgumentNullException">Any required dependency is null.</exception>
     public TenantScopedBlobStore(
         IBlobBackend backend,
@@ -94,7 +101,8 @@ public sealed class TenantScopedBlobStore : IBlobStore
         IHashingService hashing,
         IClock clock,
         ICryptoProvider? crypto = null,
-        IContentScanner? scanner = null)
+        IContentScanner? scanner = null,
+        IContentExtractor? extractor = null)
     {
         _backend = Guard.NotNull(backend, nameof(backend));
         _tenantAccessor = Guard.NotNull(tenantAccessor, nameof(tenantAccessor));
@@ -103,6 +111,7 @@ public sealed class TenantScopedBlobStore : IBlobStore
         _clock = Guard.NotNull(clock, nameof(clock));
         _crypto = crypto;
         _scanner = scanner;
+        _extractor = extractor;
     }
 
     /// <inheritdoc />
@@ -765,6 +774,144 @@ public sealed class TenantScopedBlobStore : IBlobStore
             && Guid.TryParse(subject, out Guid parsed)
                 ? parsed
                 : (Guid?)null;
+    }
+
+    /// <summary>
+    /// Extracts searchable text from a stored blob.
+    /// </summary>
+    /// <param name="path">The tenant-scoped path.</param>
+    /// <param name="cancellationToken">Cancels the extraction.</param>
+    /// <returns>
+    /// The extracted text, carrying the blob's classification, or a failure.
+    /// </returns>
+    /// <remarks>
+    /// <para>
+    /// **The extracted text inherits the blob's classification, and there is no
+    /// argument that lowers it.** The text of a scanned discharge summary is
+    /// the discharge summary. This is the seam where an OCR pipeline leaks in
+    /// practice: text goes to a search index that was never told what it was
+    /// handling, and the index has no ceiling of its own.
+    /// </para>
+    /// <para>
+    /// With no extractor configured this reports
+    /// <see cref="ErrorCodes.CapabilityNotSupported"/> rather than empty text,
+    /// so a caller cannot mistake "nobody looked" for "this document contains
+    /// no text" — the same distinction the scan state keeps.
+    /// </para>
+    /// </remarks>
+    /// <param name="minimumConfidence">
+    /// The floor below which a result must be checked by a person. Applied to
+    /// the overall score and to every field and table independently — a
+    /// document read at 0.98 overall can still carry one field at 0.41, and
+    /// that field is the one holding the dose.
+    /// </param>
+    public async Task<Result<ExtractedContent>> ExtractTextAsync(
+        BlobPath path,
+        CancellationToken cancellationToken,
+        double minimumConfidence = 0.8)
+    {
+        Guard.NotNull(path, nameof(path));
+
+        if (_extractor is null)
+        {
+            return Result.Failure<ExtractedContent>(new Error(
+                ErrorCodes.CapabilityNotSupported,
+                "No text extractor is configured, so no claim can be made about this document's text.",
+                ErrorCategory.Validation));
+        }
+
+        // Read through ReadAsync rather than the backend, so extraction gets
+        // decrypted, decompressed plaintext and inherits the tenant check.
+        Result<BlobContent> content = await ReadAsync(path, cancellationToken).ConfigureAwait(false);
+        if (content.IsFailure)
+        {
+            return Result.Failure<ExtractedContent>(content.Error!);
+        }
+
+        using BlobContent blob = content.Value;
+
+        if (!Supports(_extractor.SupportedContentTypes, blob.Descriptor.DeclaredContentType))
+        {
+            return Result.Failure<ExtractedContent>(new Error(
+                ErrorCodes.CapabilityNotSupported,
+                "The configured extractor does not read this media type.",
+                ErrorCategory.Validation));
+        }
+
+        using var buffer = new MemoryStream();
+        await blob.Content.CopyToAsync(buffer, cancellationToken).ConfigureAwait(false);
+
+        Result<ExtractedContent> extracted = await _extractor
+            .ExtractAsync(buffer.ToArray(), blob.Descriptor.DeclaredContentType, cancellationToken)
+            .ConfigureAwait(false);
+
+        if (extracted.IsFailure)
+        {
+            return extracted;
+        }
+
+        // Re-stamped with the blob's classification rather than trusted from
+        // the extractor. An extractor is third-party code; if it under-declared
+        // what it produced, the text — and the tables, and the key-value pairs
+        // — would enter a search index labelled Public.
+        var result = new ExtractedContent(
+            extracted.Value.Text,
+            blob.Descriptor.Classification,
+            extracted.Value.ExtractorName,
+            extracted.Value.Confidence,
+            extracted.Value.Language,
+            extracted.Value.Fields,
+            extracted.Value.Tables);
+
+        // Three dispositions, matching ADR-029: usable passes, doubtful is
+        // flagged for a person, and nothing is silently discarded. Dropping a
+        // low-confidence field would lose the fact that the document had
+        // something there at all, which is worse than reporting it uncertainly.
+        if (BelowFloor(result, minimumConfidence))
+        {
+            result.FlagForHumanReview();
+        }
+
+        return result;
+    }
+
+    private static bool BelowFloor(ExtractedContent content, double minimumConfidence)
+    {
+        if (content.Confidence < minimumConfidence)
+        {
+            return true;
+        }
+
+        foreach (ExtractedField field in content.Fields)
+        {
+            if (field.Confidence < minimumConfidence)
+            {
+                return true;
+            }
+        }
+
+        foreach (ExtractedTable table in content.Tables)
+        {
+            if (table.Confidence < minimumConfidence)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static bool Supports(IReadOnlyList<string> supported, string contentType)
+    {
+        for (int i = 0; i < supported.Count; i++)
+        {
+            if (string.Equals(supported[i], contentType, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private async Task<Result> ArchiveAsync(

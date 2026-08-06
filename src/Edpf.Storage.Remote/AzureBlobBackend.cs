@@ -36,7 +36,7 @@ namespace Edpf.Storage.Remote;
 /// kind of claim this framework refuses to make.
 /// </para>
 /// </remarks>
-public sealed class AzureBlobBackend : IBlobBackend
+public sealed class AzureBlobBackend : IBlobBackend, IChunkedUploadBackend
 {
     private readonly HttpClient _http;
     private readonly AzureCredentials _credentials;
@@ -253,6 +253,139 @@ public sealed class AzureBlobBackend : IBlobBackend
             Encoding.UTF8.GetBytes(builder.ToString()),
             cancellationToken).ConfigureAwait(false);
     }
+
+    /// <summary>
+    /// Begins a staged-block upload.
+    /// </summary>
+    /// <param name="path">The destination.</param>
+    /// <param name="cancellationToken">Cancels the call.</param>
+    /// <returns>The blob path, which is all Azure needs to correlate blocks.</returns>
+    /// <remarks>
+    /// Azure has no "create upload" call: staged blocks are addressed by the
+    /// blob path plus a block id, and uncommitted blocks simply exist until
+    /// committed or garbage-collected after a week. So this records nothing
+    /// remotely and returns the key — the session layer above already tracks
+    /// which blocks were staged.
+    /// </remarks>
+    public Task<Result<string>> BeginChunkedAsync(BlobPath path, CancellationToken cancellationToken)
+    {
+        Guard.NotNull(path, nameof(path));
+        cancellationToken.ThrowIfCancellationRequested();
+
+        return Task.FromResult(Result<string>.FromValue(path.Value));
+    }
+
+    /// <inheritdoc />
+    public async Task<Result<string>> AppendChunkAsync(
+        BlobPath path,
+        string uploadId,
+        int partNumber,
+        long offset,
+        byte[] chunk,
+        CancellationToken cancellationToken)
+    {
+        Guard.NotNull(path, nameof(path));
+        Guard.NotNull(chunk, nameof(chunk));
+
+        string blockId = BlockIdFor(partNumber);
+
+        var query = new Dictionary<string, string>(StringComparer.Ordinal)
+        {
+            ["comp"] = "block",
+            ["blockid"] = blockId,
+        };
+
+        using HttpRequestMessage request = Sign(
+            HttpMethod.Put, "/" + _container + "/" + path.Value, chunk.Length, query);
+
+        request.Content = new ByteArrayContent(chunk);
+
+        using HttpResponseMessage response = await _http
+            .SendAsync(request, cancellationToken)
+            .ConfigureAwait(false);
+
+        // The block id is what the commit needs back, so it is returned as the
+        // part tag. Azure ignores the byte offset entirely: order comes from
+        // the block list at commit, not from where the bytes were staged.
+        return response.IsSuccessStatusCode
+            ? blockId
+            : Result.Failure<string>(ProviderFailure());
+    }
+
+    /// <inheritdoc />
+    public async Task<Result> CompleteChunkedAsync(
+        BlobPath path,
+        string uploadId,
+        IReadOnlyList<string> partTags,
+        CancellationToken cancellationToken)
+    {
+        Guard.NotNull(path, nameof(path));
+        Guard.NotNull(partTags, nameof(partTags));
+
+        // The block list IS the ordering. A commit that listed the blocks in a
+        // different order would assemble a different file from the same staged
+        // bytes, which is why the session hands them back in sequence.
+        var body = new StringBuilder("<?xml version=\"1.0\" encoding=\"utf-8\"?><BlockList>");
+
+        foreach (string tag in partTags)
+        {
+            body.Append("<Latest>").Append(tag).Append("</Latest>");
+        }
+
+        body.Append("</BlockList>");
+
+        byte[] payload = Encoding.UTF8.GetBytes(body.ToString());
+
+        var query = new Dictionary<string, string>(StringComparer.Ordinal) { ["comp"] = "blocklist" };
+
+        using HttpRequestMessage request = Sign(
+            HttpMethod.Put, "/" + _container + "/" + path.Value, payload.Length, query);
+
+        request.Content = new ByteArrayContent(payload);
+
+        using HttpResponseMessage response = await _http
+            .SendAsync(request, cancellationToken)
+            .ConfigureAwait(false);
+
+        return response.IsSuccessStatusCode ? Result.Success() : Result.Failure(ProviderFailure());
+    }
+
+    /// <summary>
+    /// Abandons a staged upload.
+    /// </summary>
+    /// <param name="path">The destination.</param>
+    /// <param name="uploadId">Unused; Azure addresses blocks by blob path.</param>
+    /// <param name="cancellationToken">Cancels the call.</param>
+    /// <returns>Success.</returns>
+    /// <remarks>
+    /// There is no "abort" call. Uncommitted blocks are garbage-collected after
+    /// seven days, and committing an empty block list would create a
+    /// zero-length blob where there was none — worse than leaving the blocks,
+    /// because an empty file looks like a successful upload of nothing.
+    /// </remarks>
+    public Task<Result> AbortChunkedAsync(
+        BlobPath path,
+        string uploadId,
+        CancellationToken cancellationToken)
+    {
+        Guard.NotNull(path, nameof(path));
+        cancellationToken.ThrowIfCancellationRequested();
+
+        return Task.FromResult(Result.Success());
+    }
+
+    /// <summary>
+    /// Encodes a part number as a block id.
+    /// </summary>
+    /// <remarks>
+    /// **Every block id in a blob must decode to the same byte length**, which
+    /// is why the number is zero-padded before encoding. Mixing lengths makes
+    /// Azure reject the commit with an error that names neither the block nor
+    /// the reason.
+    /// </remarks>
+    internal static string BlockIdFor(int partNumber)
+        => Convert.ToBase64String(
+            Encoding.UTF8.GetBytes(partNumber.ToString("D6", CultureInfo.InvariantCulture)));
 
     private async Task<Result> PutRawAsync(string key, byte[] bytes, CancellationToken cancellationToken)
     {

@@ -795,6 +795,8 @@ Edpf.Abstractions.Storage.IContentExtractor.SupportedContentTypes.get -> System.
 Edpf.Abstractions.Storage.IContentScanner
 Edpf.Abstractions.Storage.IContentScanner.ScanAsync(byte[]! content, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result<Edpf.Abstractions.Storage.ScanVerdict>!>!
 Edpf.Abstractions.Storage.IContentScanner.ScannerName.get -> string!
+Edpf.Abstractions.Storage.IStorageAuditSink
+Edpf.Abstractions.Storage.IStorageAuditSink.RecordAsync(Edpf.Abstractions.Storage.StorageAuditEvent! auditEvent, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result!>!
 Edpf.Abstractions.Storage.ScanState
 Edpf.Abstractions.Storage.ScanState.Clean = 1 -> Edpf.Abstractions.Storage.ScanState
 Edpf.Abstractions.Storage.ScanState.NotScanned = 0 -> Edpf.Abstractions.Storage.ScanState
@@ -802,6 +804,21 @@ Edpf.Abstractions.Storage.ScanVerdict
 Edpf.Abstractions.Storage.ScanVerdict.Clean = 0 -> Edpf.Abstractions.Storage.ScanVerdict
 Edpf.Abstractions.Storage.ScanVerdict.Indeterminate = 2 -> Edpf.Abstractions.Storage.ScanVerdict
 Edpf.Abstractions.Storage.ScanVerdict.Infected = 1 -> Edpf.Abstractions.Storage.ScanVerdict
+Edpf.Abstractions.Storage.StorageAuditEvent
+Edpf.Abstractions.Storage.StorageAuditEvent.Classification.get -> Edpf.Abstractions.Primitives.DataClassificationLevel
+Edpf.Abstractions.Storage.StorageAuditEvent.ContentHash.get -> string?
+Edpf.Abstractions.Storage.StorageAuditEvent.ErrorCode.get -> string?
+Edpf.Abstractions.Storage.StorageAuditEvent.OccurredUtc.get -> System.DateTimeOffset
+Edpf.Abstractions.Storage.StorageAuditEvent.Operation.get -> Edpf.Abstractions.Storage.StorageOperation
+Edpf.Abstractions.Storage.StorageAuditEvent.Path.get -> Edpf.Abstractions.Storage.BlobPath!
+Edpf.Abstractions.Storage.StorageAuditEvent.StorageAuditEvent(Edpf.Abstractions.Storage.StorageOperation operation, Edpf.Abstractions.Storage.BlobPath! path, Edpf.Abstractions.Primitives.DataClassificationLevel classification, string? contentHash, bool succeeded, string? errorCode, System.DateTimeOffset occurredUtc) -> void
+Edpf.Abstractions.Storage.StorageAuditEvent.Succeeded.get -> bool
+Edpf.Abstractions.Storage.StorageOperation
+Edpf.Abstractions.Storage.StorageOperation.Delete = 2 -> Edpf.Abstractions.Storage.StorageOperation
+Edpf.Abstractions.Storage.StorageOperation.Extract = 4 -> Edpf.Abstractions.Storage.StorageOperation
+Edpf.Abstractions.Storage.StorageOperation.Read = 1 -> Edpf.Abstractions.Storage.StorageOperation
+Edpf.Abstractions.Storage.StorageOperation.Stat = 3 -> Edpf.Abstractions.Storage.StorageOperation
+Edpf.Abstractions.Storage.StorageOperation.Write = 0 -> Edpf.Abstractions.Storage.StorageOperation
 Edpf.Abstractions.Tenancy.BreakGlassGrant
 Edpf.Abstractions.Tenancy.BreakGlassGrant.BreakGlassGrant(System.Guid grantId, string! operatorId, System.Guid targetTenantId, string! justification, System.DateTimeOffset expiresUtc) -> void
 Edpf.Abstractions.Tenancy.BreakGlassGrant.ExpiresUtc.get -> System.DateTimeOffset

@@ -64,6 +64,7 @@ public sealed class TenantScopedBlobStore : IBlobStore
     private readonly ICryptoProvider? _crypto;
     private readonly IContentScanner? _scanner;
     private readonly IContentExtractor? _extractor;
+    private readonly IStorageAuditSink? _audit;
 
     /// <summary>
     /// Composes the policy over a backend.
@@ -93,6 +94,12 @@ public sealed class TenantScopedBlobStore : IBlobStore
     /// unsupported rather than returning nothing, so a caller cannot mistake
     /// "no extractor configured" for "this document contains no text".
     /// </param>
+    /// <param name="audit">
+    /// Access-record sink. When configured, **a failed audit fails the
+    /// operation** (BRL-005): content is not returned if the access could not
+    /// be recorded, because an access that was not recorded is one that did
+    /// not lawfully occur.
+    /// </param>
     /// <exception cref="ArgumentNullException">Any required dependency is null.</exception>
     public TenantScopedBlobStore(
         IBlobBackend backend,
@@ -102,7 +109,8 @@ public sealed class TenantScopedBlobStore : IBlobStore
         IClock clock,
         ICryptoProvider? crypto = null,
         IContentScanner? scanner = null,
-        IContentExtractor? extractor = null)
+        IContentExtractor? extractor = null,
+        IStorageAuditSink? audit = null)
     {
         _backend = Guard.NotNull(backend, nameof(backend));
         _tenantAccessor = Guard.NotNull(tenantAccessor, nameof(tenantAccessor));
@@ -112,6 +120,7 @@ public sealed class TenantScopedBlobStore : IBlobStore
         _crypto = crypto;
         _scanner = scanner;
         _extractor = extractor;
+        _audit = audit;
     }
 
     /// <inheritdoc />
@@ -295,6 +304,25 @@ public sealed class TenantScopedBlobStore : IBlobStore
             return Result.Failure<BlobDescriptor>(metadata.Error!);
         }
 
+        Result recorded = await RecordAsync(
+            StorageOperation.Write,
+            path,
+            descriptor.Classification,
+            descriptor.ContentHash,
+            succeeded: true,
+            errorCode: null,
+            cancellationToken).ConfigureAwait(false);
+
+        if (recorded.IsFailure)
+        {
+            // The bytes landed but the record did not. Removed rather than
+            // left, because an unaudited write is indistinguishable from one
+            // nobody performed — and the store must not hold content it cannot
+            // account for.
+            await _backend.RemoveAsync(path, cancellationToken).ConfigureAwait(false);
+            return Result.Failure<BlobDescriptor>(recorded.Error!);
+        }
+
         return descriptor;
     }
 
@@ -367,6 +395,24 @@ public sealed class TenantScopedBlobStore : IBlobStore
             bytes = expanded.Value;
         }
 
+        // Audited BEFORE the content is handed over. If the access cannot be
+        // recorded, it does not happen: HIPAA §164.312(b) requires the record,
+        // and serving the bytes while logging a warning produces a system whose
+        // audit trail is complete only when nothing went wrong (BRL-005).
+        Result recorded = await RecordAsync(
+            StorageOperation.Read,
+            descriptor.Value.Path,
+            descriptor.Value.Classification,
+            descriptor.Value.ContentHash,
+            succeeded: true,
+            errorCode: null,
+            cancellationToken).ConfigureAwait(false);
+
+        if (recorded.IsFailure)
+        {
+            return Result.Failure<BlobContent>(recorded.Error!);
+        }
+
         return new BlobContent(descriptor.Value, new MemoryStream(bytes, writable: false));
     }
 
@@ -400,7 +446,22 @@ public sealed class TenantScopedBlobStore : IBlobStore
             return Result.Failure(tenant.Error!);
         }
 
-        return await _backend.RemoveAsync(path, cancellationToken).ConfigureAwait(false);
+        Result<BlobDescriptor> existing = await StatAsync(path, cancellationToken).ConfigureAwait(false);
+        Result removed = await _backend.RemoveAsync(path, cancellationToken).ConfigureAwait(false);
+
+        // A deletion is recorded whether or not it succeeded. "Did anyone try
+        // to destroy this record" is a question asked after an incident, and a
+        // log of successes cannot answer it.
+        Result recorded = await RecordAsync(
+            StorageOperation.Delete,
+            path,
+            existing.IsSuccess ? existing.Value.Classification : DataClassificationLevel.Internal,
+            existing.IsSuccess ? existing.Value.ContentHash : null,
+            removed.IsSuccess,
+            removed.IsFailure ? removed.Error!.Code : null,
+            cancellationToken).ConfigureAwait(false);
+
+        return recorded.IsFailure ? recorded : removed;
     }
 
     /// <inheritdoc />
@@ -987,6 +1048,41 @@ public sealed class TenantScopedBlobStore : IBlobStore
         }
 
         return true;
+    }
+
+    /// <summary>
+    /// Writes one access record, when a sink is configured.
+    /// </summary>
+    /// <remarks>
+    /// Returns the sink's failure unchanged so the caller aborts. There is no
+    /// swallow-and-continue path, deliberately: the storage layer is where
+    /// people most often argue for an audit exception on performance grounds,
+    /// and the exception is what makes the trail worthless.
+    /// </remarks>
+    private async Task<Result> RecordAsync(
+        StorageOperation operation,
+        BlobPath path,
+        DataClassificationLevel classification,
+        string? contentHash,
+        bool succeeded,
+        string? errorCode,
+        CancellationToken cancellationToken)
+    {
+        if (_audit is null)
+        {
+            return Result.Success();
+        }
+
+        var auditEvent = new StorageAuditEvent(
+            operation,
+            path,
+            classification,
+            contentHash,
+            succeeded,
+            errorCode,
+            StorableInstant.Normalize(_clock.UtcNow));
+
+        return await _audit.RecordAsync(auditEvent, cancellationToken).ConfigureAwait(false);
     }
 
     private static bool Requires(DataProtectionRequirements set, DataProtectionRequirements flag)

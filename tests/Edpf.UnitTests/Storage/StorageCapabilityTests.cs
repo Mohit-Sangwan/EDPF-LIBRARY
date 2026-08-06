@@ -26,9 +26,11 @@ public sealed class StorageCapabilityTests
     private readonly FakeClock _clock = new();
 
     private TenantScopedBlobStore CreateStore(
-        IContentScanner? scanner = null, IContentExtractor? extractor = null)
+        IContentScanner? scanner = null,
+        IContentExtractor? extractor = null,
+        IStorageAuditSink? audit = null)
         => new(_backend, _tenants, ProtectionPolicy.Default, new TestHashingService(),
-            _clock, _crypto, scanner, extractor);
+            _clock, _crypto, scanner, extractor, audit);
 
     private IDisposable ActAs(Guid tenantId)
         => _tenants.Push(new TenantDescriptor(
@@ -679,6 +681,136 @@ public sealed class StorageCapabilityTests
     {
         Assert.Throws<ArgumentOutOfRangeException>(() => new ExtractedField("k", "v", 1.5));
         Assert.Throws<ArgumentOutOfRangeException>(() => new ExtractedField("k", "v", -0.1));
+    }
+
+    // ── audit: a failed audit fails the operation (BRL-005) ───────────────
+
+    [Fact]
+    public async Task Read_RecordsTheAccessBeforeReturningContent()
+    {
+        var audit = new RecordingAuditSink();
+        TenantScopedBlobStore store = CreateStore(audit: audit);
+        BlobPath path = BlobPath.Create(TenantA, "chart.txt");
+
+        using (ActAs(TenantA))
+        {
+            await store.WriteAsync(
+                path, Payload("MRN-000123"),
+                Options(classification: DataClassificationLevel.Phi), default);
+
+            using BlobContent content = (await store.ReadAsync(path, default)).Value;
+        }
+
+        StorageAuditEvent read = Assert.Single(
+            audit.Events, e => e.Operation == StorageOperation.Read);
+
+        Assert.Equal(DataClassificationLevel.Phi, read.Classification);
+        Assert.True(read.Succeeded);
+        Assert.Equal(0, read.OccurredUtc.UtcTicks % 10);
+    }
+
+    [Fact]
+    public async Task Read_WhenTheAuditSinkFails_ReturnsNoContent()
+    {
+        // HIPAA 164.312(b) requires the access record. Serving the bytes and
+        // logging a warning produces a system whose audit trail is complete
+        // only when nothing went wrong.
+        TenantScopedBlobStore writeStore = CreateStore();
+        BlobPath path = BlobPath.Create(TenantA, "chart.txt");
+
+        using (ActAs(TenantA))
+        {
+            await writeStore.WriteAsync(path, Payload("MRN-000123"), Options(), default);
+        }
+
+        TenantScopedBlobStore readStore = CreateStore(audit: new FailingAuditSink());
+
+        using (ActAs(TenantA))
+        {
+            Result<BlobContent> read = await readStore.ReadAsync(path, default);
+
+            Assert.True(read.IsFailure);
+            Assert.Equal(ErrorCodes.AuditUnavailable, read.Error!.Code);
+        }
+    }
+
+    [Fact]
+    public async Task Write_WhenTheAuditSinkFails_LeavesNothingStored()
+    {
+        // An unaudited write is indistinguishable from one nobody performed,
+        // and the store must not hold content it cannot account for.
+        TenantScopedBlobStore store = CreateStore(audit: new FailingAuditSink());
+        BlobPath path = BlobPath.Create(TenantA, "chart.txt");
+
+        using (ActAs(TenantA))
+        {
+            Result<BlobDescriptor> written = await store.WriteAsync(
+                path, Payload("MRN-000123"), Options(), default);
+
+            Assert.True(written.IsFailure);
+        }
+
+        Assert.Null(_backend.RawBytesAt(path.Value));
+    }
+
+    [Fact]
+    public async Task Delete_IsRecordedEvenWhenItFails()
+    {
+        // "Did anyone try to destroy this record" is a question asked after an
+        // incident, and a log of successes cannot answer it.
+        var audit = new RecordingAuditSink();
+        TenantScopedBlobStore store = CreateStore(audit: audit);
+
+        using (ActAs(TenantA))
+        {
+            await store.DeleteAsync(BlobPath.Create(TenantA, "never-existed.txt"), default);
+        }
+
+        StorageAuditEvent deleted = Assert.Single(
+            audit.Events, e => e.Operation == StorageOperation.Delete);
+
+        Assert.False(deleted.Succeeded);
+        Assert.Equal(ErrorCodes.NotFound, deleted.ErrorCode);
+    }
+
+    [Fact]
+    public async Task AuditEvents_CarryAHashAndNeverContent()
+    {
+        // An audit trail over a clinical store is itself a target. The hash
+        // identifies which bytes without being them.
+        var audit = new RecordingAuditSink();
+        TenantScopedBlobStore store = CreateStore(audit: audit);
+
+        using (ActAs(TenantA))
+        {
+            await store.WriteAsync(
+                BlobPath.Create(TenantA, "chart.txt"), Payload("MRN-000123"), Options(), default);
+        }
+
+        StorageAuditEvent written = Assert.Single(audit.Events);
+
+        Assert.NotNull(written.ContentHash);
+        Assert.DoesNotContain("MRN-000123", written.ContentHash!, StringComparison.Ordinal);
+    }
+
+    private sealed class RecordingAuditSink : IStorageAuditSink
+    {
+        public List<StorageAuditEvent> Events { get; } = [];
+
+        public Task<Result> RecordAsync(StorageAuditEvent auditEvent, CancellationToken cancellationToken)
+        {
+            Events.Add(auditEvent);
+            return Task.FromResult(Result.Success());
+        }
+    }
+
+    private sealed class FailingAuditSink : IStorageAuditSink
+    {
+        public Task<Result> RecordAsync(StorageAuditEvent auditEvent, CancellationToken cancellationToken)
+            => Task.FromResult(Result.Failure(new Error(
+                ErrorCodes.AuditUnavailable,
+                "The audit store is unreachable.",
+                ErrorCategory.Transient)));
     }
 
     private sealed class StubExtractor : IContentExtractor

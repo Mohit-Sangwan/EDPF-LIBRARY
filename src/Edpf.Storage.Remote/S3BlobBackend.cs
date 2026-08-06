@@ -84,7 +84,7 @@ public sealed class S3Endpoint
 /// would move the key out of the deployment's control.
 /// </para>
 /// </remarks>
-public sealed class S3BlobBackend : IBlobBackend
+public sealed class S3BlobBackend : IBlobBackend, IChunkedUploadBackend
 {
     private const string Service = "s3";
 
@@ -291,6 +291,123 @@ public sealed class S3BlobBackend : IBlobBackend
 
     /// <summary>The sidecar key suffix. Reserved.</summary>
     internal const string MetadataSuffix = ".edpfmeta";
+
+    /// <inheritdoc />
+    public async Task<Result<string>> BeginChunkedAsync(BlobPath path, CancellationToken cancellationToken)
+    {
+        Guard.NotNull(path, nameof(path));
+
+        using HttpRequestMessage request = Sign(
+            HttpMethod.Post, KeyFor(path), Array.Empty<byte>(), "uploads=");
+
+        using HttpResponseMessage response = await _http
+            .SendAsync(request, cancellationToken)
+            .ConfigureAwait(false);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            return Result.Failure<string>(ProviderFailure());
+        }
+
+        string body = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+        XDocument document = XDocument.Parse(body);
+        XNamespace ns = document.Root?.Name.Namespace ?? XNamespace.None;
+
+        string? uploadId = document.Descendants(ns + "UploadId").FirstOrDefault()?.Value;
+
+        return uploadId is null ? Result.Failure<string>(ProviderFailure()) : uploadId;
+    }
+
+    /// <inheritdoc />
+    public async Task<Result<string>> AppendChunkAsync(
+        BlobPath path,
+        string uploadId,
+        int partNumber,
+        long offset,
+        byte[] chunk,
+        CancellationToken cancellationToken)
+    {
+        Guard.NotNull(path, nameof(path));
+        Guard.NotNullOrWhiteSpace(uploadId, nameof(uploadId));
+        Guard.NotNull(chunk, nameof(chunk));
+
+        // The offset is ignored here and that is correct for S3: a part's
+        // position in the finished object is its part NUMBER, not a byte
+        // offset. Honouring the offset instead would silently reorder a
+        // resumed upload.
+        string query = CanonicalQuery(
+            "partNumber=" + partNumber.ToString(CultureInfo.InvariantCulture)
+            + "&uploadId=" + Uri.EscapeDataString(uploadId));
+
+        using HttpRequestMessage request = Sign(HttpMethod.Put, KeyFor(path), chunk, query);
+
+        using HttpResponseMessage response = await _http
+            .SendAsync(request, cancellationToken)
+            .ConfigureAwait(false);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            return Result.Failure<string>(ProviderFailure());
+        }
+
+        // The ETag is required back at completion. Losing it means the upload
+        // cannot be finished and the parts sit there billing until a lifecycle
+        // rule notices.
+        string? tag = response.Headers.ETag?.Tag;
+
+        return tag is null ? Result.Failure<string>(ProviderFailure()) : tag;
+    }
+
+    /// <inheritdoc />
+    public async Task<Result> CompleteChunkedAsync(
+        BlobPath path,
+        string uploadId,
+        IReadOnlyList<string> partTags,
+        CancellationToken cancellationToken)
+    {
+        Guard.NotNull(path, nameof(path));
+        Guard.NotNullOrWhiteSpace(uploadId, nameof(uploadId));
+        Guard.NotNull(partTags, nameof(partTags));
+
+        var body = new StringBuilder("<CompleteMultipartUpload>");
+
+        for (int i = 0; i < partTags.Count; i++)
+        {
+            body.Append("<Part><PartNumber>")
+                .Append((i + 1).ToString(CultureInfo.InvariantCulture))
+                .Append("</PartNumber><ETag>")
+                .Append(partTags[i])
+                .Append("</ETag></Part>");
+        }
+
+        body.Append("</CompleteMultipartUpload>");
+
+        using HttpRequestMessage request = Sign(
+            HttpMethod.Post,
+            KeyFor(path),
+            Encoding.UTF8.GetBytes(body.ToString()),
+            CanonicalQuery("uploadId=" + Uri.EscapeDataString(uploadId)));
+
+        return await SendAsync(request, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc />
+    public async Task<Result> AbortChunkedAsync(
+        BlobPath path,
+        string uploadId,
+        CancellationToken cancellationToken)
+    {
+        Guard.NotNull(path, nameof(path));
+        Guard.NotNullOrWhiteSpace(uploadId, nameof(uploadId));
+
+        using HttpRequestMessage request = Sign(
+            HttpMethod.Delete,
+            KeyFor(path),
+            Array.Empty<byte>(),
+            CanonicalQuery("uploadId=" + Uri.EscapeDataString(uploadId)));
+
+        return await SendAsync(request, cancellationToken).ConfigureAwait(false);
+    }
 
     private async Task<Result> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {

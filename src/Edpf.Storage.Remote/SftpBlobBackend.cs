@@ -272,7 +272,7 @@ public sealed class SftpReply
 /// every control the store applies, is already written and covered.
 /// </para>
 /// </remarks>
-public interface ISftpChannel : IDisposable
+public interface ISftpTransport : IDisposable
 {
     /// <summary>Sends a framed packet and reads the reply that answers it.</summary>
     /// <param name="packet">The framed packet.</param>
@@ -288,9 +288,9 @@ public interface ISftpChannel : IDisposable
 /// The protocol work — packet framing, handle lifecycle, chunked reads to end
 /// of file, status-code mapping — lives here and is tested against a scripted
 /// channel. Only the SSH transport is delegated; see
-/// <see cref="ISftpChannel"/> for why.
+/// <see cref="ISftpTransport"/> for why.
 /// </remarks>
-public sealed class SftpBlobBackend : IBlobBackend
+public sealed class SftpBlobBackend : IBlobBackend, IChunkedUploadBackend
 {
     /// <summary>Open for reading.</summary>
     private const uint FlagRead = 0x00000001;
@@ -303,7 +303,7 @@ public sealed class SftpBlobBackend : IBlobBackend
 
     private const int ReadChunkSize = 32_768;
 
-    private readonly ISftpChannel _channel;
+    private readonly ISftpTransport _channel;
     private readonly string _root;
     private uint _requestId;
 
@@ -314,7 +314,7 @@ public sealed class SftpBlobBackend : IBlobBackend
     /// <param name="rootPath">The remote directory everything is stored under.</param>
     /// <exception cref="ArgumentNullException"><paramref name="channel"/> is null.</exception>
     /// <exception cref="ArgumentException"><paramref name="rootPath"/> is blank.</exception>
-    public SftpBlobBackend(ISftpChannel channel, string rootPath)
+    public SftpBlobBackend(ISftpTransport channel, string rootPath)
     {
         _channel = Guard.NotNull(channel, nameof(channel));
         _root = Guard.NotNullOrWhiteSpace(rootPath, nameof(rootPath)).TrimEnd('/');
@@ -483,6 +483,110 @@ public sealed class SftpBlobBackend : IBlobBackend
             path.Value + MetadataSuffix,
             Encoding.UTF8.GetBytes(builder.ToString()),
             cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc />
+    public async Task<Result<string>> BeginChunkedAsync(BlobPath path, CancellationToken cancellationToken)
+    {
+        Guard.NotNull(path, nameof(path));
+
+        // SFTP has no upload-session concept: a resumable write is just an
+        // open handle plus an offset. The handle IS the upload id, which is
+        // why this returns one rather than inventing a correlation table.
+        Result directories = await EnsureDirectoriesAsync(path.Value, cancellationToken).ConfigureAwait(false);
+        if (directories.IsFailure)
+        {
+            return Result.Failure<string>(directories.Error!);
+        }
+
+        Result<SftpReply> opened = await SendAsync(
+            SftpPacketType.Open,
+            SftpWire.Join(
+                SftpWire.Text(_root + "/" + path.Value),
+                SftpWire.Word(FlagWriteCreateTruncate),
+                SftpWire.Word(NoAttributes)),
+            cancellationToken).ConfigureAwait(false);
+
+        if (opened.IsFailure)
+        {
+            return Result.Failure<string>(opened.Error!);
+        }
+
+        string? handle = HandleOf(opened.Value);
+
+        return handle is null
+            ? Result.Failure<string>(MapStatus(StatusOf(opened.Value)))
+            : handle;
+    }
+
+    /// <inheritdoc />
+    public async Task<Result<string>> AppendChunkAsync(
+        BlobPath path,
+        string uploadId,
+        int partNumber,
+        long offset,
+        byte[] chunk,
+        CancellationToken cancellationToken)
+    {
+        Guard.NotNull(path, nameof(path));
+        Guard.NotNullOrWhiteSpace(uploadId, nameof(uploadId));
+        Guard.NotNull(chunk, nameof(chunk));
+
+        // The OFFSET places the bytes here, not the part number. That is the
+        // opposite of S3 and is what makes an SFTP upload genuinely resumable:
+        // a client that reconnects seeks to where it stopped.
+        Result<SftpReply> written = await SendAsync(
+            SftpPacketType.Write,
+            SftpWire.Join(
+                SftpWire.Text(uploadId),
+                SftpWire.LongWord((ulong)offset),
+                SftpWire.Word((uint)chunk.Length),
+                chunk),
+            cancellationToken).ConfigureAwait(false);
+
+        if (written.IsFailure)
+        {
+            return Result.Failure<string>(written.Error!);
+        }
+
+        return StatusOf(written.Value) == SftpStatus.Ok
+            ? string.Empty
+            : Result.Failure<string>(ProviderFailure());
+    }
+
+    /// <inheritdoc />
+    public async Task<Result> CompleteChunkedAsync(
+        BlobPath path,
+        string uploadId,
+        IReadOnlyList<string> partTags,
+        CancellationToken cancellationToken)
+    {
+        Guard.NotNull(path, nameof(path));
+        Guard.NotNullOrWhiteSpace(uploadId, nameof(uploadId));
+
+        // Nothing to assemble: the offsets already put every byte in place.
+        // Closing the handle is what makes the file durable.
+        Result<SftpReply> closed = await SendAsync(
+            SftpPacketType.Close, SftpWire.Text(uploadId), cancellationToken).ConfigureAwait(false);
+
+        return closed.IsFailure ? Result.Failure(closed.Error!) : Result.Success();
+    }
+
+    /// <inheritdoc />
+    public async Task<Result> AbortChunkedAsync(
+        BlobPath path,
+        string uploadId,
+        CancellationToken cancellationToken)
+    {
+        Guard.NotNull(path, nameof(path));
+        Guard.NotNullOrWhiteSpace(uploadId, nameof(uploadId));
+
+        await SendAsync(SftpPacketType.Close, SftpWire.Text(uploadId), cancellationToken)
+            .ConfigureAwait(false);
+
+        // The partial file is removed. Leaving it would present a truncated
+        // document as a complete one, which is worse than no document.
+        return await RemoveFileAsync(path.Value, cancellationToken).ConfigureAwait(false);
     }
 
     private async Task<Result> WriteFileAsync(string key, byte[] bytes, CancellationToken cancellationToken)

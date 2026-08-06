@@ -8,7 +8,7 @@ namespace Edpf.UnitTests.Storage;
 
 /// <summary>
 /// The SFTP backend. The protocol work is here and tested; only the SSH
-/// transport is delegated, and <see cref="ISftpChannel"/> says why.
+/// transport is delegated, and <see cref="ISftpTransport"/> says why.
 /// </summary>
 public sealed class SftpBackendTests
 {
@@ -214,7 +214,7 @@ public sealed class SftpBackendTests
     }
 
     /// <summary>Answers SFTP packets from a script. No SSH, no sockets.</summary>
-    private sealed class ScriptedChannel : ISftpChannel
+    private sealed class ScriptedChannel : ISftpTransport
     {
         private int _dataIndex;
         private int _directoryIndex;

@@ -783,6 +783,11 @@ Edpf.Abstractions.Storage.IBlobUploadSession.AppendAsync(byte[]! chunk, System.T
 Edpf.Abstractions.Storage.IBlobUploadSession.BytesReceived.get -> long
 Edpf.Abstractions.Storage.IBlobUploadSession.CompleteAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result<Edpf.Abstractions.Storage.BlobDescriptor!>!>!
 Edpf.Abstractions.Storage.IBlobUploadSession.SessionId.get -> string!
+Edpf.Abstractions.Storage.IChunkedUploadBackend
+Edpf.Abstractions.Storage.IChunkedUploadBackend.AbortChunkedAsync(Edpf.Abstractions.Storage.BlobPath! path, string! uploadId, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result!>!
+Edpf.Abstractions.Storage.IChunkedUploadBackend.AppendChunkAsync(Edpf.Abstractions.Storage.BlobPath! path, string! uploadId, int partNumber, long offset, byte[]! chunk, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result<string!>!>!
+Edpf.Abstractions.Storage.IChunkedUploadBackend.BeginChunkedAsync(Edpf.Abstractions.Storage.BlobPath! path, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result<string!>!>!
+Edpf.Abstractions.Storage.IChunkedUploadBackend.CompleteChunkedAsync(Edpf.Abstractions.Storage.BlobPath! path, string! uploadId, System.Collections.Generic.IReadOnlyList<string!>! partTags, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result!>!
 Edpf.Abstractions.Storage.IContentExtractor
 Edpf.Abstractions.Storage.IContentExtractor.ExtractAsync(byte[]! content, string! contentType, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Edpf.Abstractions.Primitives.Result<Edpf.Abstractions.Storage.ExtractedContent!>!>!
 Edpf.Abstractions.Storage.IContentExtractor.ExtractorName.get -> string!

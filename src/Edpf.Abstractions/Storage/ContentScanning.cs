@@ -281,6 +281,93 @@ public sealed class ExtractedContent
 /// survive a single request over hospital Wi-Fi. The session exists so a
 /// failure costs one chunk rather than the whole transfer.
 /// </remarks>
+/// <summary>
+/// A backend that can accept an upload in parts, without the caller holding
+/// the whole payload.
+/// </summary>
+/// <remarks>
+/// <para>
+/// **Optional, and the fallback is honest about what it costs.** A backend
+/// that does not implement this still supports chunked upload through
+/// <see cref="IBlobUploadSession"/>, but the session then buffers — which for
+/// a DICOM study defeats the purpose. Declaring the capability separately means
+/// a deployment can find out which of its backends actually stream, rather
+/// than discovering it from a memory graph.
+/// </para>
+/// <para>
+/// The three methods map onto what the underlying services already do: S3
+/// multipart upload, and SFTP writes at an explicit offset. Neither is
+/// invented here.
+/// </para>
+/// </remarks>
+public interface IChunkedUploadBackend
+{
+    /// <summary>
+    /// Begins a multi-part upload.
+    /// </summary>
+    /// <param name="path">The destination.</param>
+    /// <param name="cancellationToken">Cancels the call.</param>
+    /// <returns>An opaque upload id the backend uses to correlate parts.</returns>
+    Task<Result<string>> BeginChunkedAsync(BlobPath path, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Sends one part.
+    /// </summary>
+    /// <param name="path">The destination.</param>
+    /// <param name="uploadId">The id from <see cref="BeginChunkedAsync"/>.</param>
+    /// <param name="partNumber">Which part, from 1.</param>
+    /// <param name="offset">Where this part starts in the finished object.</param>
+    /// <param name="chunk">The bytes.</param>
+    /// <param name="cancellationToken">Cancels the call.</param>
+    /// <returns>
+    /// A part tag the backend needs at completion, or an empty string when it
+    /// needs none. S3 returns an ETag per part and requires them all back;
+    /// SFTP needs nothing because the offset already placed the bytes.
+    /// </returns>
+    Task<Result<string>> AppendChunkAsync(
+        BlobPath path,
+        string uploadId,
+        int partNumber,
+        long offset,
+        byte[] chunk,
+        CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Finishes the upload.
+    /// </summary>
+    /// <param name="path">The destination.</param>
+    /// <param name="uploadId">The id from <see cref="BeginChunkedAsync"/>.</param>
+    /// <param name="partTags">The tags returned by each part, in order.</param>
+    /// <param name="cancellationToken">Cancels the call.</param>
+    /// <returns>Success once the object is durable.</returns>
+    Task<Result> CompleteChunkedAsync(
+        BlobPath path,
+        string uploadId,
+        IReadOnlyList<string> partTags,
+        CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Abandons the upload and releases whatever the service is holding.
+    /// </summary>
+    /// <param name="path">The destination.</param>
+    /// <param name="uploadId">The id from <see cref="BeginChunkedAsync"/>.</param>
+    /// <param name="cancellationToken">Cancels the call.</param>
+    /// <returns>Success once abandoned.</returns>
+    /// <remarks>
+    /// Not optional politeness: an abandoned S3 multipart upload keeps its
+    /// parts, and keeps billing for them, until a lifecycle rule removes it.
+    /// </remarks>
+    Task<Result> AbortChunkedAsync(BlobPath path, string uploadId, CancellationToken cancellationToken);
+}
+
+/// <summary>
+/// A single-process upload accumulator.
+/// </summary>
+/// <remarks>
+/// Superseded for large files by <c>ChunkedUploadService</c>, which tracks a
+/// durable session and streams parts to the backend. This remains for the
+/// small-payload case where buffering is genuinely cheaper than a session.
+/// </remarks>
 public interface IBlobUploadSession : IDisposable
 {
     /// <summary>The session's id, used to resume.</summary>

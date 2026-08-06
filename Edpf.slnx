@@ -23,6 +23,7 @@
     <Project Path="src/Edpf.Extensions.DependencyInjection/Edpf.Extensions.DependencyInjection.csproj" />
     <Project Path="src/Edpf.Formula/Edpf.Formula.csproj" />
     <Project Path="src/Edpf.Globalization/Edpf.Globalization.csproj" />
+    <Project Path="src/Edpf.Jobs/Edpf.Jobs.csproj" />
     <Project Path="src/Edpf.Licensing/Edpf.Licensing.csproj" />
     <Project Path="src/Edpf.Metadata/Edpf.Metadata.csproj" />
     <Project Path="src/Edpf.Migration/Edpf.Migration.csproj" />

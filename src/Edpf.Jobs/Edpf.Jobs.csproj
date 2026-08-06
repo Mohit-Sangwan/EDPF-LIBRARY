@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Background processing. Cron parsing, scheduling, overlap prevention and
+    catch-up policy.
+
+    Not Hangfire and not Quartz: no storage schema, no dashboard, no dynamic
+    job creation. What this adds over either is that a run is tenant-scoped by
+    construction and the retry rule is the one the rest of the framework
+    already uses.
+
+    Tier 1, consistent with the other platform assemblies (ADR-002/ADR-038).
+  -->
+  <PropertyGroup>
+    <TargetFrameworks>$(EdpfPlatformTargetFrameworks)</TargetFrameworks>
+    <IsPackable>true</IsPackable>
+    <Description>Enterprise Data Platform Framework - tenant-scoped scheduled jobs with UTC cron, overlap prevention and an explicit catch-up policy.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Edpf.Abstractions\Edpf.Abstractions.csproj" />
+    <ProjectReference Include="..\Edpf.Core\Edpf.Core.csproj" />
+  </ItemGroup>
+
+</Project>

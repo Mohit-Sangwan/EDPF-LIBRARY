@@ -30,6 +30,7 @@
     <Project Path="src/Edpf.RealTime/Edpf.RealTime.csproj" />
     <Project Path="src/Edpf.Reporting/Edpf.Reporting.csproj" />
     <Project Path="src/Edpf.Rules/Edpf.Rules.csproj" />
+    <Project Path="src/Edpf.Search/Edpf.Search.csproj" />
     <Project Path="src/Edpf.Security/Edpf.Security.csproj" />
     <Project Path="src/Edpf.Storage/Edpf.Storage.csproj" />
     <Project Path="src/Edpf.Storage.Remote/Edpf.Storage.Remote.csproj" />

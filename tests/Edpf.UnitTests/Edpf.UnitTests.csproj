@@ -22,6 +22,7 @@
     <ProjectReference Include="..\..\src\Edpf.Reporting\Edpf.Reporting.csproj" />
     <ProjectReference Include="..\..\src\Edpf.Licensing\Edpf.Licensing.csproj" />
     <ProjectReference Include="..\..\src\Edpf.Caching\Edpf.Caching.csproj" />
+    <ProjectReference Include="..\..\src\Edpf.Search\Edpf.Search.csproj" />
     <ProjectReference Include="..\..\src\Edpf.Security\Edpf.Security.csproj" />
     <ProjectReference Include="..\..\src\Edpf.Storage\Edpf.Storage.csproj" />
     <ProjectReference Include="..\..\src\Edpf.Storage.Remote\Edpf.Storage.Remote.csproj" />

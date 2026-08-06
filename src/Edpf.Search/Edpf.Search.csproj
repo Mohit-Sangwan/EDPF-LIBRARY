@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Search platform (Phase 16). ISearchIndex has been a contract with no
+    implementation since Wave 3; this is the implementation.
+
+    In-memory and inverted. Elasticsearch and OpenSearch are a deployment
+    choice behind the same interface, and they inherit the tenant scoping and
+    query-time trimming because those live in the policy layer rather than in
+    the engine.
+  -->
+  <PropertyGroup>
+    <TargetFrameworks>$(EdpfPlatformTargetFrameworks)</TargetFrameworks>
+    <IsPackable>true</IsPackable>
+    <Description>Enterprise Data Platform Framework - tenant-scoped search with query-time security trimming and post-trim totals.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Edpf.Abstractions\Edpf.Abstractions.csproj" />
+    <ProjectReference Include="..\Edpf.Core\Edpf.Core.csproj" />
+  </ItemGroup>
+
+</Project>

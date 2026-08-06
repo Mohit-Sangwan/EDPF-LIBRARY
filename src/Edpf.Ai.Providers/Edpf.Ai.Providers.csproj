@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    AI vendor adapters, over HttpClient only.
+
+    NO VENDOR SDK, for the reason the storage adapters established: an SDK
+    wrapper can only be exercised against the live service, and a client built
+    on HttpClient can be verified against a fake handler on every commit. That
+    is what turns "we support eleven vendors" from a claim into a tested one.
+
+    Edpf.Ai carries the governance: use cases, risk tiers, the classification
+    ceiling, instruction/content separation, the audit log. This assembly
+    carries only wire formats, and inherits all of it.
+  -->
+  <PropertyGroup>
+    <TargetFrameworks>$(EdpfPlatformTargetFrameworks)</TargetFrameworks>
+    <IsPackable>true</IsPackable>
+    <Description>Enterprise Data Platform Framework - OpenAI-compatible and Anthropic inference adapters over HttpClient, testable without credentials.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Edpf.Abstractions\Edpf.Abstractions.csproj" />
+    <ProjectReference Include="..\Edpf.Core\Edpf.Core.csproj" />
+    <ProjectReference Include="..\Edpf.Ai\Edpf.Ai.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -6,6 +6,7 @@
   <Folder Name="/src/">
     <Project Path="src/Edpf.Abstractions/Edpf.Abstractions.csproj" />
     <Project Path="src/Edpf.Ai/Edpf.Ai.csproj" />
+    <Project Path="src/Edpf.Ai.Providers/Edpf.Ai.Providers.csproj" />
     <Project Path="src/Edpf.Barcode/Edpf.Barcode.csproj" />
     <Project Path="src/Edpf.Caching/Edpf.Caching.csproj" />
     <Project Path="src/Edpf.Communication/Edpf.Communication.csproj" />
